@@ -20,9 +20,9 @@ def calibrate_encoder_to_ankle_conversion(exo: Exo):
 
 
 if __name__ == '__main__':
-    portList, baudRate = util.load_ports_and_baudrate_from_com()
-    exo = Exo(port=portList[0], baudRate=baudRate,
-              shouldLog=False, file_ID='Calibration')
+    ports, baud_rate = util.load_ports_and_baud_rate_from_com()
+    exo = Exo(port=ports[0], baud_rate=baud_rate,
+              log_en=False, file_ID='Calibration')
     exo.standing_calibration()
 
     calibrate_encoder_to_ankle_conversion(exo=exo)

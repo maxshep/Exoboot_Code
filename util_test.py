@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 class Test_timer(unittest.TestCase):
 
     def test_single_time(self):
-        custom_timer = util.FlexibleTimer(target_frequency=2)
+        custom_timer = util.FlexibleTimer(target_freq=2)
         t0 = time.time()
         custom_timer.pause()
         t1 = time.time()-t0
@@ -16,7 +16,7 @@ class Test_timer(unittest.TestCase):
         self.assertAlmostEqual(t1, 0.5, places=2)
 
     def test_timer(self):
-        custom_timer = util.FlexibleTimer(target_frequency=100)
+        custom_timer = util.FlexibleTimer(target_freq=100)
         periods = []
         delays = []
         for _ in range(500):

@@ -3,12 +3,12 @@ config = config_util.ConfigurableConstants()
 
 '''Make your modifications starting here'''
 config.CONTROL_ARCHITECTURE = config_util.ControlArchitecture.SAWICKIWICKI
-config.TARGET_FREQUENCY = 300
+config.TARGET_FREQ = 300
 
 ''' Here are the variables that are updatable in config, and their defaults:
 
-    TARGET_FREQUENCY: float = 200  # Hz
-    ACTPACK_FREQUENCY: float = 200  # Hz
+    TARGET_FREQ: float = 200  # Hz
+    ACTPACK_FREQ: float = 200  # Hz
     CONTROL_ARCHITECTURE: Type[ControlArchitecture] = ControlArchitecture.FOURPOINTSPLINE
     HS_GYRO_THRESHOLD: float = 100
     HS_GYRO_FILTER_N: int = 2
@@ -25,8 +25,8 @@ config.TARGET_FREQUENCY = 300
     PEAK_TORQUE: float = 5
 
     # Impedance
-    K: int = 500
-    B: int = 0
+    k_val: int = 500
+    b_val: int = 0
 
     READ_ONLY = False  # Does not require Lipos
     DO_READ_FSRS = False

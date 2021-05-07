@@ -2,27 +2,6 @@ import sys
 import os
 import time
 import constants
-from flexseapython import fxUtil, pyFlexsea
-
-
-def load_ports_and_baudrate_from_com():
-    if sys.platform == 'win32':		# Need for WebAgg server to work in Python 3.8
-        print('Detected win32')
-        import asyncio
-        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-        scriptPath = os.path.dirname(os.path.abspath(__file__))
-        fpath = scriptPath + '/flexseapython/com.txt'
-        portList, baudRate = fxUtil.loadPortsFromFile(fpath)
-        baudRate = int(baudRate)
-    else:
-        # Assume raspberry pi for now  TODO(maxshep)
-        # WHY DID THEY STICK THIS NECESSARY FUNCTION IN THEIR STUPID LOADPORTSFROMFILE FUNCTION
-        # Doing this here so we can avoid touching their loadportsfromfile
-        pyFlexsea.loadFlexsea()
-        # To my knowledge it's always this...
-        portList = ['/dev/ttyACM0', '/dev/ttyACM1']
-        baudRate = 230400
-    return portList, baudRate
 
 
 class DelayTimer():
@@ -42,10 +21,10 @@ class DelayTimer():
 
 
 class FlexibleTimer():
-    '''A timer that attempts to reach consistent desired frequency by variable pausing.'''
+    '''A timer that attempts to reach consistent desired freq by variable pausing.'''
 
-    def __init__(self, target_frequency):
-        self.target_period = 1/target_frequency
+    def __init__(self, target_freq):
+        self.target_period = 1/target_freq
         self.last_time = time.perf_counter()
         self.over_time = 0
 

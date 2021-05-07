@@ -2,7 +2,7 @@
 import numpy as np
 from enum import Enum
 
-TARGET_FREQUENCY = 200
+TARGET_FREQ = 200
 MAX_ANKLE_ANGLE = 83  # degrees, plantarflexion
 MIN_ANKLE_ANGLE = -60  # degrees, dorsiflexion
 
@@ -16,7 +16,7 @@ RIGHT_ANKLE_TO_MOTOR = np.array(
 LEFT_ANKLE_ANGLE_OFFSET = -91  # deg
 RIGHT_ANKLE_ANGLE_OFFSET = 88  # deg
 
-# Add to these lists if DevIds change, or new exos or actpacks are purchased!
+# Add to these lists if dev_ids change, or new exos or actpacks are purchased!
 RIGHT_EXO_DEV_IDS = [65295]
 LEFT_EXO_DEV_IDS = [63086]
 
@@ -40,10 +40,10 @@ AVERAGE_TRANSMISSION_RATIO = 14  # Used to roughly map motor to ankle impedance
 # https://dephy.com/wiki/flexsea/doku.php?id=controlgains
 DEPHY_K_CONSTANT = 0.00078125
 DEPHY_B_CONSTANT = 0.0000625
-# Multiply Dephy's K by this to get a motor stiffness in Nm/deg
+# Multiply Dephy's k_val by this to get a motor stiffness in Nm/deg
 DEPHY_K_TO_MOTOR_K = MOTOR_CURRENT_TO_MOTOR_TORQUE / (ENC_CLICKS_TO_DEG *
                                                       DEPHY_K_CONSTANT)
-# Multiply Dephy's K by this to get an estimate of ankle stiffness in Nm/deg
+# Multiply Dephy's k_val by this to get an estimate of ankle stiffness in Nm/deg
 DEPHY_K_TO_ANKLE_K = AVERAGE_TRANSMISSION_RATIO**2 * DEPHY_K_TO_MOTOR_K
 
 # Inferred from https://invensense.tdk.com/products/motion-tracking/6-axis/mpu-6050/

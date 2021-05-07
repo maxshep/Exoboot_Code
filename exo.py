@@ -11,19 +11,41 @@ import numpy as np
 import config_util
 import constants
 import custom_filters
-from flexseapython import fxUtil, pyFlexsea
+from flexsea import fxEnums as fxe
+from flexsea import flexsea as flex
+from flexsea import fxUtils as fxu
+
+fxs = flex.FlexSEA()
 
 
-def connect_to_exo(port: str, baudRate: int, frequency: int, shouldLog=False):
+def load_ports_and_baud_rate():
+    if fxu.is_win():		# Need for WebAgg server to work in Python 3.8
+        print('Detected win32')
+        import asyncio
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+        port_cfg_path = os.path.join(os.path.dirname(
+            os.path.abspath(__file__)), "ports.yaml")
+        ports, baud_rate = fxu.load_ports_from_file(port_cfg_path)
+    elif fxu.is_pi64():
+        ports = ['/dev/ttyACM0', '/dev/ttyACM1']
+        baud_rate = 230400
+    else:
+        raise ValueError('Max Code only supporting Windows or pi64 so far')
+    print(f"Using ports:\t{ports}")
+    print(f"Using baud rate:\t{baud_rate}")
+    return ports, baud_rate
+
+
+def connect_to_exo(port: str, baud_rate: int, freq: int, log_en=False):
     '''Args: 
         port: str from 'com.txt' in flexseapython/
-        baudRate: int from 'com.txt' in flexseapython/
-        shouldLog: bool indicating whether logging should be done with the flexsea lib.'''
+        baud_rate: int from 'com.txt' in flexseapython/
+        log_en: bool indicating whether logging should be done with the flexsea lib.'''
     try:
-        devId = pyFlexsea.fxOpen(port, baudRate, logLevel=6)
-        pyFlexsea.fxStartStreaming(
-            devId=devId, frequency=frequency, shouldLog=shouldLog)
-        return devId
+        dev_id = fxs.open(port, baud_rate, log_level=6)
+        fxs.start_streaming(
+            dev_id=dev_id, freq=freq, log_en=log_en)
+        return dev_id
     except IOError:
         print('Unable to open exo on port: ', port,
               ' This is okay if only one exo is connected!')
@@ -32,37 +54,39 @@ def connect_to_exo(port: str, baudRate: int, frequency: int, shouldLog=False):
 
 class Exo():
     def __init__(self,
-                 devId: int,
+                 fxs,
+                 dev_id: int,
                  file_ID: str = None,
-                 target_frequency: float = 200,
+                 target_freq: float = 200,
                  do_read_fsrs: bool = False):
-        '''Exo object is the primary interface with the Dephy ankle exos.
+        '''Exo object is the primary interface with the Dephy ankle exos, and corresponds to a single physical exoboot.
         Args:
-            devId: int. Unique integer to identify the exo in flexsea's library. Returned by connect_to_exo
+            fxs: Dephy's FlexSEA object, which is shared across devices and contains their functions...
+            dev_id: int. Unique integer to identify the exo in flexsea's library. Returned by connect_to_exo
             file_ID: str. Unique string added to filename. If None, no file will be saved.
             do_read_dsrs: bool indicating whether to read FSRs '''
-        self.devId = devId
+        self.dev_id = dev_id
         self.file_ID = file_ID
         self.do_read_fsrs = do_read_fsrs
-        if self.devId is None:
+        if self.dev_id is None:
             print('Exo obj created but no exoboot connected. Some methods available')
-        elif self.devId in constants.LEFT_EXO_DEV_IDS:
+        elif self.dev_id in constants.LEFT_EXO_DEV_IDS:
             self.side = constants.Side.LEFT
             self.motor_sign = -1
             self.ankle_to_motor_angle_polynomial = constants.LEFT_ANKLE_TO_MOTOR
             self.ankle_angle_offset = constants.LEFT_ANKLE_ANGLE_OFFSET
-        elif self.devId in constants.RIGHT_EXO_DEV_IDS:
+        elif self.dev_id in constants.RIGHT_EXO_DEV_IDS:
             self.side = constants.Side.RIGHT
             self.motor_sign = 1
             self.ankle_to_motor_angle_polynomial = constants.RIGHT_ANKLE_TO_MOTOR
             self.ankle_angle_offset = constants.RIGHT_ANKLE_ANGLE_OFFSET
         else:
             raise ValueError(
-                'devId: ', self.devId, 'not found in LEFT_EXO_DEV_IDS or RIGHT_EXO_DEV_IDS')
+                'dev_id: ', self.dev_id, 'not found in LEFT_EXO_DEV_IDS or RIGHT_EXO_DEV_IDS')
         self.motor_offset = 0
         # ankle velocity filter is hardcoded for simplicity, but can be factored out if necessary
         self.ankle_velocity_filter = custom_filters.Butterworth(
-            N=2, Wn=10, fs=target_frequency)
+            N=2, Wn=10, fs=target_freq)
         if self.do_read_fsrs:
             try:
                 if os.uname().nodename == 'raspberrypi':
@@ -88,12 +112,12 @@ class Exo():
         self.is_clipping = False
         if self.file_ID is not None:
             self.setup_data_writer(file_ID=file_ID)
-        if self.devId is not None:
+        if self.dev_id is not None:
             self.update_gains(Kp=constants.DEFAULT_KP,
                               Ki=constants.DEFAULT_KI,
                               Kd=constants.DEFAULT_KD,
-                              K=0,
-                              B=0,
+                              k_val=0,
+                              b_val=0,
                               ff=constants.DEFAULT_FF)
             self.motor_to_ankle_torque_polynomial = np.polyder(
                 self.ankle_to_motor_angle_polynomial) * constants.ENC_CLICKS_TO_DEG
@@ -131,15 +155,15 @@ class Exo():
     def close(self):
         self.command_controller_off()
         time.sleep(0.05)
-        pyFlexsea.fxStopStreaming(self.devId)
+        fxs.stop_streaming(self.dev_id)
         time.sleep(0.2)
-        pyFlexsea.fxClose(self.devId)
+        fxs.close_all(self.dev_id)
         self.close_file()
         if self.do_read_fsrs:
             self.heel_fsr_detector.close()
             self.toe_fsr_detector.close()
 
-    def update_gains(self, Kp=None, Ki=None, Kd=None, K=None, B=None, ff=None):
+    def update_gains(self, Kp=None, Ki=None, Kd=None, k_val=None, b_val=None, ff=None):
         '''Optionally updates individual exo gain values, and sends to Actpack.'''
         if Kp is not None:
             self.Kp = Kp
@@ -147,14 +171,14 @@ class Exo():
             self.Ki = Ki
         if Kd is not None:
             self.Kd = Kd
-        if K is not None:
-            self.K = K
-        if B is not None:
-            self.B = B
+        if k_val is not None:
+            self.k_val = k_val
+        if b_val is not None:
+            self.b_val = b_val
         if ff is not None:
             self.ff = ff
-        pyFlexsea.fxSetGains(self.devId, self.Kp, self.Ki,
-                             self.Kd, self.K, self.B, self.ff)
+        fxs.set_gains(self.dev_id, self.Kp, self.Ki,
+                      self.Kd, self.k_val, self.b_val, self.ff)
 
     def read_data(self, do_print=False, loop_time=None):
         '''IMU data comes from Dephy in RHR, with positive XYZ pointing
@@ -166,7 +190,7 @@ class Exo():
             self.data.loop_time = loop_time
         last_ankle_angle = self.data.ankle_angle
         self.last_state_time = self.data.state_time
-        actpack_data = pyFlexsea.fxReadDevice(self.devId)
+        actpack_data = fxs.read_exo_device(self.dev_id)
         self.data.state_time = actpack_data.state_time * constants.MS_TO_SECONDS
         self.data.accel_x = -1 * self.motor_sign * \
             actpack_data.accelx * constants.ACCEL_GAIN
@@ -217,7 +241,7 @@ class Exo():
             print('ankle_angle:          ', self.data.ankle_angle)
 
     def get_batt_voltage(self):
-        actpack_data = pyFlexsea.fxReadDevice(self.devId)
+        actpack_data = fxs.fxReadDevice(self.dev_id)
         return actpack_data.batt_volt
 
     def setup_data_writer(self, file_ID: str):
@@ -269,8 +293,8 @@ class Exo():
             self.command_controller_off()
             raise ValueError(
                 'abs(desired_mA) must be < constants.MAX_ALLOWABLE_CURRENT_COMMAND')
-        pyFlexsea.fxSendMotorCommand(
-            self.devId, pyFlexsea.FxCurrent, desired_mA)
+        fxs.send_motor_command(
+            self.dev_id, fxe.FXCURRENT, desired_mA)
         self.data.commanded_current = desired_mA
         self.data.commanded_position = None
 
@@ -279,32 +303,32 @@ class Exo():
         if abs(desired_mV) > constants.MAX_ALLOWABLE_VOLTAGE_COMMAND:
             raise ValueError(
                 'abs(desired_mV) must be < constants.MAX_ALLOWABLE_VOLTAGE_COMMAND')
-        pyFlexsea.fxSendMotorCommand(
-            self.devId, pyFlexsea.FxVoltage, desired_mV)
+        fxs.send_motor_command(
+            self.dev_id, fxe.FXVOLTAGE, desired_mV)
         self.data.commanded_current = None
         self.data.commanded_position = None
 
     def command_motor_angle(self, desired_motor_angle: int):
         '''Commands motor angle (counts). Pay attention to the sign!'''
-        pyFlexsea.fxSendMotorCommand(
-            self.devId, pyFlexsea.FxPosition, desired_motor_angle)
+        fxs.send_motor_command(
+            self.dev_id, fxe.FXPOSITION, desired_motor_angle)
         self.data.commanded_current = None
         self.data.commanded_position = desired_motor_angle
 
-    def command_motor_impedance(self, theta0: int, K: int, B: int):
+    def command_motor_impedance(self, theta0: int, k_val: int, b_val: int):
         '''Commands motor impedance, with theta0 a motor position (int).'''
-        # K and B are modified by updating gains (weird, yes)
-        if K > constants.MAX_ALLOWABLE_K_COMMAND or K < 0:
+        # k_val and b_val are modified by updating gains (weird, yes)
+        if k_val > constants.MAX_ALLOWABLE_K_COMMAND or k_val < 0:
             raise ValueError(
-                'K must be positive, and less than max. tested K in constants.py')
-        if B > constants.MAX_ALLOWABLE_B_COMMAND or B < 0:
+                'k_val must be positive, and less than max. tested k_val in constants.py')
+        if b_val > constants.MAX_ALLOWABLE_B_COMMAND or b_val < 0:
             raise ValueError(
-                'B must be positive, and less than max. tested B in constants.py')
-        if self.K != K or self.B != B:
+                'b_val must be positive, and less than max. tested b_val in constants.py')
+        if self.k_val != k_val or self.b_val != b_val:
             # Only send gains when necessary
-            self.update_gains(K=int(K), B=int(B))
-        pyFlexsea.fxSendMotorCommand(
-            self.devId, pyFlexsea.FxImpedance, int(theta0))
+            self.update_gains(k_val=int(k_val), b_val=int(b_val))
+        fxs.send_motor_command(
+            self.dev_id, fxe.FXIMPEDANCE, int(theta0))
         self.data.commanded_current = None
         self.data.commanded_position = None
 
@@ -347,10 +371,11 @@ class Exo():
         theta0_motor = self.ankle_angle_to_motor_angle(theta0_ankle)
         K_dephy = K_ankle / constants.DEPHY_K_TO_ANKLE_K
         # B_dephy = B_ankle / constants.DEPHY_B_TO_ANKLE_B
-        self.command_motor_impedance(theta0=theta0_motor, K=K_dephy, B=0)
+        self.command_motor_impedance(
+            theta0=theta0_motor, k_val=K_dephy, b_val=0)
 
     def command_controller_off(self):
-        pyFlexsea.fxSendMotorCommand(self.devId, pyFlexsea.FxNone, 0)
+        fxs.send_motor_command(self.dev_id, fxs.FxNone, 0)
 
     def command_slack(self, desired_slack=10000):
         if not self.has_calibrated:
@@ -484,17 +509,17 @@ class Exo():
 if __name__ == '__main__':
     import util
     exo_list = []
-    portList, baudRate = util.load_ports_and_baudrate_from_com()
-    for port in portList:
-        devId = connect_to_exo(port=port, baudRate=baudRate, frequency=100)
-        if devId is not None:
-            exo_list.append(Exo(devId=devId, file_ID='Test'))
+    ports, baud_rate = load_ports_and_baud_rate()
+    for port in ports:
+        dev_id = connect_to_exo(port=port, baud_rate=baud_rate, freq=100)
+        if dev_id is not None:
+            exo_list.append(Exo(dev_id=dev_id, file_ID='Test'))
     if not exo_list:  # (if empty)
         raise RuntimeError('No Exos connected')
 
     for exo in exo_list:
         # exo.standing_calibration()
-        # exo.command_motor_impedance(theta0=exo.data.motor_angle, K=500, B=0)
+        # exo.command_motor_impedance(theta0=exo.data.motor_angle, k_val=500, b_val=0)
         # time.sleep(5)
         # exo.command_controller_off()
         print(exo.get_batt_voltage())

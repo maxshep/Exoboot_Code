@@ -80,4 +80,4 @@ class SawickiWickiParameterPasser(ParameterPasser):
                          new_params_event=new_params_event, name=name)
 
     def update_params(self, param_list):
-        self.config.K = int(param_list[0])
+        self.config.k_val = int(param_list[0])

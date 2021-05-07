@@ -1,5 +1,5 @@
 ## Notes on working with the Dephy exoboots:
-This code works with Dephy's exoboots. There are a couple pains that make this code a little more complicated: 1) it's a unidirectional actuator, so managing slack is important when you want zero torque, 2) The actpacks don't know they are part of an ankle, so raw imu, current, and angle data for left/right are flipped different directions, 3) The transmission ratio is variable, and even flips to negative around 30 deg plantarflexion, 4) both the ankle and motor use absolute encoders, but the motor spins more than 10 times through the RoM, so it doesn't know where it within that RoM when you first turn it on, so requires calibration every time it's turned on, 5) Dephy has structured their python code to use relative imports, meaning you basically have to run your code out of their /Python/ folder, which is regrettable but I'm not sure how to fix it. As such, some decisions were made and functions implemented:
+This code works with Dephy's exoboots. There are a couple pains that make this code a little more complicated: 1) it's a unidirectional actuator, so managing slack is important when you want zero torque, 2) The actpacks don't know they are part of an ankle, so raw imu, current, and angle data for left/right are flipped different directions, 3) The transmission ratio is variable, and even flips to negative around 30 deg plantarflexion, 4) both the ankle and motor use absolute encoders, but the motor spins more than 10 times through the RoM, so it doesn't know where it within that RoM when you first turn it on, so requires calibration every time it's turned on. As such, some decisions were made and functions implemented:
 
 1) Slack controllers have been designed to command the motor to a position that will keep a constant amount of slack.
 
@@ -9,11 +9,9 @@ This code works with Dephy's exoboots. There are a couple pains that make this c
 
 4) A calibration routine applies a small, sign-appropriate voltage to each ankle and waits for current to rise above a threshold to indicate slack has been removed. This then calculates the appropriate offset so that the zero-slack relationship between motor angle and ankle angle is known
 
-5) Maybe someone else can solve this?
-
 ## Notes on the code architecture
 To make the code more useable and customizable, I've organized the architecture like this:
-1) Exo class, in exo.py.  This object stores variables associated with the specific exoboot, reads and writes data, and handles ALL direct ommunication with the exoboot. It should be the only interface with Dephy's scripts, pyFlexsea.py and fxUtil.py. It also contains a number of safety checks, and some low-level control.  Notably, data associated with an exoboot is stored in a subclass "DataContainer"
+1) Exo class, in exo.py.  This object stores variables associated with the specific exoboot, reads and writes data, and handles ALL direct ommunication with the exoboot. It should be the only interface with Dephy's scripts, flexsea.py and fxUtils.py. It also contains a number of safety checks, and some low-level control.  Notably, data associated with an exoboot is stored in a subclass "DataContainer"
 
 2) Controllers, in controllers.py. These are like mid-level controllers, like a spline-based stance controller, that store information such as controller-specific gains and behaviors.
 

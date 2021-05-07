@@ -34,15 +34,15 @@ class Controller(object):
 class SawickiWickiController(Controller):
     def __init__(self,
                  exo: Exo,
-                 K: int,
-                 B: int = 0,
+                 k_val: int,
+                 b_val: int = 0,
                  Kp: int = constants.DEFAULT_KP,
                  Ki: int = constants.DEFAULT_KI,
                  Kd: int = constants.DEFAULT_KD,
                  ff: int = constants.DEFAULT_FF):
         self.exo = exo
-        self.K = K
-        self.B = B
+        self.k_val = k_val
+        self.b_val = b_val
         super().update_controller_gains(Kp=Kp, Ki=Ki, Kd=Kd, ff=ff)
         self.ankle_angles = deque(maxlen=3)  # looking for peak in pf
         self.ankle_angle_filter = custom_filters.Butterworth(N=2, Wn=0.2)
@@ -62,11 +62,11 @@ class SawickiWickiController(Controller):
 
                     super().command_gains()
                     self.exo.data.gait_phase = 10  # TODO(maxshep) remove
-                    print('engaged..., desired K: ', self.K,
+                    print('engaged..., desired k_val: ', self.k_val,
                           'setpoint: ', self.ankle_angles[0])
                     self.ankle_angles.clear()  # Reset the ankle angle deque
                     self.exo.command_motor_impedance(
-                        theta0=self.theta0_motor, K=self.K, B=self.B)
+                        theta0=self.theta0_motor, k_val=self.k_val, b_val=self.b_val)
 
             else:
                 # Basically keep it reeled in
@@ -81,9 +81,9 @@ class SawickiWickiController(Controller):
                 'Attempted to command a set point outside the range of motion')
         self.theta0_motor = self.exo.ankle_angle_to_motor_angle(theta0)
 
-    def update_impedance(self, K, B=0):
-        self.K = K
-        self.B = B
+    def update_impedance(self, k_val, b_val=0):
+        self.k_val = k_val
+        self.b_val = b_val
 
 
 class ConstantTorqueController(Controller):

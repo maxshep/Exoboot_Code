@@ -30,13 +30,13 @@ gait_state_estimator_list = []
 state_machine_list = []
 
 '''Connect to Exos, instantiate Exo objects.'''
-portList, baudRate = util.load_ports_and_baudrate_from_com()
-for port in portList:
-    devId = connect_to_exo(port=port, baudRate=baudRate,
-                           frequency=config.ACTPACK_FREQUENCY)
-    if devId is not None:
-        exo_list.append(Exo(devId=devId, file_ID=file_ID,
-                            target_frequency=config.TARGET_FREQUENCY,
+ports, baud_rate = exo.load_ports_and_baud_rate()
+for port in ports:
+    dev_id = connect_to_exo(port=port, baud_rate=baud_rate,
+                            freq=config.ACTPACK_FREQ)
+    if dev_id is not None:
+        exo_list.append(Exo(dev_id=dev_id, file_ID=file_ID,
+                            target_freq=config.TARGET_FREQ,
                             do_read_fsrs=config.DO_READ_FSRS))
 if not exo_list:  # (if empty)
     raise RuntimeError('No Exos connected')
@@ -48,7 +48,7 @@ for exo in exo_list:
         height=config.HS_GYRO_THRESHOLD,
         gyro_filter=custom_filters.Butterworth(N=config.HS_GYRO_FILTER_N,
                                                Wn=config.HS_GYRO_FILTER_WN,
-                                               fs=config.TARGET_FREQUENCY),
+                                               fs=config.TARGET_FREQ),
         delay=config.HS_GYRO_DELAY)
     gait_phase_estimator = gait_state_estimators.StrideAverageGaitPhaseEstimator()
     toe_off_detector = gait_state_estimators.GaitPhaseBasedToeOffDetector(
@@ -76,7 +76,7 @@ for exo in exo_list:
             bias_torque=config.SPLINE_BIAS)
     elif config.CONTROL_ARCHITECTURE == config_util.ControlArchitecture.SAWICKIWICKI:
         stance_controller = controllers.SawickiWickiController(
-            exo=exo, K=config.K)
+            exo=exo, k_val=config.k_val)
     state_machine_list.append(state_machines.StanceSwingReeloutReelinStateMachine(exo=exo,
                                                                                   stance_controller=stance_controller,
                                                                                   swing_controller=swing_controller,
@@ -101,7 +101,7 @@ print('Start!')
 
 '''Main Loop: Check param updates, Read data, calculate gait state, apply control, write data.'''
 timer = util.FlexibleTimer(
-    target_frequency=config.TARGET_FREQUENCY)  # attempts constants freq
+    target_freq=config.TARGET_FREQ)  # attempts constants freq
 t0 = time.perf_counter()
 if config.CONTROL_ARCHITECTURE == config_util.ControlArchitecture.FOURPOINTSPLINE:
     keyboard_thread = parameter_passers.FourPointSplineParameterPasser(
@@ -127,7 +127,7 @@ while True:
             elif config.CONTROL_ARCHITECTURE == config_util.ControlArchitecture.SAWICKIWICKI:
                 for state_machine in state_machine_list:
                     state_machine.stance_controller.update_impedance(
-                        K=config.K)
+                        k_val=config.k_val)
             new_params_event.clear()
         if quit_event.is_set():  # If user enters "quit"
             break

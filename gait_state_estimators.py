@@ -83,13 +83,13 @@ class GyroHeelStrikeDetector():
 
 
 class AnkleAngleBasedToeOffDetector():
-    def __init__(self, target_frequency, threshold: float = 4, min_phase: float = 0.5):
+    def __init__(self, target_freq, threshold: float = 4, min_phase: float = 0.5):
         '''Uses peak plantarflexion angle to determine toe-off. Warning--does not work well when actuated!'''
         self.threshold = threshold
         self.min_phase = min_phase
         self.ankle_angle_history = deque([0, 0, 0], maxlen=3)
         self.ankle_angle_filter = custom_filters.Butterworth(
-            N=2, Wn=10/(target_frequency/2))
+            N=2, Wn=10/(target_freq/2))
 
     def detect(self, data: Type[exo.Exo.DataContainer]):
         self.ankle_angle_history.appendleft(

@@ -25,9 +25,9 @@ class Butterworth(Filter):
     def __init__(self, N: int, Wn: float, btype='low', fs=None):
         ''' 
         N: order
-        Wn: (default) normalized cutoff frequency (cutoff freq / Nyquist freq). If fs is passed, cutoff is in freq.
+        Wn: (default) normalized cutoff freq (cutoff freq / Nyquist freq). If fs is passed, cutoff is in freq.
         btyple: 'low', 'high', or 'bandpass'
-        fs: Optional: sample freq, Hz. If not None, Wn describes the cutoff frequency in Hz
+        fs: Optional: sample freq, Hz. If not None, Wn describes the cutoff freq in Hz
         '''
         self.N = N
         if fs is not None:
