@@ -10,14 +10,19 @@ class DelayTimer():
         self.start_time = None
 
     def set_start(self):
+        '''Starts the timer.'''
         self.start_time = time.perf_counter()
 
     def check(self):
+        '''Returns True if elapsed time since set_start() if greater than delay_time.'''
         if self.start_time is not None and time.perf_counter() > self.start_time + self.delay_time:
             self.start_time = None
             return True
         else:
             return False
+
+    def reset(self):
+        self.start_time = None
 
 
 class FlexibleTimer():

@@ -5,6 +5,7 @@ import csv
 import sys
 import importlib
 from enum import Enum
+import argparse
 
 
 class ControlArchitecture(Enum):
@@ -78,30 +79,27 @@ class ConfigSaver():
             self.my_file.close()
 
 
-def parse_config_to_use() -> Type[ConfigurableConstants]:
-    '''Finds file for config to use based on command line passed args.
-
-    To use a config file other than default_config, for example: 
-
-    python main_loop cc max_config
-
-    will import the config object stored in max_config.py.'''
-    args = sys.argv[1:]
-    if "cc" in args:
-        config_filename = args[args.index("cc") + 1]
-    else:
-        config_filename = 'default_config'
-    module = importlib.import_module('.' + config_filename,
-                                     package='custom_constants')
+def load_config(config_filename) -> Type[ConfigurableConstants]:
+    try:
+        module = importlib.import_module('.' + config_filename,
+                                         package='custom_configs')
+    except:
+        error_str = 'Unable to find config file: ' + \
+            config_filename + ' in custom_constants'
+        raise ValueError(error_str)
     config = module.config
     print('Using ConfigurableConstants from: ', config_filename)
     return config
 
 
-if __name__ == '__main__':
-    from custom_constants import default_config
-    config = parse_config_to_use()
-    config_saver = ConfigSaver(file_ID='testyo', config=config)
-    config_saver.write_data(loop_time=1)
-    config_saver.write_data(loop_time=2)
-    config_saver.close_file
+def parse_args():
+    # Create the parser
+    my_parser = argparse.ArgumentParser(prog='Exoboot Code',
+                                        description='Run Exoboot Controllers',
+                                        epilog='Enjoy the program! :)')
+    # Add the arguments
+    my_parser.add_argument('-c', '--config', action='store',
+                           type=str, required=False, default='default_config')
+    # Execute the parse_args() method
+    args = my_parser.parse_args()
+    return(args)

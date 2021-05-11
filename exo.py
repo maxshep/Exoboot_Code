@@ -15,7 +15,33 @@ from flexsea import fxEnums as fxe
 from flexsea import flexsea as flex
 from flexsea import fxUtils as fxu
 
+# Instantiate Dephy's FlexSEA object, which contains important functions
 fxs = flex.FlexSEA()
+
+
+def connect_to_exos(file_ID: str = None,
+                    target_freq: int = 200,
+                    actpack_freq: int = 200,
+                    log_en: bool = False,
+                    do_read_fsrs: bool = False):
+    '''Connect to Exos, instantiate Exo objects.'''
+    exo_list = []
+    ports, baud_rate = load_ports_and_baud_rate()
+    for port in ports:
+        try:
+            dev_id = fxs.open(port, baud_rate, log_level=6)
+            fxs.start_streaming(
+                dev_id=dev_id, freq=actpack_freq, log_en=log_en)
+            exo_list.append(Exo(dev_id=dev_id, file_ID=file_ID,
+                                target_freq=target_freq,
+                                do_read_fsrs=do_read_fsrs))
+        except IOError:
+            print('Unable to open exo on port: ', port,
+                  ' This is okay if only one exo is connected!')
+
+    if not exo_list:  # (if empty)
+        raise RuntimeError('No Exos connected')
+    return exo_list
 
 
 def load_ports_and_baud_rate():
@@ -36,32 +62,14 @@ def load_ports_and_baud_rate():
     return ports, baud_rate
 
 
-def connect_to_exo(port: str, baud_rate: int, freq: int, log_en=False):
-    '''Args: 
-        port: str from 'com.txt' in flexseapython/
-        baud_rate: int from 'com.txt' in flexseapython/
-        log_en: bool indicating whether logging should be done with the flexsea lib.'''
-    try:
-        dev_id = fxs.open(port, baud_rate, log_level=6)
-        fxs.start_streaming(
-            dev_id=dev_id, freq=freq, log_en=log_en)
-        return dev_id
-    except IOError:
-        print('Unable to open exo on port: ', port,
-              ' This is okay if only one exo is connected!')
-        return None
-
-
 class Exo():
     def __init__(self,
-                 fxs,
                  dev_id: int,
                  file_ID: str = None,
                  target_freq: float = 200,
                  do_read_fsrs: bool = False):
         '''Exo object is the primary interface with the Dephy ankle exos, and corresponds to a single physical exoboot.
         Args:
-            fxs: Dephy's FlexSEA object, which is shared across devices and contains their functions...
             dev_id: int. Unique integer to identify the exo in flexsea's library. Returned by connect_to_exo
             file_ID: str. Unique string added to filename. If None, no file will be saved.
             do_read_dsrs: bool indicating whether to read FSRs '''
@@ -89,7 +97,7 @@ class Exo():
             N=2, Wn=10, fs=target_freq)
         if self.do_read_fsrs:
             try:
-                if os.uname().nodename == 'raspberrypi':
+                if fxu.is_pi() or fxu.is_pi64():
                     import gpiozero
                     self.data = self.DataContainerWithFSRs()
                     if self.side == constants.Side.LEFT:
@@ -157,7 +165,7 @@ class Exo():
         time.sleep(0.05)
         fxs.stop_streaming(self.dev_id)
         time.sleep(0.2)
-        fxs.close_all(self.dev_id)
+        fxs.close(self.dev_id)
         self.close_file()
         if self.do_read_fsrs:
             self.heel_fsr_detector.close()
@@ -177,8 +185,8 @@ class Exo():
             self.b_val = b_val
         if ff is not None:
             self.ff = ff
-        fxs.set_gains(self.dev_id, self.Kp, self.Ki,
-                      self.Kd, self.k_val, self.b_val, self.ff)
+        fxs.set_gains(dev_id=self.dev_id, kp=self.Kp, ki=self.Ki,
+                      kd=self.Kd, k_val=self.k_val, b_val=self.b_val, ff=self.ff)
 
     def read_data(self, do_print=False, loop_time=None):
         '''IMU data comes from Dephy in RHR, with positive XYZ pointing
@@ -227,7 +235,7 @@ class Exo():
             self.data.heel_fsr = self.heel_fsr_detector.value
             self.data.toe_fsr = self.toe_fsr_detector.value
         if do_print:
-            fxUtil.clearTerminal()
+            fxu.clear_terminal()
             print('acc_x:                ', self.data.accel_x)
             print('acc_y:                ', self.data.accel_y)
             print('acc_z:                ', self.data.accel_z)
@@ -241,7 +249,7 @@ class Exo():
             print('ankle_angle:          ', self.data.ankle_angle)
 
     def get_batt_voltage(self):
-        actpack_data = fxs.fxReadDevice(self.dev_id)
+        actpack_data = fxs.read_exo_device(self.dev_id)
         return actpack_data.batt_volt
 
     def setup_data_writer(self, file_ID: str):
@@ -294,7 +302,7 @@ class Exo():
             raise ValueError(
                 'abs(desired_mA) must be < constants.MAX_ALLOWABLE_CURRENT_COMMAND')
         fxs.send_motor_command(
-            self.dev_id, fxe.FXCURRENT, desired_mA)
+            dev_id=self.dev_id, ctrl_mode=fxe.FX_CURRENT, value=desired_mA)
         self.data.commanded_current = desired_mA
         self.data.commanded_position = None
 
@@ -304,14 +312,14 @@ class Exo():
             raise ValueError(
                 'abs(desired_mV) must be < constants.MAX_ALLOWABLE_VOLTAGE_COMMAND')
         fxs.send_motor_command(
-            self.dev_id, fxe.FXVOLTAGE, desired_mV)
+            dev_id=self.dev_id, ctrl_mode=fxe.FX_VOLTAGE, value=desired_mV)
         self.data.commanded_current = None
         self.data.commanded_position = None
 
     def command_motor_angle(self, desired_motor_angle: int):
         '''Commands motor angle (counts). Pay attention to the sign!'''
         fxs.send_motor_command(
-            self.dev_id, fxe.FXPOSITION, desired_motor_angle)
+            dev_id=self.dev_id, ctrl_mode=fxe.FX_POSITION, value=desired_motor_angle)
         self.data.commanded_current = None
         self.data.commanded_position = desired_motor_angle
 
@@ -328,7 +336,7 @@ class Exo():
             # Only send gains when necessary
             self.update_gains(k_val=int(k_val), b_val=int(b_val))
         fxs.send_motor_command(
-            self.dev_id, fxe.FXIMPEDANCE, int(theta0))
+            dev_id=self.dev_id, ctrl_mode=fxe.FX_IMPEDANCE, value=int(theta0))
         self.data.commanded_current = None
         self.data.commanded_position = None
 
@@ -375,7 +383,8 @@ class Exo():
             theta0=theta0_motor, k_val=K_dephy, b_val=0)
 
     def command_controller_off(self):
-        fxs.send_motor_command(self.dev_id, fxs.FxNone, 0)
+        fxs.send_motor_command(
+            dev_id=self.dev_id, ctrl_mode=fxe.FX_NONE, value=0)
 
     def command_slack(self, desired_slack=10000):
         if not self.has_calibrated:
@@ -507,20 +516,8 @@ class Exo():
 
 
 if __name__ == '__main__':
-    import util
-    exo_list = []
-    ports, baud_rate = load_ports_and_baud_rate()
-    for port in ports:
-        dev_id = connect_to_exo(port=port, baud_rate=baud_rate, freq=100)
-        if dev_id is not None:
-            exo_list.append(Exo(dev_id=dev_id, file_ID='Test'))
-    if not exo_list:  # (if empty)
-        raise RuntimeError('No Exos connected')
-
+    exo_list = connect_to_exos(file_ID='test')
     for exo in exo_list:
-        # exo.standing_calibration()
-        # exo.command_motor_impedance(theta0=exo.data.motor_angle, k_val=500, b_val=0)
-        # time.sleep(5)
-        # exo.command_controller_off()
+        exo.standing_calibration()
         print(exo.get_batt_voltage())
         exo.close()
