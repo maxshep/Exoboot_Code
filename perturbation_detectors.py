@@ -1,11 +1,11 @@
-import exo
+import exoboot
 from typing import Type
 import util
 
 
 class SlipDetectorAP():
     def __init__(self,
-                 data_container: Type[exo.Exo.DataContainer],
+                 data_container: Type[exoboot.Exo.DataContainer],
                  acc_threshold_x: float = 0.5,
                  time_out: float = 1.1,
                  max_acc_y: float = 0.2,
@@ -29,7 +29,7 @@ class SlipDetectorAP():
 
 if __name__ == '__main__':
     import time
-    data = exo.Exo.DataContainer()
+    data = exoboot.Exo.DataContainer()
     slip_detector = SlipDetectorAP(data, time_out=0.05)
     accel_x = [0, 0.5, 1.2, 1.5, 1.1, 0.5]
     accel_y = [1, 1, 0.85, 1, 1, 1]

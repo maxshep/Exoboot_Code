@@ -1,5 +1,5 @@
 import numpy as np
-from exo import Exo
+from exoboot import Exo
 import controllers
 import custom_filters
 import gait_state_estimators

@@ -1,5 +1,5 @@
 import constants
-from exo import Exo
+from exoboot import Exo
 from scipy import signal, interpolate
 import time
 import copy

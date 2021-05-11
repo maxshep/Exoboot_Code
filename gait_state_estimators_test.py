@@ -2,7 +2,7 @@ import numpy as np
 import gait_state_estimators
 import unittest
 import matplotlib.pyplot as plt
-import exo
+import exoboot
 import custom_filters
 
 
@@ -22,7 +22,7 @@ class TestGaitEventDetectors(unittest.TestCase):
         '''Simultaneously runs roughly simulated gyro through heel strike detector,
          toe off detector, gait phase estimator. Requires looking at the plot to
          confirm.'''
-        data = exo.Exo.DataContainer()
+        data = exoboot.Exo.DataContainer()
         sampling_freq = 100
         time_nows = 1/sampling_freq * np.arange(0, 1300)
         # about 1 heel strike per second

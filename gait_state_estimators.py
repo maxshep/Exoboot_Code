@@ -1,6 +1,6 @@
 import numpy as np
 import custom_filters
-import exo
+import exoboot
 from scipy import signal
 from collections import deque
 import time
@@ -10,7 +10,7 @@ from typing import Type
 
 class GaitStateEstimator():
     def __init__(self,
-                 data_container: Type[exo.Exo.DataContainer],
+                 data_container: Type[exoboot.Exo.DataContainer],
                  heel_strike_detector,
                  gait_phase_estimator,
                  toe_off_detector,
@@ -36,7 +36,7 @@ class GaitStateEstimator():
 class MLGaitStateEstimator():
     def __init__(self,
                  side: Type[constants.Side],
-                 data_container: Type[exo.Exo.DataContainer],
+                 data_container: Type[exoboot.Exo.DataContainer],
                  heel_strike_detector,
                  gait_phase_estimator,
                  toe_off_detector):
@@ -47,7 +47,7 @@ class MLGaitStateEstimator():
         self.gait_phase_estimator = gait_phase_estimator
         self.toe_off_detector = toe_off_detector
 
-    def detect(self, data: Type[exo.Exo.DataContainer], do_print_heel_strikes=True, do_print_toe_offs=False):
+    def detect(self, data: Type[exoboot.Exo.DataContainer], do_print_heel_strikes=True, do_print_toe_offs=False):
         data = self.data_container  # For convenience
         data.did_heel_strike = self.heel_strike_detector.detect(data)
         data.gait_phase = self.gait_phase_estimator.estimate(data)
@@ -66,7 +66,7 @@ class GyroHeelStrikeDetector():
         self.delay = delay
         self.timer_active = False
 
-    def detect(self, data: Type[exo.Exo.DataContainer]):
+    def detect(self, data: Type[exoboot.Exo.DataContainer]):
         self.gyro_history.appendleft(self.gyro_filter.filter(data.gyro_z))
         if (self.timer_active is False and
             self.gyro_history[1] > self.height and
@@ -91,7 +91,7 @@ class AnkleAngleBasedToeOffDetector():
         self.ankle_angle_filter = custom_filters.Butterworth(
             N=2, Wn=10/(target_freq/2))
 
-    def detect(self, data: Type[exo.Exo.DataContainer]):
+    def detect(self, data: Type[exoboot.Exo.DataContainer]):
         self.ankle_angle_history.appendleft(
             self.ankle_angle_filter.filter(data.ankle_angle))
         data.accel_x = self.ankle_angle_history[0]
@@ -113,7 +113,7 @@ class GaitPhaseBasedToeOffDetector():
         self.fraction_of_gait = fraction_of_gait
         self.has_toe_off_occurred = False
 
-    def detect(self, data: Type[exo.Exo.DataContainer]):
+    def detect(self, data: Type[exoboot.Exo.DataContainer]):
         gait_phase = data.gait_phase
         if gait_phase is None:
             did_toe_off = False
@@ -157,7 +157,7 @@ class StrideAverageGaitPhaseEstimator():
         self.stride_duration_filter = custom_filters.MovingAverage(
             window_size=num_strides_to_average)
 
-    def estimate(self, data: Type[exo.Exo.DataContainer]):
+    def estimate(self, data: Type[exoboot.Exo.DataContainer]):
         time_now = time.perf_counter()
         if data.did_heel_strike:
             stride_duration = time_now - self.time_of_last_heel_strike

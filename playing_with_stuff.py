@@ -1,2 +1,0 @@
-import gpiozero
-print('heyy')

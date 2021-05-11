@@ -2,7 +2,7 @@
 This is the main GT program for running the Dephy exos. Read the Readme.
 '''
 
-from exo import Exo, connect_to_exos
+import exoboot
 import threading
 import controllers
 import state_machines
@@ -27,8 +27,8 @@ config_saver = config_util.ConfigSaver(
     file_ID=file_ID, config=config)  # Saves config updates
 
 '''Connect to Exos, instantiate Exo objects.'''
-exo_list = connect_to_exos(file_ID=file_ID, target_freq=config.TARGET_FREQ,
-                           actpack_freq=config.ACTPACK_FREQ, do_read_fsrs=config.DO_READ_FSRS)
+exo_list = exoboot.connect_to_exos(file_ID=file_ID, target_freq=config.TARGET_FREQ,
+                                   actpack_freq=config.ACTPACK_FREQ, do_read_fsrs=config.DO_READ_FSRS)
 print('Battery Voltage: ', 0.001*exo_list[0].get_batt_voltage(), 'V')
 
 '''Prepare empty lists for exos, gait_state_estimators, and state_machines.'''

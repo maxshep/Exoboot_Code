@@ -1,6 +1,6 @@
 import os
 import sys
-from exo import Exo
+from exoboot import Exo
 from flexseapython import pyFlexsea, fxUtil
 import time
 from signal import signal, SIGINT
