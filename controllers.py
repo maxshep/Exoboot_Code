@@ -61,7 +61,6 @@ class SawickiWickiController(Controller):
                     self.update_setpoint(theta0=self.ankle_angles[0])
 
                     super().command_gains()
-                    self.exo.data.gait_phase = 10  # TODO(maxshep) remove
                     print('engaged..., desired k_val: ', self.k_val,
                           'setpoint: ', self.ankle_angles[0])
                     self.ankle_angles.clear()  # Reset the ankle angle deque
@@ -275,3 +274,57 @@ class SoftReelOutController(Controller):
             return True
         else:
             return False
+
+
+class StandingSlipController(Controller):
+    def __init__(self,
+                 exo: Exo,
+                 bias_torque=0,
+                 pf_setpoint=20,
+                 k_val=500,
+                 Kp: int = 100,
+                 Ki: int = 10,
+                 Kd: int = 0,
+                 ff: int = 0):
+        '''This controller uses impedance control with a pf setpoint when a slip is detected.
+
+        Arguments:
+            exo: exo.Exo instance
+            bias_torque: bias torque when perturbation response is inactive
+            pf_setpoint set_point: spring set point when perturbation reponse is active
+            k_val: spring set point when a slip is detected
+            time_out: defines maximum amount of time to reel in
+        Returns:
+            Bool describing whether reel in operation has completed.
+         '''
+        self.exo = exo
+        self.bias_torque = bias_torque
+        self.pf_set_point = pf_setpoint
+        self.k_val = k_val
+        super().update_controller_gains(Kp=Kp, Ki=Ki, Kd=Kd, ff=ff)
+        # set maximum time for controller to be active in PF position
+        self.pf_timer = util.DelayTimer(delay_time=0)
+
+    def command(self, did_slip=False):
+        if did_slip:
+            self.pf_timer.set_start()
+            self.pf_active = True
+        if self.pf_active and not self.pf_timer.check():
+            # Create plantarflexion torque
+            setpoint_motor = self.exo.ankle_angle_to_motor_angle(
+                ankle_angle=self.pf_setpoint)
+        else:
+            setpoint_motor = self.exo.ankle_angle_to_motor_angle(
+                ankle_angle=self.bias_torque)
+        self.exo.command_ankle_impedance(
+            theta0_ankle=setpoint_motor, K_ankle=self.k_val)
+
+    def update_stiffness(self, k_val):
+        self.k_val = k_val
+
+    def update_standing_setpoint(self, theta0):
+        self.bias_torque = theta0
+
+    def update_pf_setpoint(self, theta0):
+        '''Take in desired ankle setpoint (deg) and stores equivalent motor angle.'''
+        self.pf_setpoint = theta0
