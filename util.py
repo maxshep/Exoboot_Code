@@ -5,8 +5,16 @@ import constants
 
 
 class DelayTimer():
-    def __init__(self, delay_time):
+    def __init__(self, delay_time, true_until: bool = False):
+        '''
+        A timer
+
+        Args:
+            delay_time: amount of time to delay
+            true_until: option to make the timer go True until delay_time is reached, then False
+        '''
         self.delay_time = delay_time
+        self.true_until = true_until
         self.start_time = None
 
     def set_start(self):
@@ -14,12 +22,18 @@ class DelayTimer():
         self.start_time = time.perf_counter()
 
     def check(self):
-        '''Returns True if elapsed time since set_start() if greater than delay_time.'''
-        if self.start_time is not None and time.perf_counter() > self.start_time + self.delay_time:
-            self.start_time = None
-            return True
+        '''Depending on true_until, will either go True when time is hit, or go False when time is hit.'''
+        if self.true_until:
+            if self.start_time is not None and time.perf_counter() < self.start_time + self.delay_time:
+                return True
+            else:
+                return False
         else:
-            return False
+            if self.start_time is not None and time.perf_counter() > self.start_time + self.delay_time:
+                self.start_time = None
+                return True
+            else:
+                return False
 
     def reset(self):
         self.start_time = None

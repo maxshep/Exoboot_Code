@@ -6,6 +6,7 @@ import copy
 import custom_filters
 import util
 from collections import deque
+import perturbation_detectors
 
 
 class Controller(object):
@@ -279,7 +280,7 @@ class SoftReelOutController(Controller):
 class StandingSlipController(Controller):
     def __init__(self,
                  exo: Exo,
-                 bias_torque=0,
+                 bias_torque=5,
                  pf_setpoint=20,
                  k_val=500,
                  Kp: int = 100,
@@ -302,22 +303,22 @@ class StandingSlipController(Controller):
         self.pf_set_point = pf_setpoint
         self.k_val = k_val
         super().update_controller_gains(Kp=Kp, Ki=Ki, Kd=Kd, ff=ff)
-        # set maximum time for controller to be active in PF position
-        self.pf_timer = util.DelayTimer(delay_time=0)
+        # set time for controller to be active in PF position
+        self.pf_timer = util.DelayTimer(delay_time=1.5, true_until=True)
+        self.slip_detector = perturbation_detectors.SlipDetectorAP(
+            self.exo.data)
 
     def command(self, did_slip=False):
-        if did_slip:
-            self.pf_timer.set_start()
-            self.pf_active = True
-        if self.pf_active and not self.pf_timer.check():
+        if self.slip_detector.detect():
+            self.pf_timer.set_start()  # Activate plantarflexion for set amt of time
+        if self.pf_timer.check():
             # Create plantarflexion torque
             setpoint_motor = self.exo.ankle_angle_to_motor_angle(
                 ankle_angle=self.pf_setpoint)
+            self.exo.command_ankle_impedance(
+                theta0_ankle=setpoint_motor, K_ankle=self.k_val)
         else:
-            setpoint_motor = self.exo.ankle_angle_to_motor_angle(
-                ankle_angle=self.bias_torque)
-        self.exo.command_ankle_impedance(
-            theta0_ankle=setpoint_motor, K_ankle=self.k_val)
+            self.exo.command_torque(self.bias_torque)
 
     def update_stiffness(self, k_val):
         self.k_val = k_val

@@ -81,3 +81,17 @@ class SawickiWickiParameterPasser(ParameterPasser):
 
     def update_params(self, param_list):
         self.config.k_val = int(param_list[0])
+
+
+class StandingSlipControllerParameterPasser(ParameterPasser):
+    def __init__(self,
+                 lock: Type[threading.Lock],
+                 config: Type[config_util.ConfigurableConstants],
+                 quit_event: Type[threading.Event],
+                 new_params_event: Type[threading.Event],
+                 name='keyboard-input-thread'):
+        super().__init__(lock=lock, config=config, quit_event=quit_event,
+                         new_params_event=new_params_event, name=name)
+
+    def update_params(self, param_list):
+        self.config.k_val = int(param_list[0])
