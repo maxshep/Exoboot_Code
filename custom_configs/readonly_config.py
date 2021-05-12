@@ -1,12 +1,8 @@
+
 import config_util
 config = config_util.ConfigurableConstants()
+config.READ_ONLY = True  # For example
 
-'''Make your modifications starting here'''
-config.CONTROL_ARCHITECTURE = config_util.ControlArchitecture.SAWICKIWICKI
-config.K_VAL = 1000
-config.HS_GYRO_DELAY = 0.01
-config.TOE_OFF_FRACTION = 0.68
-config.REEL_IN_TIMEOUT = 0.1
 
 ''' Here are the variables that are updatable in config, and their defaults:
 

@@ -30,20 +30,35 @@ class ParameterPasser(threading.Thread):
             msg = input()
             if len(msg) < 3:
                 print('Message must be either "quit" or a string of parameters')
-            elif msg[0] == 'v' and msg[-1] == '!':
-                msg = msg[1:-1]
-                param_list = [float(x) for x in msg.split(',')]
-                self.lock.acquire()
-                self.update_params(param_list)
-                self.new_params_event.set()
-                self.lock.release()
-                print('Parameters sent')
             elif msg.lower() == 'quit':
                 print('Quitting')
                 self.lock.acquire()
                 self.quit_event.set()
                 self.lock.release()
                 break
+            elif msg[0] == 'v' and msg[-1] == '!':
+                # UPDATE FOUR POINT SPLINE WITH v<>!
+                msg = msg[1:-1]
+                param_list = [float(x) for x in msg.split(',')]
+                if len(param_list) != 4:
+                    print('Must send four spline points with v<>! message')
+                else:
+                    self.lock.acquire()
+                    self.config.RISE_FRACTION = param_list[0]
+                    self.config.PEAK_TORQUE = param_list[1]
+                    self.config.PEAK_FRACTION = param_list[2]
+                    self.config.FALL_FRACTION = param_list[3]
+                    self.new_params_event.set()
+                    self.lock.release()
+                    print('Parameters sent')
+            elif msg[0] == 'k' and msg[-1] == '!':
+                msg = msg[1:-1]
+                if msg is int:
+                    self.config.K_VAL = msg
+                    print('k_val updated to: ', msg)
+                else:
+                    print('Must provide single integer to update k_val')
+
             else:
                 print('IDK how to interpret your message')
 
@@ -52,46 +67,46 @@ class ParameterPasser(threading.Thread):
             'No update_params function implemented yet for this parameter_passer child')
 
 
-class FourPointSplineParameterPasser(ParameterPasser):
-    def __init__(self,
-                 lock: Type[threading.Lock],
-                 config: Type[config_util.ConfigurableConstants],
-                 quit_event: Type[threading.Event],
-                 new_params_event: Type[threading.Event],
-                 name='keyboard-input-thread'):
-        super().__init__(lock=lock, config=config, quit_event=quit_event,
-                         new_params_event=new_params_event, name=name)
+# class FourPointSplineParameterPasser(ParameterPasser):
+#     def __init__(self,
+#                  lock: Type[threading.Lock],
+#                  config: Type[config_util.ConfigurableConstants],
+#                  quit_event: Type[threading.Event],
+#                  new_params_event: Type[threading.Event],
+#                  name='keyboard-input-thread'):
+#         super().__init__(lock=lock, config=config, quit_event=quit_event,
+#                          new_params_event=new_params_event, name=name)
 
-    def update_params(self, param_list):
-        self.config.RISE_FRACTION = param_list[0]
-        self.config.PEAK_TORQUE = param_list[1]
-        self.config.PEAK_FRACTION = param_list[2]
-        self.config.FALL_FRACTION = param_list[3]
-
-
-class SawickiWickiParameterPasser(ParameterPasser):
-    def __init__(self,
-                 lock: Type[threading.Lock],
-                 config: Type[config_util.ConfigurableConstants],
-                 quit_event: Type[threading.Event],
-                 new_params_event: Type[threading.Event],
-                 name='keyboard-input-thread'):
-        super().__init__(lock=lock, config=config, quit_event=quit_event,
-                         new_params_event=new_params_event, name=name)
-
-    def update_params(self, param_list):
-        self.config.k_val = int(param_list[0])
+#     def update_params(self, param_list):
+#         self.config.RISE_FRACTION = param_list[0]
+#         self.config.PEAK_TORQUE = param_list[1]
+#         self.config.PEAK_FRACTION = param_list[2]
+#         self.config.FALL_FRACTION = param_list[3]
 
 
-class StandingSlipControllerParameterPasser(ParameterPasser):
-    def __init__(self,
-                 lock: Type[threading.Lock],
-                 config: Type[config_util.ConfigurableConstants],
-                 quit_event: Type[threading.Event],
-                 new_params_event: Type[threading.Event],
-                 name='keyboard-input-thread'):
-        super().__init__(lock=lock, config=config, quit_event=quit_event,
-                         new_params_event=new_params_event, name=name)
+# class SawickiWickiParameterPasser(ParameterPasser):
+#     def __init__(self,
+#                  lock: Type[threading.Lock],
+#                  config: Type[config_util.ConfigurableConstants],
+#                  quit_event: Type[threading.Event],
+#                  new_params_event: Type[threading.Event],
+#                  name='keyboard-input-thread'):
+#         super().__init__(lock=lock, config=config, quit_event=quit_event,
+#                          new_params_event=new_params_event, name=name)
 
-    def update_params(self, param_list):
-        self.config.k_val = int(param_list[0])
+#     def update_params(self, param_list):
+#         self.config.K_VAL = int(param_list[0])
+
+
+# class StandingSlipControllerParameterPasser(ParameterPasser):
+#     def __init__(self,
+#                  lock: Type[threading.Lock],
+#                  config: Type[config_util.ConfigurableConstants],
+#                  quit_event: Type[threading.Event],
+#                  new_params_event: Type[threading.Event],
+#                  name='keyboard-input-thread'):
+#         super().__init__(lock=lock, config=config, quit_event=quit_event,
+#                          new_params_event=new_params_event, name=name)
+
+#     def update_params(self, param_list):
+#         self.config.K_VAL = int(param_list[0])

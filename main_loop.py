@@ -69,7 +69,7 @@ for exo in exo_list:
             bias_torque=config.SPLINE_BIAS)
     elif config.CONTROL_ARCHITECTURE == config_util.ControlArchitecture.SAWICKIWICKI:
         stance_controller = controllers.SawickiWickiController(
-            exo=exo, k_val=config.k_val)
+            exo=exo, k_val=config.K_VAL)
     state_machine_list.append(state_machines.StanceSwingReeloutReelinStateMachine(exo=exo,
                                                                                   stance_controller=stance_controller,
                                                                                   swing_controller=swing_controller,
@@ -88,6 +88,8 @@ new_params_event = threading.Event()
 if not config.READ_ONLY:
     for exo in exo_list:
         exo.standing_calibration()
+else:
+    print('Not calibrating... READ_ONLY = True in config')
 
 input('Press any key to begin')
 print('Start!')
@@ -96,12 +98,14 @@ print('Start!')
 timer = util.FlexibleTimer(
     target_freq=config.TARGET_FREQ)  # attempts constants freq
 t0 = time.perf_counter()
-if config.CONTROL_ARCHITECTURE == config_util.ControlArchitecture.FOURPOINTSPLINE:
-    keyboard_thread = parameter_passers.FourPointSplineParameterPasser(
-        lock=lock, config=config, quit_event=quit_event, new_params_event=new_params_event)
-elif config.CONTROL_ARCHITECTURE == config_util.ControlArchitecture.SAWICKIWICKI:
-    keyboard_thread = parameter_passers.SawickiWickiParameterPasser(
-        lock=lock, config=config, quit_event=quit_event, new_params_event=new_params_event)
+keyboard_thread = parameter_passers.ParameterPasser(
+    lock=lock, config=config, quit_event=quit_event, new_params_event=new_params_event)
+# if config.CONTROL_ARCHITECTURE == config_util.ControlArchitecture.FOURPOINTSPLINE:
+#     keyboard_thread = parameter_passers.FourPointSplineParameterPasser(
+#         lock=lock, config=config, quit_event=quit_event, new_params_event=new_params_event)
+# elif config.CONTROL_ARCHITECTURE == config_util.ControlArchitecture.SAWICKIWICKI:
+#     keyboard_thread = parameter_passers.SawickiWickiParameterPasser(
+#         lock=lock, config=config, quit_event=quit_event, new_params_event=new_params_event)
 
 while True:
     try:
@@ -120,7 +124,7 @@ while True:
             elif config.CONTROL_ARCHITECTURE == config_util.ControlArchitecture.SAWICKIWICKI:
                 for state_machine in state_machine_list:
                     state_machine.stance_controller.update_impedance(
-                        k_val=config.k_val)
+                        k_val=config.K_VAL)
             new_params_event.clear()
         if quit_event.is_set():  # If user enters "quit"
             break

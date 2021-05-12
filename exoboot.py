@@ -90,7 +90,7 @@ class Exo():
             self.ankle_angle_offset = constants.RIGHT_ANKLE_ANGLE_OFFSET
         else:
             raise ValueError(
-                'dev_id: ', self.dev_id, 'not found in LEFT_EXO_DEV_IDS or RIGHT_EXO_DEV_IDS')
+                'dev_id: ', self.dev_id, 'not found in constants.LEFT_EXO_DEV_IDS or constants.RIGHT_EXO_DEV_IDS')
         self.motor_offset = 0
         # ankle velocity filter is hardcoded for simplicity, but can be factored out if necessary
         self.ankle_velocity_filter = custom_filters.Butterworth(
@@ -98,7 +98,7 @@ class Exo():
         if self.do_read_fsrs:
             try:
                 if fxu.is_pi() or fxu.is_pi64():
-                    import gpiozero
+                    import gpiozero  # pylint: disable=import-error
                     self.data = self.DataContainerWithFSRs()
                     if self.side == constants.Side.LEFT:
                         self.heel_fsr_detector = gpiozero.Button(
@@ -198,7 +198,7 @@ class Exo():
             self.data.loop_time = loop_time
         last_ankle_angle = self.data.ankle_angle
         self.last_state_time = self.data.state_time
-        actpack_data = fxs.read_exo_device(self.dev_id)
+        actpack_data = fxs.read_device(self.dev_id)
         self.data.state_time = actpack_data.state_time * constants.MS_TO_SECONDS
         self.data.accel_x = -1 * self.motor_sign * \
             actpack_data.accelx * constants.ACCEL_GAIN
@@ -441,7 +441,7 @@ class Exo():
         return motor_angle
 
     def standing_calibration(self,
-                             calibration_mV: int = 1600,
+                             calibration_mV: int = 1000,
                              max_seconds_to_calibrate: float = 5,
                              current_threshold: float = 1300,
                              require_user_input: bool = True):
@@ -456,6 +456,7 @@ class Exo():
         while time.time()-t0 < max_seconds_to_calibrate:
             time.sleep(0.01)
             self.read_data()
+            print(self.data.motor_current)
             if abs(current_filter.filter(self.data.motor_current)) > current_threshold:
                 break
         else:
@@ -518,6 +519,11 @@ class Exo():
 if __name__ == '__main__':
     exo_list = connect_to_exos(file_ID='test')
     for exo in exo_list:
-        exo.standing_calibration()
-        print(exo.get_batt_voltage())
-        exo.close()
+        actpack_data = fxs.read_exo_device(exo.dev_id)
+        print(actpack_data)
+        print(actpack_data.__dict__)
+        for i in range(20):
+            # actpack_data = fxs.read_exo_device(exo.dev_id)
+            actpack_data = fxs.read_device(exo.dev_id)
+            print(actpack_data.accely, actpack_data.ank_ang)
+            time.sleep(0.1)

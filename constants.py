@@ -17,8 +17,8 @@ LEFT_ANKLE_ANGLE_OFFSET = -91  # deg
 RIGHT_ANKLE_ANGLE_OFFSET = 88  # deg
 
 # Add to these lists if dev_ids change, or new exos or actpacks are purchased!
-RIGHT_EXO_DEV_IDS = [65295]
-LEFT_EXO_DEV_IDS = [63086]
+RIGHT_EXO_DEV_IDS = [65295, 3148]
+LEFT_EXO_DEV_IDS = [63086, 2873]
 
 MS_TO_SECONDS = 0.001
 # Converts raw Dephy encoder output to degrees
@@ -53,8 +53,11 @@ GYRO_GAIN = 1 / 32.75  # LSB -> deg/s
 
 LOGGING_FREQ = 200
 # Dephy recommends as a starting point: Kp=250, Ki=200, Kd=0, FF=100
-DEFAULT_KP = 300  # updated from 250 on 3/10/2021
-DEFAULT_KI = 360  # updated from 250 on 3/10/2021
+# DEFAULT_KP = 300  # updated from 250 on 3/10/2021
+# DEFAULT_KI = 360  # updated from 250 on 3/10/2021
+# DEFAULT_KD = 5
+DEFAULT_KP = 200
+DEFAULT_KI = 200
 DEFAULT_KD = 5
 # Feedforward term. "0 is 0% and 128 (possibly unstable!) is 100%."
 DEFAULT_FF = 126

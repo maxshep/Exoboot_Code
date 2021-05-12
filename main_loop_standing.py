@@ -70,7 +70,7 @@ while True:
         if new_params_event.is_set():
             config_saver.write_data(loop_time=loop_time)  # Update config file
             for controller in controller_list:
-                controller.update_pf_setpoint(config.k_val)
+                controller.update_pf_setpoint(config.K_VAL)
             new_params_event.clear()
         if quit_event.is_set():  # If user enters "quit"
             break

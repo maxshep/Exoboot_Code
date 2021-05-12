@@ -12,6 +12,7 @@ class ControlArchitecture(Enum):
     FOURPOINTSPLINE = 0
     SAWICKIWICKI = 1
     GENERICIMPEDANCE = 2
+    STANDINGPERTURBATION = 3
 
 
 @dataclass
@@ -44,8 +45,9 @@ class ConfigurableConstants():
     PEAK_TORQUE: float = 5
 
     # Impedance
-    k_val: int = 500
-    b_val: int = 0
+    K_VAL: int = 500
+    B_VAL: int = 0
+    SET_POINT: int = 0
 
     READ_ONLY = False  # Does not require Lipos
     DO_READ_FSRS = False
