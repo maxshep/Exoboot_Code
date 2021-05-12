@@ -456,7 +456,6 @@ class Exo():
         while time.time()-t0 < max_seconds_to_calibrate:
             time.sleep(0.01)
             self.read_data()
-            print(self.data.motor_current)
             if abs(current_filter.filter(self.data.motor_current)) > current_threshold:
                 break
         else:
