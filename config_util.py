@@ -8,7 +8,7 @@ from enum import Enum
 import argparse
 
 
-class ControlArchitecture(Enum):
+class CtrlStyle(Enum):
     FOURPOINTSPLINE = 0
     SAWICKIWICKI = 1
     GENERICIMPEDANCE = 2
@@ -19,23 +19,28 @@ class ControlArchitecture(Enum):
 class ConfigurableConstants():
     '''Class that stores configuration-related constants.
 
-    Below are the default config constants. DO NOT MODIFY. Write your own short script 
-    in /custom_constants/ (see max_config.py for example).
+    These variables serve to allow 1) loadable configurations from files in /custom_constants/, 
+    2) online updating of device behavior via parameter_passers.py, and 3) to store calibration 
+    details. Below are the default config constants. DO NOT MODIFY DEFAULTS. Write your own short
+    script in /custom_constants/ (see default_config.py for example).
     (see )  '''
+    # Set by functions... no need to change in config file
     loop_time: float = 0
     actual_time: float = time.time()
+    LEFT_ANKLE_ANGLE_ZERO: float = None  # Deg
+    RIGHT_ANKLE_ANGLE_ZERO: float = None  # Deg
+
     TARGET_FREQ: float = 200  # Hz
     ACTPACK_FREQ: float = 200  # Hz
-    CONTROL_ARCHITECTURE: Type[ControlArchitecture] = ControlArchitecture.FOURPOINTSPLINE
+    HIGH_LEVEL_CTRL_STYLE: Type[CtrlStyle] = CtrlStyle.FOURPOINTSPLINE
+
+    # Gait State details
     HS_GYRO_THRESHOLD: float = 100
     HS_GYRO_FILTER_N: int = 2
     HS_GYRO_FILTER_WN: float = 3
     HS_GYRO_DELAY: float = 0.05
-
     SWING_SLACK: int = 10000
     TOE_OFF_FRACTION: float = 0.62
-    SPLINE_BIAS: float = 5  # Nm
-
     REEL_IN_TIMEOUT: float = 0.2
 
     # 4 point Spline
@@ -43,6 +48,7 @@ class ConfigurableConstants():
     PEAK_FRACTION: float = 0.53
     FALL_FRACTION: float = 0.63
     PEAK_TORQUE: float = 5
+    SPLINE_BIAS: float = 5  # Nm
 
     # Impedance
     K_VAL: int = 500

@@ -24,11 +24,10 @@ To make the code more useable and customizable, I've organized the architecture 
 
 ## To use this code:
 Run main_loop.py, or your custom main_loop script, from the command line.
+For info on running it with the pi we have setup: https://docs.google.com/document/d/1HhQxAFK55nA6wYKboyCqtMmRvlXgh4rKzXELoV7ybzg/edit?usp=sharing
 
 ## To modify this code:
-For simple modifications to a controller, gait event estimator, or state machine, you probably only need to modify constants located in constants.py.
-
-For more complex edits, I recommend avoiding editing exo.py. There are a number of tricky things it does, particularly around sign conventions for the left and right exos. If you need to add new variables to its .data subclass, I recommend doing it outside of the exo class. In general, I recommend being comfortable working with classes.
+Avoid editing exo.py. There are a number of tricky things it does, particularly around sign conventions for the left and right exos. The best way to work with this code is to add controllers if necessary and state_machines, and make small modifications to main_loop.py so that it works
 
 ## To pull/push your code to/from the pi:
 This is mostly for Max, since the git is linked to his github account on the pi.

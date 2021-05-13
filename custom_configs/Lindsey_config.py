@@ -2,7 +2,7 @@ import config_util
 config = config_util.ConfigurableConstants()
 
 '''Make your modifications starting here'''
-config.CONTROL_ARCHITECTURE = config_util.ControlArchitecture.SAWICKIWICKI
+config.HIGH_LEVEL_CTRL_STYLE = config_util.CtrlStyle.SAWICKIWICKI
 config.K_VAL = 1000
 config.HS_GYRO_DELAY = 0.01
 config.TOE_OFF_FRACTION = 0.68
@@ -12,7 +12,7 @@ config.REEL_IN_TIMEOUT = 0.1
 
     TARGET_FREQ: float = 200  # Hz
     ACTPACK_FREQ: float = 200  # Hz
-    CONTROL_ARCHITECTURE: Type[ControlArchitecture] = ControlArchitecture.FOURPOINTSPLINE
+    HIGH_LEVEL_CTRL_STYLE: Type[CtrlStyle] = CtrlStyle.FOURPOINTSPLINE
     HS_GYRO_THRESHOLD: float = 100
     HS_GYRO_FILTER_N: int = 2
     HS_GYRO_FILTER_WN: float = 3

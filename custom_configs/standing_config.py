@@ -1,9 +1,9 @@
 
 import config_util
 config = config_util.ConfigurableConstants()
-config.CONTROL_ARCHITECTURE = config_util.ControlArchitecture.STANDINGPERTURBATION  # For example
+config.HIGH_LEVEL_CTRL_STYLE = config_util.CtrlStyle.STANDINGPERTURBATION  # For example
 config.K_VAL = 400
-config.SET_POINT = 20
+config.SET_POINT = 30
 config.READ_ONLY = False
 
 
@@ -11,7 +11,7 @@ config.READ_ONLY = False
 
     TARGET_FREQ: float = 200  # Hz
     ACTPACK_FREQ: float = 200  # Hz
-    CONTROL_ARCHITECTURE: Type[ControlArchitecture] = ControlArchitecture.FOURPOINTSPLINE
+    HIGH_LEVEL_CTRL_STYLE: Type[CtrlStyle] = CtrlStyle.FOURPOINTSPLINE
     HS_GYRO_THRESHOLD: float = 100
     HS_GYRO_FILTER_N: int = 2
     HS_GYRO_FILTER_WN: float = 3

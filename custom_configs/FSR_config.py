@@ -7,7 +7,7 @@ config.DO_READ_FSRS = True
 
     TARGET_FREQ: float = 200  # Hz
     ACTPACK_FREQ: float = 200  # Hz
-    CONTROL_ARCHITECTURE: Type[ControlArchitecture] = ControlArchitecture.FOURPOINTSPLINE
+    HIGH_LEVEL_CTRL_STYLE: Type[CtrlStyle] = CtrlStyle.FOURPOINTSPLINE
     HS_GYRO_THRESHOLD: float = 100
     HS_GYRO_FILTER_N: int = 2
     HS_GYRO_FILTER_WN: float = 3

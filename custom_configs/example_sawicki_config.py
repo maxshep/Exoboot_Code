@@ -2,14 +2,14 @@ import config_util
 config = config_util.ConfigurableConstants()
 
 '''Make your modifications starting here'''
-config.CONTROL_ARCHITECTURE = config_util.ControlArchitecture.SAWICKIWICKI
+config.HIGH_LEVEL_CTRL_STYLE = config_util.CtrlStyle.SAWICKIWICKI
 config.TARGET_FREQ = 300
 
 ''' Here are the variables that are updatable in config, and their defaults:
 
     TARGET_FREQ: float = 200  # Hz
     ACTPACK_FREQ: float = 200  # Hz
-    CONTROL_ARCHITECTURE: Type[ControlArchitecture] = ControlArchitecture.FOURPOINTSPLINE
+    HIGH_LEVEL_CTRL_STYLE: Type[CtrlStyle] = CtrlStyle.FOURPOINTSPLINE
     HS_GYRO_THRESHOLD: float = 100
     HS_GYRO_FILTER_N: int = 2
     HS_GYRO_FILTER_WN: float = 3

@@ -224,18 +224,17 @@ class Exo():
         if self.has_calibrated:
             self.data.slack = self.get_slack()
 
-        # if (self.last_state_time is None or
-        #     last_ankle_angle is None or
-        #         self.data.state_time-self.last_state_time > 20):
-        #     self.data.ankle_velocity = 0
-        # elif self.data.state_time == self.last_state_time:
-        #     pass  # Keep old velocity
-        # else:
-        #     angular_velocity = (
-        #         self.data.ankle_angle - last_ankle_angle)/(self.data.state_time-self.last_state_time)
-        #     self.data.ankle_velocity = self.ankle_velocity_filter.filter(
-        #         angular_velocity)
-        self.data.ankle_velocity = actpack_data.ank_vel  # TODO:maxshep
+        if (self.last_state_time is None or
+            last_ankle_angle is None or
+                self.data.state_time-self.last_state_time > 20):
+            self.data.ankle_velocity = 0
+        elif self.data.state_time == self.last_state_time:
+            pass  # Keep old velocity
+        else:
+            angular_velocity = (
+                self.data.ankle_angle - last_ankle_angle)/(self.data.state_time-self.last_state_time)
+            self.data.ankle_velocity = self.ankle_velocity_filter.filter(
+                angular_velocity)
 
         if self.do_read_fsrs:
             self.data.heel_fsr = self.heel_fsr_detector.value
@@ -440,22 +439,21 @@ class Exo():
             raise ValueError(
                 'Must perform standing calibration before performing this task')
         if ankle_angle > constants.MAX_ANKLE_ANGLE or ankle_angle < constants.MIN_ANKLE_ANGLE:
-            print('ankle angle: ', ankle_angle)
+            print('ankle angle: ', ankle_angle, ' on side: ', self.side)
             raise ValueError(
-                'Attempted to convert ankle angle outside allowable bounds')
+                'Attempted to convert ankle angle outside allowable bounds--Typically due to disconnection')
         motor_angle = int(np.polyval(
             self.ankle_to_motor_angle_polynomial, ankle_angle) + self.motor_offset)
         return motor_angle
 
     def standing_calibration(self,
-                             calibration_mV: int = 1000,
+                             calibration_mV: int = 1300,
                              max_seconds_to_calibrate: float = 5,
-                             current_threshold: float = 1300,
-                             require_user_input: bool = True):
+                             current_threshold: float = 1500,
+                             do_zero_ankle_angle: bool = False):
         '''Brings up slack, calibrates ankle and motor offset angles.'''
-        if require_user_input:
-            input(['Press any key to calibrate exo on ' + str(self.side)])
-            time.sleep(0.5)
+        input(['Press any key to calibrate exo on ' + str(self.side)])
+        time.sleep(0.2)
         print('Calibrating...')
         current_filter = custom_filters.MovingAverage(window_size=10)
         self.command_voltage(desired_mV=self.motor_sign * calibration_mV)
@@ -464,7 +462,9 @@ class Exo():
             time.sleep(0.01)
             self.read_data()
             if abs(current_filter.filter(self.data.motor_current)) > current_threshold:
+                self.calibrated_ankle_angle = self.data.ankle_angle
                 break
+            print(self.data.motor_current)
         else:
             # Enters here if while loop doesn't break
             self.command_controller_off()
