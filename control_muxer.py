@@ -80,7 +80,7 @@ def get_state_machine(exo: exoboot.Exo,
         slip_controller = controllers.GenericImpedanceController(
             exo=exo, setpoint=config.SET_POINT, k_val=config.K_VAL)
         standing_controller = controllers.GenericImpedanceController(
-            exo=exo, setpoint=10, k_val=200)
+            exo=exo, setpoint=10, k_val=100)
         state_machine = state_machines.StandingPerturbationResponse(exo=exo,
                                                                     standing_controller=standing_controller,
                                                                     slip_controller=slip_controller)

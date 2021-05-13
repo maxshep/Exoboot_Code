@@ -31,7 +31,7 @@ config_saver = config_util.ConfigSaver(
 '''Connect to Exos, instantiate Exo objects.'''
 exo_list = exoboot.connect_to_exos(file_ID=file_ID, target_freq=config.TARGET_FREQ,
                                    actpack_freq=config.ACTPACK_FREQ, do_read_fsrs=config.DO_READ_FSRS)
-print('Battery Voltage: ', exo_list[0].get_batt_voltage(), 'V')
+print('Battery Voltage: ', 0.001*exo_list[0].get_batt_voltage(), 'V')
 
 '''Instantiate gait_state_estimator objects, store in list.'''
 gait_state_estimator_list = []
@@ -53,7 +53,11 @@ new_params_event = threading.Event()
 '''Perform standing calibration.'''
 if not config.READ_ONLY:
     for exo in exo_list:
-        exo.standing_calibration()
+        standing_angle = exo.standing_calibration()
+        if exo.side == constants.Side.LEFT:
+            config.LEFT_STANDING_ANGLE = standing_angle
+        else:
+            config.RIGHT_STANDING_ANGLE = standing_angle
 else:
     print('Not calibrating... READ_ONLY = True in config')
 
@@ -66,6 +70,7 @@ timer = util.FlexibleTimer(
 t0 = time.perf_counter()
 keyboard_thread = parameter_passers.ParameterPasser(
     lock=lock, config=config, quit_event=quit_event, new_params_event=new_params_event)
+config_saver.write_data(loop_time=0)  # Write first row on config
 
 while True:
     try:

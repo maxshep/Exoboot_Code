@@ -27,8 +27,8 @@ class ConfigurableConstants():
     # Set by functions... no need to change in config file
     loop_time: float = 0
     actual_time: float = time.time()
-    LEFT_ANKLE_ANGLE_ZERO: float = None  # Deg
-    RIGHT_ANKLE_ANGLE_ZERO: float = None  # Deg
+    LEFT_STANDING_ANGLE: float = None  # Deg
+    RIGHT_STANDING_ANGLE: float = None  # Deg
 
     TARGET_FREQ: float = 200  # Hz
     ACTPACK_FREQ: float = 200  # Hz
@@ -74,7 +74,7 @@ class ConfigSaver():
         self.writer = csv.DictWriter(
             self.my_file, fieldnames=self.config.__dict__.keys())
         self.writer.writeheader()
-        self.write_data(loop_time=0)
+        # self.write_data(loop_time=0)
 
     def write_data(self, loop_time):
         '''Writes new row of Config data to Config file.'''

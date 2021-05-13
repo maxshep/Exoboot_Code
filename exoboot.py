@@ -25,8 +25,23 @@ def connect_to_exos(file_ID: str = None,
                     log_en: bool = False,
                     do_read_fsrs: bool = False):
     '''Connect to Exos, instantiate Exo objects.'''
+
+    # Load Ports and baude rate
+    if fxu.is_win():		# Need for WebAgg server to work in Python 3.8
+        print('Detected win32')
+        import asyncio
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+        port_cfg_path = os.path.join(os.path.dirname(
+            os.path.abspath(__file__)), "ports.yaml")
+        ports, baud_rate = fxu.load_ports_from_file(port_cfg_path)
+    elif fxu.is_pi64():
+        ports = ['/dev/ttyACM0', '/dev/ttyACM1']
+        baud_rate = 230400
+    else:
+        raise ValueError('Max Code only supporting Windows or pi64 so far')
+    print(f"Using ports:\t{ports}")
+
     exo_list = []
-    ports, baud_rate = load_ports_and_baud_rate()
     for port in ports:
         try:
             dev_id = fxs.open(port, baud_rate, log_level=6)
@@ -42,24 +57,6 @@ def connect_to_exos(file_ID: str = None,
     if not exo_list:  # (if empty)
         raise RuntimeError('No Exos connected')
     return exo_list
-
-
-def load_ports_and_baud_rate():
-    if fxu.is_win():		# Need for WebAgg server to work in Python 3.8
-        print('Detected win32')
-        import asyncio
-        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-        port_cfg_path = os.path.join(os.path.dirname(
-            os.path.abspath(__file__)), "ports.yaml")
-        ports, baud_rate = fxu.load_ports_from_file(port_cfg_path)
-    elif fxu.is_pi64():
-        ports = ['/dev/ttyACM0', '/dev/ttyACM1']
-        baud_rate = 230400
-    else:
-        raise ValueError('Max Code only supporting Windows or pi64 so far')
-    print(f"Using ports:\t{ports}")
-    print(f"Using baud rate:\t{baud_rate}")
-    return ports, baud_rate
 
 
 class Exo():
@@ -254,7 +251,7 @@ class Exo():
             print('ankle_angle:          ', self.data.ankle_angle)
 
     def get_batt_voltage(self):
-        actpack_data = fxs.read_exo_device(self.dev_id)
+        actpack_data = fxs.read_device(self.dev_id)
         return actpack_data.batt_volt
 
     def setup_data_writer(self, file_ID: str):
@@ -462,9 +459,8 @@ class Exo():
             time.sleep(0.01)
             self.read_data()
             if abs(current_filter.filter(self.data.motor_current)) > current_threshold:
-                self.calibrated_ankle_angle = self.data.ankle_angle
+                calibrated_ankle_angle = self.data.ankle_angle
                 break
-            print(self.data.motor_current)
         else:
             # Enters here if while loop doesn't break
             self.command_controller_off()
@@ -478,6 +474,7 @@ class Exo():
                                  self.motor_sign * calibration_mV)
         self.command_controller_off()
         print('Finished Calibrating ', self.side)
+        return calibrated_ankle_angle
 
     def _test_units(self):
         # self.command_current(-2000)
