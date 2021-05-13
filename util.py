@@ -17,7 +17,7 @@ class DelayTimer():
         self.true_until = true_until
         self.start_time = None
 
-    def set_start(self):
+    def start(self):
         '''Starts the timer.'''
         self.start_time = time.perf_counter()
 

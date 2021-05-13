@@ -1,7 +1,10 @@
 
 import config_util
 config = config_util.ConfigurableConstants()
-config.HS_GYRO_DELAY = 0.049  # For example
+config.CONTROL_ARCHITECTURE = config_util.ControlArchitecture.STANDINGPERTURBATION  # For example
+config.K_VAL = 400
+config.SET_POINT = 20
+config.READ_ONLY = False
 
 
 ''' Here are the variables that are updatable in config, and their defaults:

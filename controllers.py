@@ -4,9 +4,11 @@ from scipy import signal, interpolate
 import time
 import copy
 import custom_filters
+import config_util
 import util
 from collections import deque
 import perturbation_detectors
+from typing import Type
 
 
 class Controller(object):
@@ -30,6 +32,13 @@ class Controller(object):
 
     def command_gains(self):
         self.exo.update_gains(Kp=self.Kp, Ki=self.Ki, Kd=self.Kd, ff=self.ff)
+
+    def update_ctrl_params_from_config(self, config: Type[config_util.ConfigurableConstants]):
+        '''For modularity, new controllers ideally use this function to update internal
+        control params (e.g., k_val, or rise_time) from the config object. If needed, add
+        new ctrl params to ConfigurableConstants.'''
+        raise ValueError(
+            'update_ctrl_params_from_config() not defined in child class of Controller')
 
 
 class SawickiWickiController(Controller):
@@ -59,7 +68,7 @@ class SawickiWickiController(Controller):
                 if (self.ankle_angles[1] > self.ankle_angles[0] and
                         self.ankle_angles[1] > self.ankle_angles[2]):
                     self.do_engage = True
-                    self.update_setpoint(theta0=self.ankle_angles[0])
+                    self._update_setpoint(theta0=self.ankle_angles[0])
 
                     super().command_gains()
                     print('engaged..., desired k_val: ', self.k_val,
@@ -74,16 +83,17 @@ class SawickiWickiController(Controller):
         else:
             pass  # Engage command was sent when do_engage went true
 
-    def update_setpoint(self, theta0):
+    def _update_setpoint(self, theta0):
         '''Take in desired ankle setpoint (deg) and stores equivalent motor angle.'''
         if theta0 > constants.MAX_ANKLE_ANGLE or theta0 < constants.MIN_ANKLE_ANGLE:
             raise ValueError(
                 'Attempted to command a set point outside the range of motion')
         self.theta0_motor = self.exo.ankle_angle_to_motor_angle(theta0)
 
-    def update_impedance(self, k_val, b_val=0):
-        self.k_val = k_val
-        self.b_val = b_val
+    def update_ctrl_params_from_config(self, config: Type[config_util.ConfigurableConstants]):
+        'Updates controller parameters from the config object.'''
+        self.k_val = config.K_VAL
+        self.b_val = config.B_VAL
 
 
 class ConstantTorqueController(Controller):
@@ -199,9 +209,12 @@ class FourPointSplineController(GenericSplineController):
                          Kp=Kp, Ki=Ki, Kd=Kd, ff=ff,
                          fade_duration=fade_duration)
 
-    def update_spline_with_four_params(self, rise_fraction, peak_torque, peak_fraction, fall_fraction):
-        super().update_spline(spline_x=self._get_spline_x(rise_fraction, peak_fraction, fall_fraction),
-                              spline_y=self._get_spline_y(peak_torque))
+    def update_ctrl_params_from_config(self, config: Type[config_util.ConfigurableConstants]):
+        'Updates controller parameters from the config object.'''
+        super().update_spline(spline_x=self._get_spline_x(rise_fraction=config.RISE_FRACTION,
+                                                          peak_fraction=config.PEAK_FRACTION,
+                                                          fall_fraction=config.FALL_FRACTION),
+                              spline_y=self._get_spline_y(peak_torque=config.PEAK_TORQUE))
 
     def _get_spline_x(self, rise_fraction, peak_fraction, fall_fraction) -> list:
         return [0, rise_fraction, peak_fraction, fall_fraction, 1]
@@ -237,7 +250,7 @@ class BallisticReelInController(Controller):
     def command(self, reset=False):
         if reset:
             super().command_gains()
-            self.delay_timer.set_start()
+            self.delay_timer.start()
         self.exo.command_slack(desired_slack=0)
 
     def check_completion_status(self):
@@ -266,7 +279,7 @@ class SoftReelOutController(Controller):
     def command(self, reset=False):
         if reset:
             super().command_gains()
-            self.delay_timer.set_start()
+            self.delay_timer.start()
         self.exo.command_slack(desired_slack=self.desired_slack)
 
     def check_completion_status(self):
@@ -277,55 +290,38 @@ class SoftReelOutController(Controller):
             return False
 
 
-class StandingSlipController(Controller):
+class GenericImpedanceController(Controller):
     def __init__(self,
                  exo: Exo,
-                 bias_torque=5,
-                 pf_setpoint=20,
-                 k_val=500,
-                 Kp: int = 100,
-                 Ki: int = 10,
-                 Kd: int = 0,
-                 ff: int = 0):
-        '''This controller uses impedance control with a pf setpoint when a slip is detected.
-
-        Arguments:
-            exo: exo.Exo instance
-            bias_torque: bias torque when perturbation response is inactive
-            pf_setpoint set_point: spring set point when perturbation reponse is active
-            k_val: spring set point when a slip is detected
-            time_out: defines maximum amount of time to reel in
-        Returns:
-            Bool describing whether reel in operation has completed.
-         '''
+                 setpoint,
+                 k_val,
+                 b_val=0,
+                 Kp: int = constants.DEFAULT_KP,
+                 Ki: int = constants.DEFAULT_KI,
+                 Kd: int = constants.DEFAULT_KD,
+                 ff: int = constants.DEFAULT_FF):
         self.exo = exo
-        self.bias_torque = bias_torque
-        self.pf_set_point = pf_setpoint
+        self.setpoint = setpoint
         self.k_val = k_val
+        self.b_val = b_val
         super().update_controller_gains(Kp=Kp, Ki=Ki, Kd=Kd, ff=ff)
-        # set time for controller to be active in PF position
-        self.pf_timer = util.DelayTimer(delay_time=1.5, true_until=True)
-        self.slip_detector = perturbation_detectors.SlipDetectorAP(
-            self.exo.data)
 
-    def command(self, did_slip=False):
-        if self.slip_detector.detect():
-            self.pf_timer.set_start()  # Activate plantarflexion for set amt of time
-        if self.pf_timer.check():
-            # Create plantarflexion torque
-            setpoint_motor = self.exo.ankle_angle_to_motor_angle(
-                ankle_angle=self.pf_setpoint)
-            self.exo.command_ankle_impedance(
-                theta0_ankle=setpoint_motor, K_ankle=self.k_val)
-        else:
-            self.exo.command_torque(self.bias_torque)
+    def command(self, reset=False):
+        if reset:
+            super().command_gains()
+            print('switched to controller... kval: ',
+                  self.k_val, 'setpoint', self.setpoint,
+                  'Kp', self.Kp, 'Ki', self.Ki)
+        theta0_motor = self.exo.ankle_angle_to_motor_angle(self.setpoint)
+        self.exo.command_motor_impedance(
+            theta0=theta0_motor, k_val=self.k_val, b_val=self.b_val)
 
-    def update_stiffness(self, k_val):
-        self.k_val = k_val
-
-    def update_standing_setpoint(self, theta0):
-        self.bias_torque = theta0
-
-    def update_pf_setpoint(self, theta0):
-        '''Take in desired ankle setpoint (deg) and stores equivalent motor angle.'''
-        self.pf_setpoint = theta0
+    def update_ctrl_params_from_config(self, config: Type[config_util.ConfigurableConstants],
+                                       update_k=True, update_b=True, update_setpoint=True):
+        'Updates controller parameters from the config object.'''
+        if update_k:
+            self.k_val = config.K_VAL
+        if update_b:
+            self.b_val = config.B_VAL
+        if update_setpoint:
+            self.setpoint = config.SET_POINT

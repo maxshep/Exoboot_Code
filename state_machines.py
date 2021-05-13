@@ -1,17 +1,77 @@
+from typing import Type
+
 import numpy as np
-from exoboot import Exo
+
+import constants
 import controllers
 import custom_filters
 import gait_state_estimators
-import constants
-from typing import Type
+import perturbation_detectors
+from exoboot import Exo
+import util
 
 
-class StanceSwingStateMachine():
+class HighLevelController():
+    '''A class that steps through controllers depending on, for instance, gait events.'''
+
+    def __init__(self,
+                 exo: Type[Exo]):
+        self.exo = exo
+
+    def step(self, read_only):
+        '''Primary function to step through mid-level controllers.'''
+        raise ValueError('step() not written yet for this controller')
+
+    def update_ctrl_params_from_config(self, config):
+        '''A function to update mid-level control params from the config object.'''
+        raise ValueError(
+            'update_ctrl_params_from_config() not written yet for this controller')
+
+
+class StandingPerturbationResponse(HighLevelController):
+    '''Pass through high level controller that implements standing perturbation response.'''
+
+    def __init__(self,
+                 exo: Type[Exo],
+                 standing_controller: Type[controllers.Controller],
+                 slip_controller: Type[controllers.Controller],
+                 slip_recovery_time: float = 5):
+        self.exo = exo
+        self.standing_controller = standing_controller
+        self.slip_controller = slip_controller
+        self.slip_ctrl_timer = util.DelayTimer(delay_time=slip_recovery_time)
+        self.controller_now = self.standing_controller
+
+    def step(self, read_only):
+        '''uses slip detector to detect slip onset, uses timer to stop slip controller.'''
+
+        if self.slip_ctrl_timer.check():
+            print('slip timeout--moving back now')
+            # If slip controller time has elapsed (goes True) and we need to switch back
+            self.slip_ctrl_timer.reset()
+            self.controller_now = self.standing_controller
+            did_controllers_switch = True
+        elif self.exo.data.did_slip:
+            print('slip detected, moving to slip controller')
+            self.slip_ctrl_timer.start()
+            self.controller_now = self.slip_controller
+            did_controllers_switch = True
+        else:
+            did_controllers_switch = False
+
+        if not read_only:
+            self.controller_now.command(reset=did_controllers_switch)
+
+    def update_ctrl_params_from_config(self, config):
+        self.slip_controller.update_ctrl_params_from_config(
+            self, config=config)
+
+
+class StanceSwingStateMachine(HighLevelController):
     '''Unilateral state machine that takes in data, segments strides, and applies controllers'''
 
     def __init__(self,
-                 exo: Exo,
+                 exo: Type[Exo],
                  stance_controller: Type[controllers.Controller],
                  swing_controller: Type[controllers.Controller]
                  ):
@@ -39,8 +99,12 @@ class StanceSwingStateMachine():
         if not read_only:
             self.controller_now.command(reset=did_controllers_switch)
 
+    def update_ctrl_params_from_config(self, config):
+        self.stance_controller.update_ctrl_params_from_config(
+            self, config=config)
 
-class StanceSwingReeloutReelinStateMachine():
+
+class StanceSwingReeloutReelinStateMachine(HighLevelController):
     '''Unilateral state machine that takes in data, segments strides, and applies controllers'''
 
     def __init__(self,
@@ -81,3 +145,7 @@ class StanceSwingReeloutReelinStateMachine():
 
         if not read_only:
             self.controller_now.command(reset=did_controllers_switch)
+
+    def update_ctrl_params_from_config(self, config):
+        self.stance_controller.update_ctrl_params_from_config(
+            self, config=config)

@@ -47,7 +47,7 @@ class ConfigurableConstants():
     # Impedance
     K_VAL: int = 500
     B_VAL: int = 0
-    SET_POINT: int = 0
+    SET_POINT: float = 0  # Deg
 
     READ_ONLY = False  # Does not require Lipos
     DO_READ_FSRS = False

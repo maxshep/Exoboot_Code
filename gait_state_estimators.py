@@ -14,6 +14,8 @@ class GaitStateEstimator():
                  heel_strike_detector,
                  gait_phase_estimator,
                  toe_off_detector,
+                 do_print_heel_strikes: bool = False,
+                 do_print_toe_offs: bool = False,
                  side: Type[constants.Side] = constants.Side.NONE):
         '''Looks at the exo data, applies logic to detect HS, gait phase, and TO, and adds to exo.data'''
         self.side = side
@@ -21,15 +23,17 @@ class GaitStateEstimator():
         self.heel_strike_detector = heel_strike_detector
         self.gait_phase_estimator = gait_phase_estimator
         self.toe_off_detector = toe_off_detector
+        self.do_print_heel_strikes = do_print_heel_strikes
+        self.do_print_toe_offs = do_print_toe_offs
 
-    def detect(self, do_print_heel_strikes=True, do_print_toe_offs=False):
+    def detect(self):
         data = self.data_container  # For convenience
         data.did_heel_strike = self.heel_strike_detector.detect(data)
         data.gait_phase = self.gait_phase_estimator.estimate(data)
         data.did_toe_off = self.toe_off_detector.detect(data)
-        if do_print_heel_strikes and data.did_heel_strike:
+        if self.do_print_heel_strikes and data.did_heel_strike:
             print('heel strike detected on side: ', self.side)
-        if do_print_toe_offs and data.did_toe_off:
+        if self.do_print_toe_offs and data.did_toe_off:
             print('toe off detected on side: ', self.side)
 
 

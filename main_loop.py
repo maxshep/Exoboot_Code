@@ -16,6 +16,7 @@ import util
 import config_util
 import parameter_passers
 import argparse
+import perturbation_detectors
 
 
 file_ID = input(
@@ -37,21 +38,28 @@ state_machine_list = []
 
 '''Instantiate gait_state_estimator objects, store in list.'''
 for exo in exo_list:
-    heel_strike_detector = gait_state_estimators.GyroHeelStrikeDetector(
-        height=config.HS_GYRO_THRESHOLD,
-        gyro_filter=custom_filters.Butterworth(N=config.HS_GYRO_FILTER_N,
-                                               Wn=config.HS_GYRO_FILTER_WN,
-                                               fs=config.TARGET_FREQ),
-        delay=config.HS_GYRO_DELAY)
-    gait_phase_estimator = gait_state_estimators.StrideAverageGaitPhaseEstimator()
-    toe_off_detector = gait_state_estimators.GaitPhaseBasedToeOffDetector(
-        fraction_of_gait=config.TOE_OFF_FRACTION)
-    gait_state_estimator_list.append(gait_state_estimators.GaitStateEstimator(
-        side=exo.side,
-        data_container=exo.data,
-        heel_strike_detector=heel_strike_detector,
-        gait_phase_estimator=gait_phase_estimator,
-        toe_off_detector=toe_off_detector))
+    if (config.CONTROL_ARCHITECTURE == config_util.ControlArchitecture.FOURPOINTSPLINE or
+            config.CONTROL_ARCHITECTURE == config_util.ControlArchitecture.SAWICKIWICKI):
+        heel_strike_detector = gait_state_estimators.GyroHeelStrikeDetector(
+            height=config.HS_GYRO_THRESHOLD,
+            gyro_filter=custom_filters.Butterworth(N=config.HS_GYRO_FILTER_N,
+                                                   Wn=config.HS_GYRO_FILTER_WN,
+                                                   fs=config.TARGET_FREQ),
+            delay=config.HS_GYRO_DELAY)
+        gait_phase_estimator = gait_state_estimators.StrideAverageGaitPhaseEstimator()
+        toe_off_detector = gait_state_estimators.GaitPhaseBasedToeOffDetector(
+            fraction_of_gait=config.TOE_OFF_FRACTION)
+        gait_state_estimator_list.append(gait_state_estimators.GaitStateEstimator(
+            side=exo.side,
+            data_container=exo.data,
+            heel_strike_detector=heel_strike_detector,
+            gait_phase_estimator=gait_phase_estimator,
+            toe_off_detector=toe_off_detector,
+            do_print_heel_strikes=config.PRINT_HS))
+    elif config.CONTROL_ARCHITECTURE == config_util.ControlArchitecture.STANDINGPERTURBATION:
+        gait_state_estimator_list.append(
+            perturbation_detectors.SlipDetectorAP(data_container=exo.data, acc_threshold_x=0.7,
+                                                  time_out=2, max_acc_y=0.5, max_acc_z=0.5))
 
 '''Instantiate controllers, link to a state_machine, store state_machines in list.'''
 for exo in exo_list:
@@ -67,14 +75,28 @@ for exo in exo_list:
             peak_fraction=config.PEAK_FRACTION,
             fall_fraction=config.FALL_FRACTION,
             bias_torque=config.SPLINE_BIAS)
+        state_machine_list.append(state_machines.StanceSwingReeloutReelinStateMachine(exo=exo,
+                                                                                      stance_controller=stance_controller,
+                                                                                      swing_controller=swing_controller,
+                                                                                      reel_in_controller=reel_in_controller,
+                                                                                      reel_out_controller=reel_out_controller))
     elif config.CONTROL_ARCHITECTURE == config_util.ControlArchitecture.SAWICKIWICKI:
         stance_controller = controllers.SawickiWickiController(
             exo=exo, k_val=config.K_VAL)
-    state_machine_list.append(state_machines.StanceSwingReeloutReelinStateMachine(exo=exo,
-                                                                                  stance_controller=stance_controller,
-                                                                                  swing_controller=swing_controller,
-                                                                                  reel_in_controller=reel_in_controller,
-                                                                                  reel_out_controller=reel_out_controller))
+        state_machine_list.append(state_machines.StanceSwingReeloutReelinStateMachine(exo=exo,
+                                                                                      stance_controller=stance_controller,
+                                                                                      swing_controller=swing_controller,
+                                                                                      reel_in_controller=reel_in_controller,
+                                                                                      reel_out_controller=reel_out_controller))
+
+    elif config.CONTROL_ARCHITECTURE == config_util.ControlArchitecture.STANDINGPERTURBATION:
+        slip_controller = controllers.GenericImpedanceController(
+            exo=exo, setpoint=config.SET_POINT, k_val=config.K_VAL)
+        standing_controller = controllers.GenericImpedanceController(
+            exo=exo, setpoint=10, k_val=200)
+        state_machine_list.append(state_machines.StandingPerturbationResponse(exo=exo,
+                                                                              standing_controller=standing_controller,
+                                                                              slip_controller=slip_controller))
 
 
 '''Prep parameter passing.'''
@@ -82,7 +104,7 @@ lock = threading.Lock()
 quit_event = threading.Event()
 new_params_event = threading.Event()
 # v0.2,30,0.53,0.62!
-# v500!
+# k500!
 
 '''Perform standing calibration.'''
 if not config.READ_ONLY:
@@ -100,12 +122,6 @@ timer = util.FlexibleTimer(
 t0 = time.perf_counter()
 keyboard_thread = parameter_passers.ParameterPasser(
     lock=lock, config=config, quit_event=quit_event, new_params_event=new_params_event)
-# if config.CONTROL_ARCHITECTURE == config_util.ControlArchitecture.FOURPOINTSPLINE:
-#     keyboard_thread = parameter_passers.FourPointSplineParameterPasser(
-#         lock=lock, config=config, quit_event=quit_event, new_params_event=new_params_event)
-# elif config.CONTROL_ARCHITECTURE == config_util.ControlArchitecture.SAWICKIWICKI:
-#     keyboard_thread = parameter_passers.SawickiWickiParameterPasser(
-#         lock=lock, config=config, quit_event=quit_event, new_params_event=new_params_event)
 
 while True:
     try:
@@ -115,16 +131,8 @@ while True:
         lock.acquire()
         if new_params_event.is_set():
             config_saver.write_data(loop_time=loop_time)  # Update config file
-            if config.CONTROL_ARCHITECTURE == config_util.ControlArchitecture.FOURPOINTSPLINE:
-                for state_machine in state_machine_list:
-                    state_machine.stance_controller.update_spline_with_four_params(rise_fraction=config.RISE_FRACTION,
-                                                                                   peak_torque=config.PEAK_TORQUE,
-                                                                                   peak_fraction=config.PEAK_FRACTION,
-                                                                                   fall_fraction=config.FALL_FRACTION)
-            elif config.CONTROL_ARCHITECTURE == config_util.ControlArchitecture.SAWICKIWICKI:
-                for state_machine in state_machine_list:
-                    state_machine.stance_controller.update_impedance(
-                        k_val=config.K_VAL)
+            for state_machine in state_machine_list:
+                state_machine.update_ctrl_params_from_config(config)
             new_params_event.clear()
         if quit_event.is_set():  # If user enters "quit"
             break
@@ -133,7 +141,7 @@ while True:
         for exo in exo_list:
             exo.read_data(loop_time=loop_time)
         for gait_state_estimator in gait_state_estimator_list:
-            gait_state_estimator.detect(do_print_heel_strikes=config.PRINT_HS)
+            gait_state_estimator.detect()
         for state_machine in state_machine_list:
             state_machine.step(read_only=config.READ_ONLY)
         for exo in exo_list:

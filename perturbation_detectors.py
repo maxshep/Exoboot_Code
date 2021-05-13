@@ -1,6 +1,7 @@
 import exoboot
 from typing import Type
 import util
+import custom_filters
 
 
 class SlipDetectorAP():
@@ -15,23 +16,37 @@ class SlipDetectorAP():
         self.max_acc_y = max_acc_y
         self.max_acc_z = max_acc_z
         self.timer = util.DelayTimer(time_out, true_until=True)
+        self.accel_x_filter = custom_filters.Butterworth(
+            N=2, Wn=[0.01, 0.30], btype='bandpass')
+        self.accel_y_filter = custom_filters.Butterworth(
+            N=2, Wn=[0.01, 0.30], btype='bandpass')
+        self.accel_z_filter = custom_filters.Butterworth(
+            N=2, Wn=[0.01, 0.30], btype='bandpass')
 
     def detect(self):
-        if (self.data_container.accel_x > self.acc_threshold_x and
-            abs(self.data_container.accel_y-1) < + self.max_acc_y and
-                abs(self.data_container.accel_z) < self.max_acc_z and
+        accel_x_filt = self.accel_x_filter.filter(self.data_container.accel_x)
+        accel_y_filt = self.accel_y_filter.filter(self.data_container.accel_y)
+        accel_z_filt = self.accel_z_filter.filter(self.data_container.accel_z)
+        self.data_container.gen_var1 = accel_x_filt
+        self.data_container.gen_var2 = accel_y_filt
+        self.data_container.gen_var3 = accel_z_filt
+
+        if (-1*accel_x_filt > self.acc_threshold_x and
+            abs(accel_y_filt-1) < + self.max_acc_y and
+                abs(accel_z_filt) < self.max_acc_z and
                 not self.timer.check()):
-            self.timer.set_start()
-            return True
+            self.timer.start()
+            self.data_container.did_slip = True
+            print('slip detected!')
         else:
-            return False
+            self.data_container.did_slip = False
 
 
 if __name__ == '__main__':
     import time
     data = exoboot.Exo.DataContainer()
     slip_detector = SlipDetectorAP(data, time_out=0.05)
-    accel_x = [0, 0.5, 1.2, 1.5, 1.1, 0.5]
+    accel_x = [0, -0.5, -1.2, -1.5, -1.1, -0.5]
     accel_y = [1, 1, 0.85, 1, 1, 1]
     accel_z = [0, 0, 0, 0, 0, 0]
 
@@ -40,5 +55,5 @@ if __name__ == '__main__':
         data.accel_x = accel_x[i]
         data.accel_y = accel_y[i]
         data.accel_z = accel_z[i]
-        slip = slip_detector.detect()
-        print(slip)
+        slip_detector.detect()
+        print(data.did_slip)

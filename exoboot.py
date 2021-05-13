@@ -150,10 +150,14 @@ class Exo():
         did_heel_strike: bool = False
         gait_phase: float = 0
         did_toe_off: bool = False
+        did_slip: bool = False
         commanded_current: int = None
         commanded_position: int = None
         commanded_torque: float = None  # TODO(maxshep) remove
         slack: int = None
+        gen_var1: float = None
+        gen_var2: float = None
+        gen_var3: float = None
 
     @dataclass
     class DataContainerWithFSRs(DataContainer):
@@ -220,17 +224,19 @@ class Exo():
         if self.has_calibrated:
             self.data.slack = self.get_slack()
 
-        if (self.last_state_time is None or
-            last_ankle_angle is None or
-                self.data.state_time-self.last_state_time > 20):
-            self.data.ankle_velocity = 0
-        elif self.data.state_time == self.last_state_time:
-            pass  # Keep old velocity
-        else:
-            angular_velocity = (
-                self.data.ankle_angle - last_ankle_angle)/(self.data.state_time-self.last_state_time)
-            self.data.ankle_velocity = self.ankle_velocity_filter.filter(
-                angular_velocity)
+        # if (self.last_state_time is None or
+        #     last_ankle_angle is None or
+        #         self.data.state_time-self.last_state_time > 20):
+        #     self.data.ankle_velocity = 0
+        # elif self.data.state_time == self.last_state_time:
+        #     pass  # Keep old velocity
+        # else:
+        #     angular_velocity = (
+        #         self.data.ankle_angle - last_ankle_angle)/(self.data.state_time-self.last_state_time)
+        #     self.data.ankle_velocity = self.ankle_velocity_filter.filter(
+        #         angular_velocity)
+        self.data.ankle_velocity = actpack_data.ank_vel  # TODO:maxshep
+
         if self.do_read_fsrs:
             self.data.heel_fsr = self.heel_fsr_detector.value
             self.data.toe_fsr = self.toe_fsr_detector.value
@@ -335,6 +341,7 @@ class Exo():
         if self.k_val != k_val or self.b_val != b_val:
             # Only send gains when necessary
             self.update_gains(k_val=int(k_val), b_val=int(b_val))
+        self.data.gen_var1 = k_val
         fxs.send_motor_command(
             dev_id=self.dev_id, ctrl_mode=fxe.FX_IMPEDANCE, value=int(theta0))
         self.data.commanded_current = None
