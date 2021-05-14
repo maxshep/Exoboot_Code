@@ -8,7 +8,7 @@ class SlipDetectorAP():
     def __init__(self,
                  data_container: Type[exoboot.Exo.DataContainer],
                  acc_threshold_x: float = 0.5,
-                 time_out: float = 1.1,
+                 time_out: float = 5,
                  max_acc_y: float = 0.2,
                  max_acc_z: float = 0.2):
         self.data_container = data_container
@@ -31,13 +31,13 @@ class SlipDetectorAP():
         self.data_container.gen_var2 = accel_y_filt
         self.data_container.gen_var3 = accel_z_filt
 
-        if (-1*accel_x_filt > self.acc_threshold_x and
-            abs(accel_y_filt-1) < + self.max_acc_y and
-                abs(accel_z_filt) < self.max_acc_z and
+        if (-1*self.data_container.accel_x > self.acc_threshold_x and
+            abs(self.data_container.accel_y-1) < + self.max_acc_y and
+                abs(self.data_container.accel_z) < self.max_acc_z and
                 not self.timer.check()):
             self.timer.start()
             self.data_container.did_slip = True
-            print('slip detected!')
+            # print('slip detected!')
         else:
             self.data_container.did_slip = False
 

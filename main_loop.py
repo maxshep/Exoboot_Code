@@ -47,7 +47,7 @@ for exo in exo_list:
 lock = threading.Lock()
 quit_event = threading.Event()
 new_params_event = threading.Event()
-# v0.2,30,0.53,0.62!
+# v0.2,15,0.53,0.62!
 # k500!
 
 '''Perform standing calibration.'''
@@ -81,7 +81,7 @@ while True:
         if new_params_event.is_set():
             config_saver.write_data(loop_time=loop_time)  # Update config file
             for state_machine in state_machine_list:
-                state_machine.update_ctrl_params_from_config(config)
+                state_machine.update_ctrl_params_from_config(config=config)
             new_params_event.clear()
         if quit_event.is_set():  # If user enters "quit"
             break

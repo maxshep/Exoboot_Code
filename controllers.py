@@ -211,6 +211,7 @@ class FourPointSplineController(GenericSplineController):
 
     def update_ctrl_params_from_config(self, config: Type[config_util.ConfigurableConstants]):
         'Updates controller parameters from the config object.'''
+        print('Updating spline...')
         super().update_spline(spline_x=self._get_spline_x(rise_fraction=config.RISE_FRACTION,
                                                           peak_fraction=config.PEAK_FRACTION,
                                                           fall_fraction=config.FALL_FRACTION),
@@ -309,9 +310,6 @@ class GenericImpedanceController(Controller):
     def command(self, reset=False):
         if reset:
             super().command_gains()
-            print('switched to controller... kval: ',
-                  self.k_val, 'setpoint', self.setpoint,
-                  'Kp', self.Kp, 'Ki', self.Ki)
         theta0_motor = self.exo.ankle_angle_to_motor_angle(self.setpoint)
         self.exo.command_motor_impedance(
             theta0=theta0_motor, k_val=self.k_val, b_val=self.b_val)

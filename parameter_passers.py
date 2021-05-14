@@ -38,35 +38,36 @@ class ParameterPasser(threading.Thread):
                 self.quit_event.set()
                 self.lock.release()
                 break
-            elif msg[0] == 'v' and msg[-1] == '!':
-                # UPDATE FOUR POINT SPLINE WITH v<>!
-                msg = msg[1:-1]
-                param_list = [float(x) for x in msg.split(',')]
-                if len(param_list) != 4:
-                    print('Must send four spline points with v<>! message')
-                else:
-                    self.lock.acquire()
-                    self.config.RISE_FRACTION = param_list[0]
-                    self.config.PEAK_TORQUE = param_list[1]
-                    self.config.PEAK_FRACTION = param_list[2]
-                    self.config.FALL_FRACTION = param_list[3]
-                    self.new_params_event.set()
-                    self.lock.release()
-                    print('Parameters sent')
-            elif msg[0] == 'k' and msg[-1] == '!':
-                msg = msg[1:-1]
-                if msg.isdigit():
-                    self.config.K_VAL = msg
-                    print('k_val updated to: ', msg)
-                else:
-                    print('Must provide single positive integer to update k_val')
-            elif msg[0] == 's' and msg[-1] == '!':
-                msg = msg[1:-1]
-                if msg.lstrip('-').isdigit():
-                    self.config.SET_POINT = msg
-                    print('SET_POINT updated to: ', msg)
-                else:
-                    print('Must provide single integer to update SET_POINT')
+            elif msg[-1] == '!':
+                self.lock.acquire()
+                first_letter = msg[0]
+                msg_content = msg[1:-1]
+
+                if first_letter == 'v':
+                    param_list = [float(x) for x in msg_content.split(',')]
+                    if len(param_list) != 4:
+                        print('Must send four spline points with v<>! message')
+                    else:
+                        self.config.RISE_FRACTION = param_list[0]
+                        self.config.PEAK_TORQUE = param_list[1]
+                        self.config.PEAK_FRACTION = param_list[2]
+                        self.config.FALL_FRACTION = param_list[3]
+                        print('Parameters sent')
+                elif first_letter == 'k':
+                    if msg_content.isdigit():
+                        self.config.K_VAL = int(msg_content)
+                        print('k_val updated to: ', msg_content)
+                    else:
+                        print('Must provide single positive integer to update k_val')
+                elif first_letter == 's':
+                    if msg_content.lstrip('-').isdigit():
+                        self.config.SET_POINT = int(msg_content)
+                        print('SET_POINT updated to: ', msg_content)
+                    else:
+                        print('Must provide single integer to update SET_POINT')
+
+                self.new_params_event.set()
+                self.lock.release()
 
             else:
                 print('IDK how to interpret your message')

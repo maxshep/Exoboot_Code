@@ -337,7 +337,6 @@ class Exo():
         if self.k_val != k_val or self.b_val != b_val:
             # Only send gains when necessary
             self.update_gains(k_val=int(k_val), b_val=int(b_val))
-        self.data.gen_var1 = k_val
         fxs.send_motor_command(
             dev_id=self.dev_id, ctrl_mode=fxe.FX_IMPEDANCE, value=int(theta0))
         self.data.commanded_current = None

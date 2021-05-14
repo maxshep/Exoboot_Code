@@ -35,7 +35,7 @@ class StandingPerturbationResponse(HighLevelController):
                  exo: Type[Exo],
                  standing_controller: Type[controllers.Controller],
                  slip_controller: Type[controllers.Controller],
-                 slip_recovery_time: float = 5):
+                 slip_recovery_time: float = 3):
         self.exo = exo
         self.standing_controller = standing_controller
         self.slip_controller = slip_controller
@@ -46,13 +46,15 @@ class StandingPerturbationResponse(HighLevelController):
         '''uses slip detector to detect slip onset, uses timer to stop slip controller.'''
 
         if self.slip_ctrl_timer.check():
-            print('slip timeout--moving back now')
+            if self.exo.side == constants.Side.LEFT:
+                print('slip timeout--moving back now')
             # If slip controller time has elapsed (goes True) and we need to switch back
             self.slip_ctrl_timer.reset()
             self.controller_now = self.standing_controller
             did_controllers_switch = True
         elif self.exo.data.did_slip:
-            print('slip detected, moving to slip controller')
+            if self.exo.side == constants.Side.LEFT:
+                print('slip detected, moving to slip controller')
             self.slip_ctrl_timer.start()
             self.controller_now = self.slip_controller
             did_controllers_switch = True
@@ -63,8 +65,7 @@ class StandingPerturbationResponse(HighLevelController):
             self.controller_now.command(reset=did_controllers_switch)
 
     def update_ctrl_params_from_config(self, config):
-        self.slip_controller.update_ctrl_params_from_config(
-            self, config=config)
+        self.slip_controller.update_ctrl_params_from_config(config=config)
 
 
 class StanceSwingStateMachine(HighLevelController):
@@ -100,8 +101,7 @@ class StanceSwingStateMachine(HighLevelController):
             self.controller_now.command(reset=did_controllers_switch)
 
     def update_ctrl_params_from_config(self, config):
-        self.stance_controller.update_ctrl_params_from_config(
-            self, config=config)
+        self.stance_controller.update_ctrl_params_from_config(config=config)
 
 
 class StanceSwingReeloutReelinStateMachine(HighLevelController):
@@ -147,5 +147,4 @@ class StanceSwingReeloutReelinStateMachine(HighLevelController):
             self.controller_now.command(reset=did_controllers_switch)
 
     def update_ctrl_params_from_config(self, config):
-        self.stance_controller.update_ctrl_params_from_config(
-            self, config=config)
+        self.stance_controller.update_ctrl_params_from_config(config=config)

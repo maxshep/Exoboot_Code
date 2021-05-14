@@ -25,6 +25,7 @@ To make the code more useable and customizable, I've organized the architecture 
 ## To use this code:
 Run main_loop.py, or your custom main_loop script, from the command line.
 For info on running it with the pi we have setup: https://docs.google.com/document/d/1HhQxAFK55nA6wYKboyCqtMmRvlXgh4rKzXELoV7ybzg/edit?usp=sharing
+Latest notes on Dephy's suggested gains and such: https://dephy.com/wiki/flexsea/doku.php?id=controlgains#typical_values
 
 ## To modify this code:
 Avoid editing exo.py. There are a number of tricky things it does, particularly around sign conventions for the left and right exos. The best way to work with this code is to add controllers if necessary and state_machines, and make small modifications to main_loop.py so that it works
