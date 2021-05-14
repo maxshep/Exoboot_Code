@@ -1,7 +1,6 @@
 '''
 This is the main GT program for running the Dephy exos. Read the Readme.
 '''
-
 import exoboot
 import threading
 import controllers

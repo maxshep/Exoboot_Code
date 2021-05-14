@@ -1,14 +1,12 @@
 import os
 import sys
-from exoboot import Exo
-from flexseapython import pyFlexsea, fxUtil
+import exoboot
 import time
-from signal import signal, SIGINT
 import csv
 import util
 
 
-def calibrate_encoder_to_ankle_conversion(exo: Exo):
+def calibrate_encoder_to_ankle_conversion(exo: exoboot.Exo):
     '''This routine can be used to manually calibrate the relationship
     between ankle and motor angles. Move through the full RoM!!!'''
     exo.command_current(exo.motor_sign*2000)
@@ -20,11 +18,10 @@ def calibrate_encoder_to_ankle_conversion(exo: Exo):
 
 
 if __name__ == '__main__':
-    ports, baud_rate = util.load_ports_and_baud_rate_from_com()
-    exo = Exo(port=ports[0], baud_rate=baud_rate,
-              log_en=False, file_ID='Calibration')
+    exo_list = exoboot.connect_to_exos(file_ID='calibration')
+    if len(exo_list) > 1:
+        raise ValueError("Just turn on one exo for calibration")
+    exo = exo_list[0]
     exo.standing_calibration()
-
     calibrate_encoder_to_ankle_conversion(exo=exo)
-    exo.stop_streaming()
     exo.close()
