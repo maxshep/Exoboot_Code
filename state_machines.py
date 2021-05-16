@@ -35,7 +35,7 @@ class StandingPerturbationResponse(HighLevelController):
                  exo: Type[Exo],
                  standing_controller: Type[controllers.Controller],
                  slip_controller: Type[controllers.Controller],
-                 slip_recovery_time: float = 3):
+                 slip_recovery_time: float = 1.5):
         self.exo = exo
         self.standing_controller = standing_controller
         self.slip_controller = slip_controller
