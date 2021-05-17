@@ -80,7 +80,7 @@ class Side(Enum):
 
 
 # RPi's GPIO pin numbers (not physical pin number) for FSR testing
-LEFT_HEEL_FSR_PIN = 2  # physical pin 3
-LEFT_TOE_FSR_PIN = 3  # physical pin 5
-RIGHT_HEEL_FSR_PIN = 5  # physical pin 29
-RIGHT_TOE_FSR_PIN = 6  # physical pin 31
+LEFT_HEEL_FSR_PIN = 17
+LEFT_TOE_FSR_PIN = 18
+RIGHT_HEEL_FSR_PIN = 24
+RIGHT_TOE_FSR_PIN = 25
