@@ -34,7 +34,7 @@ def connect_to_exos(file_ID: str = None,
         port_cfg_path = os.path.join(os.path.dirname(
             os.path.abspath(__file__)), "ports.yaml")
         ports, baud_rate = fxu.load_ports_from_file(port_cfg_path)
-    elif fxu.is_pi64():
+    elif fxu.is_pi64() or fxu.is_pi():
         ports = ['/dev/ttyACM0', '/dev/ttyACM1']
         baud_rate = 230400
     else:
