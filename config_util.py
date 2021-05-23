@@ -59,6 +59,7 @@ class ConfigurableConstants():
     DO_READ_FSRS = False
 
     PRINT_HS = True  # Print heel strikes
+    SLIP_DETECT_ACTIVE = False
 
 
 class ConfigSaver():

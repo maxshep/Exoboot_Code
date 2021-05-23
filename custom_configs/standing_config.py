@@ -2,7 +2,7 @@
 import config_util
 config = config_util.ConfigurableConstants()
 config.HIGH_LEVEL_CTRL_STYLE = config_util.CtrlStyle.STANDINGPERTURBATION  # For example
-config.K_VAL = 400
+config.K_VAL = 500
 config.SET_POINT = 30
 config.READ_ONLY = False
 

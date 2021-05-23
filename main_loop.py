@@ -9,13 +9,9 @@ import gait_state_estimators
 import constants
 import custom_filters
 import time
-import sys
-import os
 import util
 import config_util
 import parameter_passers
-import argparse
-import perturbation_detectors
 import control_muxer
 
 
@@ -45,8 +41,9 @@ for exo in exo_list:
 '''Prep parameter passing.'''
 lock = threading.Lock()
 quit_event = threading.Event()
-new_params_event = threading.Event()
-# v0.2,15,0.53,0.62!
+new_ctrl_params_event = threading.Event()
+new_gait_state_params_event = threading.Event()
+# v0.2,25,0.53,0.62!
 # k500!
 
 '''Perform standing calibration.'''
@@ -68,7 +65,9 @@ timer = util.FlexibleTimer(
     target_freq=config.TARGET_FREQ)  # attempts constants freq
 t0 = time.perf_counter()
 keyboard_thread = parameter_passers.ParameterPasser(
-    lock=lock, config=config, quit_event=quit_event, new_params_event=new_params_event)
+    lock=lock, config=config, quit_event=quit_event,
+    new_ctrl_params_event=new_ctrl_params_event,
+    new_gait_state_params_event=new_gait_state_params_event)
 config_saver.write_data(loop_time=0)  # Write first row on config
 
 while True:
@@ -77,11 +76,16 @@ while True:
         loop_time = time.perf_counter() - t0
 
         lock.acquire()
-        if new_params_event.is_set():
+        if new_ctrl_params_event.is_set():
             config_saver.write_data(loop_time=loop_time)  # Update config file
             for state_machine in state_machine_list:
                 state_machine.update_ctrl_params_from_config(config=config)
-            new_params_event.clear()
+            new_ctrl_params_event.clear()
+        if new_gait_state_params_event.is_set():
+            config_saver.write_data(loop_time=loop_time)  # Update config file
+            for gait_state_estimator in gait_state_estimator_list:
+                gait_state_estimator.update_params_from_config(config=config)
+            new_gait_state_params_event.clear()
         if quit_event.is_set():  # If user enters "quit"
             break
         lock.release()

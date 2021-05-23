@@ -8,9 +8,10 @@ class ParameterPasser(threading.Thread):
                  lock: Type[threading.Lock],
                  config: Type[config_util.ConfigurableConstants],
                  quit_event: Type[threading.Event],
-                 new_params_event: Type[threading.Event],
+                 new_ctrl_params_event: Type[threading.Event],
+                 new_gait_state_params_event: Type[threading.Event],
                  name='keyboard-input-thread'):
-        '''This is a parent class for parallel parameter passers.
+        '''This class passes parameters via user input and a parallel thread.
 
         The general idea is that this thread waits for an input, then grabs a lock (to stop the main thread),
         checks if the message follows the "code" (starts with 'v', ends with '!'), and then updates config
@@ -21,14 +22,20 @@ class ParameterPasser(threading.Thread):
         self.lock = lock
         self.config = config
         self.quit_event = quit_event
-        self.new_params_event = new_params_event
+        self.new_ctrl_params_event = new_ctrl_params_event
+        self.new_gait_state_params_event = new_gait_state_params_event
         self.start()  # Starts the run() function
 
     # This run function overrides the run() function in threading.Thread
     def run(self):
         while True:
             msg = input()
-            if len(msg) < 3:
+            if msg == 'a':
+                self.lock.acquire()
+                self.config.SLIP_DETECT_ACTIVE = not self.config.SLIP_DETECT_ACTIVE
+                self.new_gait_state_params_event.set()
+                self.lock.release()
+            elif len(msg) < 3:
                 print('Message must be either "quit" or a string of parameters'
                       ' starting with a letter (v for splines, k for stiffness,'
                       ' s for setpoint) and ending with an exclamation point)')
@@ -66,7 +73,7 @@ class ParameterPasser(threading.Thread):
                     else:
                         print('Must provide single integer to update SET_POINT')
 
-                self.new_params_event.set()
+                self.new_ctrl_params_event.set()
                 self.lock.release()
 
             else:

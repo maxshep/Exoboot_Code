@@ -8,7 +8,7 @@ import pandas as pd
 from scipy import signal
 
 folder = 'exo_data'
-filename = "20210514_1733RishZeroSetpoint_LEFT.csv"
+filename = "20210521_1205teststanding_RIGHT.csv"
 
 df = pd.read_csv(folder + '/' + filename)
 

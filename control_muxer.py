@@ -32,8 +32,8 @@ def get_gait_state_estimator(exo: exoboot.Exo,
             do_print_heel_strikes=config.PRINT_HS)
 
     elif config.HIGH_LEVEL_CTRL_STYLE == config_util.CtrlStyle.STANDINGPERTURBATION:
-        gait_state_estimator = perturbation_detectors.SlipDetectorAP(data_container=exo.data, acc_threshold_x=0.35,
-                                                                     time_out=5, max_acc_y=0.25, max_acc_z=0.25)
+        gait_state_estimator = gait_state_estimators.SlipDetectorAP(
+            data_container=exo.data)  # acc_threshold_x=0.35, time_out=5, max_acc_y=0.25, max_acc_z=0.25
 
     else:
         raise ValueError('Unknown CtrlStyle for get_gait_state_estimator')
