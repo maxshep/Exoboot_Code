@@ -6,7 +6,6 @@ import constants
 import controllers
 import custom_filters
 import gait_state_estimators
-import perturbation_detectors
 from exoboot import Exo
 import util
 
