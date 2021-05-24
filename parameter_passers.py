@@ -72,7 +72,14 @@ class ParameterPasser(threading.Thread):
                         print('SET_POINT updated to: ', msg_content)
                     else:
                         print('Must provide single integer to update SET_POINT')
-
+                elif first_letter == 'p':
+                    if msg_content.isdigit():
+                        if 0 <= msg_content <= 40:
+                            self.config.PEAK_TORQUE = msg_content
+                            print('peak torque set to: ',
+                                  self.config.PEAK_TORQUE)
+                    else:
+                        print('Must provide single integer to update PEAK_TORQUE')
                 self.new_ctrl_params_event.set()
                 self.lock.release()
 
