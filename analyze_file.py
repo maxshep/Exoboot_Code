@@ -8,25 +8,23 @@ import pandas as pd
 from scipy import signal
 
 folder = 'exo_data'
-filename = "20210521_1205teststanding_RIGHT.csv"
+filename = "20210524_1553t1v2_RIGHT.csv"
 
 df = pd.read_csv(folder + '/' + filename)
 
 
 plt.figure()
-plt.plot(df.loop_time, df.accel_x)
-plt.plot(df.loop_time, df.accel_y-1)
-plt.plot(df.loop_time, df.accel_z)
-plt.plot(df.loop_time, df.did_slip)
+plt.plot(df.loop_time, df.heel_fsr)
+plt.plot(df.loop_time, df.toe_fsr)
 
-b, a = signal.butter(N=2, Wn=0.01, btype='high')
-accel_x_filter = signal.lfilter(b, a, df.accel_x)
-accel_y_filter = signal.lfilter(b, a, df.accel_y-1)
-accel_z_filter = signal.lfilter(b, a, df.accel_z)
+# b, a = signal.butter(N=2, Wn=0.01, btype='high')
+# accel_x_filter = signal.lfilter(b, a, df.accel_x)
+# accel_y_filter = signal.lfilter(b, a, df.accel_y-1)
+# accel_z_filter = signal.lfilter(b, a, df.accel_z)
 
-plt.plot(df.loop_time, accel_x_filter)
-plt.plot(df.loop_time, accel_y_filter)
-plt.plot(df.loop_time, accel_z_filter)
+# plt.plot(df.loop_time, accel_x_filter)
+# plt.plot(df.loop_time, accel_y_filter)
+# plt.plot(df.loop_time, accel_z_filter)
 
 plt.show()
 
