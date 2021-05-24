@@ -1,7 +1,6 @@
 from typing import Type
 import config_util
 import state_machines
-import perturbation_detectors
 import gait_state_estimators
 import exoboot
 import custom_filters
