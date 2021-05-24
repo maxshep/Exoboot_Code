@@ -12,8 +12,8 @@ while True:
         print("Left Heel is pressed")
     if left_toe_FSR.is_pressed:
         print("Left Toe is pressed")
-    if right_heel_FSR.is_pressed:
-        print("Right Heel is pressed")
-    if right_toe_FSR.is_pressed:
-        print("Right Toe is pressed")
-    time.sleep(0.5)
+    # if right_heel_FSR.is_pressed:
+    #     print("Right Heel is pressed")
+    # if right_toe_FSR.is_pressed:
+    #     print("Right Toe is pressed")
+    time.sleep(0.25)
