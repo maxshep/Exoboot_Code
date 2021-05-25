@@ -201,6 +201,12 @@ class Exo():
         last_ankle_angle = self.data.ankle_angle
         self.last_state_time = self.data.state_time
         actpack_data = fxs.read_device(self.dev_id)
+        if actpack_data.state_time == 0:
+            print('Statetime = 0!!')
+            fxs.start_streaming(
+                dev_id=dev_id, freq=actpack_freq, log_en=log_en)
+            time.sleep(0.5)
+
         self.data.state_time = actpack_data.state_time * constants.MS_TO_SECONDS
         self.data.accel_x = -1 * self.motor_sign * \
             actpack_data.accelx * constants.ACCEL_GAIN
