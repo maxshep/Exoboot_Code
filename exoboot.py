@@ -204,7 +204,7 @@ class Exo():
         if actpack_data.state_time == 0:
             print('Statetime = 0!!')
             fxs.start_streaming(
-                dev_id=dev_id, freq=actpack_freq, log_en=log_en)
+                dev_id=self.dev_id, freq=200, log_en=6)
             time.sleep(0.5)
 
         self.data.state_time = actpack_data.state_time * constants.MS_TO_SECONDS
