@@ -202,11 +202,9 @@ class Exo():
         self.last_state_time = self.data.state_time
         actpack_data = fxs.read_device(self.dev_id)
         if actpack_data.state_time == 0:
-            print('Statetime = 0!!')
-            time.sleep(0.5)
-            fxs.start_streaming(
-                dev_id=self.dev_id, freq=200, log_en=6)
-            time.sleep(0.5)
+            self.errored_out = True
+            print("Error--lost connection on side: ", self.side)
+            return
 
         self.data.state_time = actpack_data.state_time * constants.MS_TO_SECONDS
         self.data.accel_x = -1 * self.motor_sign * \
@@ -444,13 +442,8 @@ class Exo():
                 'Must perform standing calibration before performing this task')
         elif ankle_angle > constants.MAX_ANKLE_ANGLE or ankle_angle < constants.MIN_ANKLE_ANGLE:
             print('ankle angle: ', ankle_angle, ' on side: ', self.side)
-            # raise ValueError(
-            #     'Attempted to convert ankle angle outside allowable bounds--Typically due to disconnection')
-            logging.warning(
+            raise ValueError(
                 'Attempted to convert ankle angle outside allowable bounds--Typically due to disconnection')
-            motor_angle = 0
-            self.errored_out = True
-
         else:
             motor_angle = int(np.polyval(
                 self.ankle_to_motor_angle_polynomial, ankle_angle) + self.motor_offset)
