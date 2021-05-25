@@ -73,6 +73,7 @@ class Exo():
         self.dev_id = dev_id
         self.file_ID = file_ID
         self.do_read_fsrs = do_read_fsrs
+        self.errored_out = False
         if self.dev_id is None:
             print('Exo obj created but no exoboot connected. Some methods available')
         elif self.dev_id in constants.LEFT_EXO_DEV_IDS:
@@ -434,12 +435,18 @@ class Exo():
         if not self.has_calibrated:
             raise ValueError(
                 'Must perform standing calibration before performing this task')
-        if ankle_angle > constants.MAX_ANKLE_ANGLE or ankle_angle < constants.MIN_ANKLE_ANGLE:
+        elif ankle_angle > constants.MAX_ANKLE_ANGLE or ankle_angle < constants.MIN_ANKLE_ANGLE:
             print('ankle angle: ', ankle_angle, ' on side: ', self.side)
-            raise ValueError(
+            # raise ValueError(
+            #     'Attempted to convert ankle angle outside allowable bounds--Typically due to disconnection')
+            logging.warning(
                 'Attempted to convert ankle angle outside allowable bounds--Typically due to disconnection')
-        motor_angle = int(np.polyval(
-            self.ankle_to_motor_angle_polynomial, ankle_angle) + self.motor_offset)
+            motor_angle = 0
+            self.errored_out = True
+
+        else:
+            motor_angle = int(np.polyval(
+                self.ankle_to_motor_angle_polynomial, ankle_angle) + self.motor_offset)
         return motor_angle
 
     def standing_calibration(self,

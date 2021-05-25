@@ -92,6 +92,8 @@ while True:
 
         for exo in exo_list:
             exo.read_data(loop_time=loop_time)
+            if exo.errored_out is True:
+                config.READ_ONLY = True  #
         for gait_state_estimator in gait_state_estimator_list:
             gait_state_estimator.detect()
         for state_machine in state_machine_list:
