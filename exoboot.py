@@ -99,15 +99,15 @@ class Exo():
                     import gpiozero  # pylint: disable=import-error
                     self.data = self.DataContainerWithFSRs()
                     if self.side == constants.Side.LEFT:
-                        self.heel_fsr_detector = gpiozero.Button(
-                            pin=constants.LEFT_HEEL_FSR_PIN)
-                        self.toe_fsr_detector = gpiozero.Button(
-                            pin=constants.LEFT_TOE_FSR_PIN)
+                        self.heel_fsr_detector = gpiozero.InputDevice(
+                            pin=constants.LEFT_HEEL_FSR_PIN, pull_up=True)
+                        self.toe_fsr_detector = gpiozero.InputDevice(
+                            pin=constants.LEFT_TOE_FSR_PIN, pull_up=True)
                     else:
-                        self.heel_fsr_detector = gpiozero.Button(
-                            pin=constants.RIGHT_HEEL_FSR_PIN)
-                        self.toe_fsr_detector = gpiozero.Button(
-                            pin=constants.RIGHT_TOE_FSR_PIN)
+                        self.heel_fsr_detector = gpiozero.InputDevice(
+                            pin=constants.RIGHT_HEEL_FSR_PIN, pull_up=True)
+                        self.toe_fsr_detector = gpiozero.InputDevice(
+                            pin=constants.RIGHT_TOE_FSR_PIN, pull_up=True)
 
             except:
                 raise Exception('Can only use FSRs with rapberry pi!')
