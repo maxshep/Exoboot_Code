@@ -62,9 +62,9 @@ DEFAULT_KD = 0
 # Feedforward term. "0 is 0% and 128 (possibly unstable!) is 100%."
 DEFAULT_FF = 120  # 126
 DEFAULT_SWING_KP = 150
-DEFAULT_SWING_KI = 100
+DEFAULT_SWING_KI = 50
 DEFAULT_SWING_KD = 0
-DEFAULT_SWING_FF = 80
+DEFAULT_SWING_FF = 0
 
 # TODO(maxshep) raise these when it seems safe
 MAX_ALLOWABLE_VOLTAGE_COMMAND = 3000  # mV
