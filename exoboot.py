@@ -203,6 +203,7 @@ class Exo():
         actpack_data = fxs.read_device(self.dev_id)
         if actpack_data.state_time == 0:
             print('Statetime = 0!!')
+            time.sleep(0.5)
             fxs.start_streaming(
                 dev_id=self.dev_id, freq=200, log_en=6)
             time.sleep(0.5)
