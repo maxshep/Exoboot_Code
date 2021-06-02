@@ -228,8 +228,8 @@ class BallisticReelInController(Controller):
                  exo: Exo,
                  slack_cutoff: float = 2000,
                  time_out: float = 0.2,
-                 Kp: int = 30,  # 50  150
-                 Ki: int = 10,  # 10   50
+                 Kp: int = 10,  # 50  150
+                 Ki: int = 3,  # 10   50
                  Kd: int = 0,
                  ff: int = 0):
         '''This controller uses position control for zero slack, checking for a cutoff.
