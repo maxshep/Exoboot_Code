@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from scipy import signal
 
-folder = 'exo_data/S02 unkempt'
-filename = "20210528_1102S02_T10_LEFT.csv"
+folder = 'exo_data/S03_unkempt'
+filename = "20210602_1749S03_T10_RIGHT.csv"
 
 df = pd.read_csv(folder + '/' + filename)
 
@@ -16,9 +16,9 @@ df = pd.read_csv(folder + '/' + filename)
 # plt.figure()
 # plt.plot(df.loop_time, df.heel_fsr)
 # plt.plot(df.loop_time, df.toe_fsr)
-plt.plot(df.loop_time, df.ankle_angle)
-plt.plot(df.loop_time, df.commanded_current*0.001)
-# plt.plot(df.loop_time, df.motor_current*0.001)
+# plt.plot(df.loop_time, df.ankle_angle)
+plt.plot(df.loop_time, df.commanded_current)
+plt.plot(df.loop_time, df.motor_current)
 # plt.plot(df.loop_time, df.commanded_position*0.001)
 # plt.plot(df.loop_time, df.motor_angle*0.001)
 

@@ -190,7 +190,7 @@ class Exo():
         fxs.set_gains(dev_id=self.dev_id, kp=self.Kp, ki=self.Ki,
                       kd=self.Kd, k_val=self.k_val, b_val=self.b_val, ff=self.ff)
 
-    def read_data(self, do_print=False, loop_time=None):
+    def read_data(self, loop_time=None):
         '''IMU data comes from Dephy in RHR, with positive XYZ pointing
         backwards, downwards, and rightwards on the right side and forwards,
         downwards, and leftwards on the left side. It is converted here
@@ -224,6 +224,12 @@ class Exo():
                                  constants.ENC_CLICKS_TO_DEG + self.ankle_angle_offset)
         self.data.ankle_torque_from_current = self._motor_current_to_ankle_torque(
             self.data.motor_current)
+
+        if self.data.ankle_angle > constants.MAX_ANKLE_ANGLE or self.data.ankle_angle < constants.MIN_ANKLE_ANGLE:
+            self.errored_out = True
+            print('ankle angle: ', self.data.ankle_angle, ' on side: ', self.side)
+            raise ValueError(
+                'Unreasonable ankle_angle--switching to Read_Only')
         if self.has_calibrated:
             self.data.slack = self.get_slack()
 
@@ -242,19 +248,6 @@ class Exo():
         if self.do_read_fsrs:
             self.data.heel_fsr = self.heel_fsr_detector.value
             self.data.toe_fsr = self.toe_fsr_detector.value
-        if do_print:
-            fxu.clear_terminal()
-            print('acc_x:                ', self.data.accel_x)
-            print('acc_y:                ', self.data.accel_y)
-            print('acc_z:                ', self.data.accel_z)
-            print('gyro_x:               ', self.data.gyro_x)
-            print('gyro_y:               ', self.data.gyro_y)
-            print('gyro_z:               ', self.data.gyro_z)
-            print('state_time:           ', self.data.state_time)
-            print('motor_angle:          ', self.data.motor_angle)
-            print('motor_velocity:       ', self.data.motor_velocity)
-            print('motor_current:        ', self.data.motor_current)
-            print('ankle_angle:          ', self.data.ankle_angle)
 
     def get_batt_voltage(self):
         actpack_data = fxs.read_device(self.dev_id)

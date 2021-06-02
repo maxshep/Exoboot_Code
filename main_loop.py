@@ -91,9 +91,12 @@ while True:
         lock.release()
 
         for exo in exo_list:
-            exo.read_data(loop_time=loop_time)
-            if exo.errored_out is True:
-                raise IOError("exo disconnected")
+            try:
+                exo.read_data(loop_time=loop_time)
+            except:
+                config.READ_ONLY = True
+            # if exo.errored_out is True:
+            #     raise IOError("exo disconnected")
         for gait_state_estimator in gait_state_estimator_list:
             gait_state_estimator.detect()
         for state_machine in state_machine_list:
@@ -101,7 +104,7 @@ while True:
         for exo in exo_list:
             exo.write_data(only_write_if_new=not config.READ_ONLY)
     except KeyboardInterrupt:
-        print('Ctrl-C detected, Exiting Gracefully')  # TODO(maxshep) Debug
+        print('Ctrl-C detected, Exiting Gracefully')
         break
     except Exception as err:
         print("Unexpected error:", err)
