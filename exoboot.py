@@ -227,7 +227,8 @@ class Exo():
 
         if self.data.ankle_angle > constants.MAX_ANKLE_ANGLE or self.data.ankle_angle < constants.MIN_ANKLE_ANGLE:
             self.errored_out = True
-            print('ankle angle: ', self.data.ankle_angle, ' on side: ', self.side)
+            print('ankle angle: ', self.data.ankle_angle,
+                  ' on side: ', self.side)
             raise ValueError(
                 'Unreasonable ankle_angle--switching to Read_Only')
         if self.has_calibrated:
@@ -433,10 +434,10 @@ class Exo():
         if not self.has_calibrated:
             raise ValueError(
                 'Must perform standing calibration before performing this task')
-        elif ankle_angle > constants.MAX_ANKLE_ANGLE or ankle_angle < constants.MIN_ANKLE_ANGLE:
-            print('ankle angle: ', ankle_angle, ' on side: ', self.side)
-            raise ValueError(
-                'Attempted to convert ankle angle outside allowable bounds--Typically due to disconnection')
+        # elif ankle_angle > constants.MAX_ANKLE_ANGLE or ankle_angle < constants.MIN_ANKLE_ANGLE:
+        #     print('ankle angle: ', ankle_angle, ' on side: ', self.side)
+        #     raise ValueError(
+        #         'Attempted to convert ankle angle outside allowable bounds--Typically due to disconnection')
         else:
             motor_angle = int(np.polyval(
                 self.ankle_to_motor_angle_polynomial, ankle_angle) + self.motor_offset)

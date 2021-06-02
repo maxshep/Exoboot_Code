@@ -95,6 +95,7 @@ while True:
                 exo.read_data(loop_time=loop_time)
             except:
                 config.READ_ONLY = True
+                print('config switched to read_only!')
             # if exo.errored_out is True:
             #     raise IOError("exo disconnected")
         for gait_state_estimator in gait_state_estimator_list:
