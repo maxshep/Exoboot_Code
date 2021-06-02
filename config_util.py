@@ -48,7 +48,7 @@ class ConfigurableConstants():
     PEAK_FRACTION: float = 0.53
     FALL_FRACTION: float = 0.63
     PEAK_TORQUE: float = 5
-    SPLINE_BIAS: float = 5  # Nm
+    SPLINE_BIAS: float = 3  # Nm
 
     # Impedance
     K_VAL: int = 500
