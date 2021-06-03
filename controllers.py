@@ -223,6 +223,48 @@ class FourPointSplineController(GenericSplineController):
         return [self.bias_torque, self.bias_torque, peak_torque, self.bias_torque, self.bias_torque]
 
 
+class SmoothReelInController(Controller):
+    def __init__(self,
+                 exo: Exo,
+                 slack_cutoff: float = 2000,
+                 time_out: float = 0.2,
+                 Kp: int = 10,  # 50  150
+                 Ki: int = 3,  # 10   50
+                 Kd: int = 0,
+                 ff: int = 0):
+        '''This controller uses current control to get to zero slack, checking for a cutoff.
+
+        Arguments:
+            exo: exo.Exo instance
+            slack_cutoff: the amount of slack (in motor counts) for the controller to be completed
+            time_out: defines maximum amount of time to reel in
+        Returns:
+            Bool describing whether reel in operation has completed.
+         '''
+        self.exo = exo
+        super().update_controller_gains(Kp=Kp, Ki=Ki, Kd=Kd, ff=ff)
+        self.slack_cutoff = slack_cutoff
+        # set maximum time for controller
+        self.delay_timer = util.DelayTimer(delay_time=time_out)
+        self.time_to_reel_in = 0.1
+        self.peak_current = 5
+
+    def command(self, reset=False):
+        if reset:
+            super().command_gains()
+            self.delay_timer.start()
+            self.t0 = time.perf_counter()
+        desired_mA = self.peak_current * \
+            (time.perf_counter() - self.t0)/self.time_to_reel_in
+        self.exo.command_current(desired_mA)
+
+    def check_completion_status(self):
+        if self.delay_timer.check():
+            return True
+        else:
+            return False
+
+
 class BallisticReelInController(Controller):
     def __init__(self,
                  exo: Exo,
