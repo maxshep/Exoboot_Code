@@ -247,7 +247,7 @@ class SmoothReelInController(Controller):
         # set maximum time for controller
         self.delay_timer = util.DelayTimer(delay_time=time_out)
         self.time_to_reel_in = 0.1
-        self.peak_torque = 5
+        self.peak_torque = 3
 
     def command(self, reset=False):
         if reset:
