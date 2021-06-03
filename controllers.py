@@ -268,7 +268,7 @@ class SmoothReelInController(Controller):
 class BallisticReelInController(Controller):
     def __init__(self,
                  exo: Exo,
-                 slack_cutoff: float = 2000,
+                 slack_cutoff: float = 1500,
                  time_out: float = 0.2,
                  Kp: int = 10,  # 50  150
                  Ki: int = 3,  # 10   50
