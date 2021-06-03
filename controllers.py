@@ -232,7 +232,7 @@ class SmoothReelInController(Controller):
                  Ki: int = 300,  # 10   50
                  Kd: int = 0,
                  ff: int = 0):
-        '''This controller uses current control to get to zero slack, checking for a cutoff.
+        '''This controller uses current control to get to zero slack, checking for a cutoff..
 
         Arguments:
             exo: exo.Exo instance
