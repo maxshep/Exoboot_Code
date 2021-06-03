@@ -201,10 +201,10 @@ class Exo():
         last_ankle_angle = self.data.ankle_angle
         self.last_state_time = self.data.state_time
         actpack_data = fxs.read_device(self.dev_id)
-        if actpack_data.ank_ang == 0:
-            self.errored_out = True
-            print("Error--lost connection on side: ", self.side)
-            return
+        # if actpack_data.ank_ang == 0:
+        #     self.errored_out = True
+        #     print("Error--lost connection on side: ", self.side)
+        #     return
 
         self.data.state_time = actpack_data.state_time * constants.MS_TO_SECONDS
         self.data.accel_x = -1 * self.motor_sign * \
