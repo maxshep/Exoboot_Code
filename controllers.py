@@ -245,21 +245,21 @@ class SmoothReelInController(Controller):
         super().update_controller_gains(Kp=Kp, Ki=Ki, Kd=Kd, ff=ff)
         self.slack_cutoff = slack_cutoff
         # set maximum time for controller
-        self.delay_timer = util.DelayTimer(delay_time=time_out)
+        # self.delay_timer = util.DelayTimer(delay_time=time_out)
         self.time_to_reel_in = 0.1
         self.peak_torque = 3
 
     def command(self, reset=False):
         if reset:
             super().command_gains()
-            self.delay_timer.start()
+            # self.delay_timer.start()
             self.t0 = time.perf_counter()
         desired_torque = self.peak_torque * \
             (time.perf_counter() - self.t0)/self.time_to_reel_in
         self.exo.command_torque(desired_torque=desired_torque)
 
     def check_completion_status(self):
-        if self.delay_timer.check():
+        if time.perf_counter()-self.t0 > self.time_to_reel_in:
             return True
         else:
             return False
