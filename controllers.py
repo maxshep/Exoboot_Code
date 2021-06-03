@@ -247,16 +247,16 @@ class SmoothReelInController(Controller):
         # set maximum time for controller
         self.delay_timer = util.DelayTimer(delay_time=time_out)
         self.time_to_reel_in = 0.1
-        self.peak_current = 5
+        self.peak_torque = 5
 
     def command(self, reset=False):
         if reset:
             super().command_gains()
             self.delay_timer.start()
             self.t0 = time.perf_counter()
-        desired_mA = self.peak_current * \
+        desired_torque = self.peak_torque * \
             (time.perf_counter() - self.t0)/self.time_to_reel_in
-        self.exo.command_current(desired_mA)
+        self.exo.command_torque(desired_torque=desired_torque)
 
     def check_completion_status(self):
         if self.delay_timer.check():
