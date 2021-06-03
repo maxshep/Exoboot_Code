@@ -220,17 +220,22 @@ class Exo():
         self.data.motor_angle = actpack_data.mot_ang
         self.data.motor_velocity = actpack_data.mot_vel
         self.data.motor_current = actpack_data.mot_cur
-        self.data.ankle_angle = (-1 * self.motor_sign * actpack_data.ank_ang *
-                                 constants.ENC_CLICKS_TO_DEG + self.ankle_angle_offset)
+        # self.data.ankle_angle = (-1 * self.motor_sign * actpack_data.ank_ang *
+        #                          constants.ENC_CLICKS_TO_DEG + self.ankle_angle_offset)
         self.data.ankle_torque_from_current = self._motor_current_to_ankle_torque(
             self.data.motor_current)
+        ankle_angle_temp = (-1 * self.motor_sign * actpack_data.ank_ang *
+                            constants.ENC_CLICKS_TO_DEG + self.ankle_angle_offset)
+        if ankle_angle_temp > constants.MAX_ANKLE_ANGLE or ankle_angle_temp < constants.MIN_ANKLE_ANGLE:
+            # self.errored_out = True
+            print('ankle angle: ', ankle_angle_temp,
+                  ' on side: ', self.side, 'at time: ', self.data.state_time)
+            # raise ValueError(
+            #     'Unreasonable ankle_angle--switching to Read_Only')
+            self.data.gen_var1 = ankle_angle_temp
+        else:
+            self.data.ankle_angle = ankle_angle_temp
 
-        if self.data.ankle_angle > constants.MAX_ANKLE_ANGLE or self.data.ankle_angle < constants.MIN_ANKLE_ANGLE:
-            self.errored_out = True
-            print('ankle angle: ', self.data.ankle_angle,
-                  ' on side: ', self.side)
-            raise ValueError(
-                'Unreasonable ankle_angle--switching to Read_Only')
         if self.has_calibrated:
             self.data.slack = self.get_slack()
 
