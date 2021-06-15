@@ -32,6 +32,8 @@ class ConfigurableConstants():
 
     TARGET_FREQ: float = 200  # Hz
     ACTPACK_FREQ: float = 200  # Hz
+    DO_DEPHY_LOG: bool = True
+    DEPHY_LOG_LEVEL: int = 4
     HIGH_LEVEL_CTRL_STYLE: Type[CtrlStyle] = CtrlStyle.FOURPOINTSPLINE
 
     # Gait State details

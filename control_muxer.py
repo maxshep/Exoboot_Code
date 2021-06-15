@@ -48,7 +48,7 @@ def get_state_machine(exo: exoboot.Exo,
         # reel_in_controller = controllers.BallisticReelInController(
         #     exo=exo, time_out=config.REEL_IN_TIMEOUT)
         reel_in_controller = controllers.SmoothReelInController(
-            exo=exo)
+            exo=exo, time_out=config.REEL_IN_TIMEOUT)
         swing_controller = controllers.StalkController(
             exo=exo, desired_slack=config.SWING_SLACK)
         reel_out_controller = controllers.SoftReelOutController(
@@ -64,7 +64,9 @@ def get_state_machine(exo: exoboot.Exo,
                                                                             reel_in_controller=reel_in_controller,
                                                                             reel_out_controller=reel_out_controller)
     elif config.HIGH_LEVEL_CTRL_STYLE == config_util.CtrlStyle.SAWICKIWICKI:
-        reel_in_controller = controllers.BallisticReelInController(
+        # reel_in_controller = controllers.BallisticReelInController(
+        #     exo=exo, time_out=config.REEL_IN_TIMEOUT)
+        reel_in_controller = controllers.SmoothReelInController(
             exo=exo, time_out=config.REEL_IN_TIMEOUT)
         swing_controller = controllers.StalkController(
             exo=exo, desired_slack=config.SWING_SLACK)

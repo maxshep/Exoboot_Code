@@ -23,6 +23,7 @@ def connect_to_exos(file_ID: str = None,
                     target_freq: int = 200,
                     actpack_freq: int = 200,
                     log_en: bool = False,
+                    log_level: int = 3,
                     do_read_fsrs: bool = False):
     '''Connect to Exos, instantiate Exo objects.'''
 
@@ -44,7 +45,7 @@ def connect_to_exos(file_ID: str = None,
     exo_list = []
     for port in ports:
         try:
-            dev_id = fxs.open(port, baud_rate, log_level=6)
+            dev_id = fxs.open(port, baud_rate, log_level=log_level)
             fxs.start_streaming(
                 dev_id=dev_id, freq=actpack_freq, log_en=log_en)
             exo_list.append(Exo(dev_id=dev_id, file_ID=file_ID,
@@ -152,6 +153,7 @@ class Exo():
         commanded_position: int = None
         commanded_torque: float = None  # TODO(maxshep) remove
         slack: int = None
+        temperature: int = None
         gen_var1: float = None
         gen_var2: float = None
         gen_var3: float = None
@@ -210,6 +212,7 @@ class Exo():
             return  # Exit early
         self.data.ankle_angle = ankle_angle_temp
         self.data.state_time = actpack_data.state_time * constants.MS_TO_SECONDS
+        self.data.temperature = actpack_data.temperature
         self.data.accel_x = -1 * self.motor_sign * \
             actpack_data.accelx * constants.ACCEL_GAIN
         self.data.accel_y = -1 * actpack_data.accely * constants.ACCEL_GAIN

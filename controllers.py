@@ -226,7 +226,7 @@ class FourPointSplineController(GenericSplineController):
 class SmoothReelInController(Controller):
     def __init__(self,
                  exo: Exo,
-                 reel_in_mV: int = 800,
+                 reel_in_mV: int = 1200,
                  slack_cutoff: float = 1500,
                  time_out: float = 0.3,
                  Kp: int = 30,  # 50  150
