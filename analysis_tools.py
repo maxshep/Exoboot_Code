@@ -9,6 +9,8 @@ with open(filename) as f:
 with open(filename) as f:
     left_ankle_angle = [np.floor(float(row["ankle_angle"]))
                         for row in csv.DictReader(f)]
+left_motor_angle = np.array(left_motor_angle)*constants.ENC_CLICKS_TO_DEG
+
 p_left = np.polyfit(left_ankle_angle, left_motor_angle, deg=5)
 print('Polynomial coefficients for the left: ', p_left)
 polyfitted_left_motor_angle = np.polyval(p_left, left_ankle_angle)
@@ -19,6 +21,8 @@ with open(filename) as f:
 with open(filename) as f:
     right_ankle_angle = [np.floor(float(row["ankle_angle"]))
                          for row in csv.DictReader(f)]
+right_motor_angle = np.array(right_motor_angle)*constants.ENC_CLICKS_TO_DEG
+
 p_right = np.polyfit(right_ankle_angle, right_motor_angle, deg=5)
 print('Polynomial coefficients for the right: ', p_right)
 polyfitted_right_motor_angle = np.polyval(p_right, right_ankle_angle)
@@ -35,7 +39,8 @@ plt.show()
 plt.figure()
 deriv_left = np.polyder(p_left)
 deriv_right = np.polyder(p_right)
-plt.plot(left_ankle_angle, np.polyval(deriv_left, left_ankle_angle))
+# plt.plot(left_ankle_angle, np.polyval(deriv_left, left_ankle_angle))
 plt.plot(right_ankle_angle, np.polyval(deriv_right, right_ankle_angle))
-
+plt.ylabel('Transmission Ratio')
+plt.xlabel('Ankle Angle')
 plt.show()

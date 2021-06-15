@@ -226,8 +226,9 @@ class FourPointSplineController(GenericSplineController):
 class SmoothReelInController(Controller):
     def __init__(self,
                  exo: Exo,
-                 slack_cutoff: float = 2000,
-                 time_out: float = 0.2,
+                 reel_in_mV: int = 800,
+                 slack_cutoff: float = 1500,
+                 time_out: float = 0.3,
                  Kp: int = 30,  # 50  150
                  Ki: int = 300,  # 10   50
                  Kd: int = 0,
@@ -245,21 +246,18 @@ class SmoothReelInController(Controller):
         super().update_controller_gains(Kp=Kp, Ki=Ki, Kd=Kd, ff=ff)
         self.slack_cutoff = slack_cutoff
         # set maximum time for controller
-        # self.delay_timer = util.DelayTimer(delay_time=time_out)
-        self.time_to_reel_in = 0.1
-        self.peak_torque = 3
+        self.delay_timer = util.DelayTimer(delay_time=time_out)
+        self.reel_in_mV = reel_in_mV
 
     def command(self, reset=False):
         if reset:
             super().command_gains()
-            # self.delay_timer.start()
             self.t0 = time.perf_counter()
-        desired_torque = self.peak_torque * \
-            (time.perf_counter() - self.t0)/self.time_to_reel_in
-        self.exo.command_torque(desired_torque=desired_torque)
+        self.exo.command_voltage(
+            desired_mV=self.exo.motor_sign * self.reel_in_mV)
 
     def check_completion_status(self):
-        if time.perf_counter()-self.t0 > self.time_to_reel_in:
+        if self.delay_timer.check() or self.exo.get_slack() < self.slack_cutoff:
             return True
         else:
             return False
@@ -270,8 +268,8 @@ class BallisticReelInController(Controller):
                  exo: Exo,
                  slack_cutoff: float = 1500,
                  time_out: float = 0.2,
-                 Kp: int = 10,  # 50  150
-                 Ki: int = 3,  # 10   50
+                 Kp: int = 3,  # 50  150
+                 Ki: int = 1,  # 10   50
                  Kd: int = 0,
                  ff: int = 0):
         '''This controller uses position control for zero slack, checking for a cutoff.

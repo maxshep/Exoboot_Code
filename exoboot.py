@@ -73,7 +73,6 @@ class Exo():
         self.dev_id = dev_id
         self.file_ID = file_ID
         self.do_read_fsrs = do_read_fsrs
-        self.errored_out = False
         if self.dev_id is None:
             print('Exo obj created but no exoboot connected. Some methods available')
         elif self.dev_id in constants.LEFT_EXO_DEV_IDS:
@@ -201,11 +200,15 @@ class Exo():
         last_ankle_angle = self.data.ankle_angle
         self.last_state_time = self.data.state_time
         actpack_data = fxs.read_device(self.dev_id)
-        # if actpack_data.ank_ang == 0:
-        #     self.errored_out = True
-        #     print("Error--lost connection on side: ", self.side)
-        #     return
 
+        # Check to see if values are reasonable
+        ankle_angle_temp = (-1 * self.motor_sign * actpack_data.ank_ang *
+                            constants.ENC_CLICKS_TO_DEG + self.ankle_angle_offset)
+        if ankle_angle_temp > constants.MAX_ANKLE_ANGLE or ankle_angle_temp < constants.MIN_ANKLE_ANGLE:
+            print('Bad packet caught on side: ', self.side,
+                  'at time: ', self.data.state_time)
+            return  # Exit early
+        self.data.ankle_angle = ankle_angle_temp
         self.data.state_time = actpack_data.state_time * constants.MS_TO_SECONDS
         self.data.accel_x = -1 * self.motor_sign * \
             actpack_data.accelx * constants.ACCEL_GAIN
@@ -224,17 +227,6 @@ class Exo():
         #                          constants.ENC_CLICKS_TO_DEG + self.ankle_angle_offset)
         self.data.ankle_torque_from_current = self._motor_current_to_ankle_torque(
             self.data.motor_current)
-        ankle_angle_temp = (-1 * self.motor_sign * actpack_data.ank_ang *
-                            constants.ENC_CLICKS_TO_DEG + self.ankle_angle_offset)
-        if ankle_angle_temp > constants.MAX_ANKLE_ANGLE or ankle_angle_temp < constants.MIN_ANKLE_ANGLE:
-            # self.errored_out = True
-            print('ankle angle: ', ankle_angle_temp,
-                  ' on side: ', self.side, 'at time: ', self.data.state_time)
-            # raise ValueError(
-            #     'Unreasonable ankle_angle--switching to Read_Only')
-            self.data.gen_var1 = ankle_angle_temp
-        else:
-            self.data.ankle_angle = ankle_angle_temp
 
         if self.has_calibrated:
             self.data.slack = self.get_slack()
@@ -322,6 +314,7 @@ class Exo():
             dev_id=self.dev_id, ctrl_mode=fxe.FX_VOLTAGE, value=desired_mV)
         self.data.commanded_current = None
         self.data.commanded_position = None
+        self.data.commanded_torque = None
 
     def command_motor_angle(self, desired_motor_angle: int):
         '''Commands motor angle (counts). Pay attention to the sign!'''
@@ -329,6 +322,7 @@ class Exo():
             dev_id=self.dev_id, ctrl_mode=fxe.FX_POSITION, value=desired_motor_angle)
         self.data.commanded_current = None
         self.data.commanded_position = desired_motor_angle
+        self.data.commanded_torque = None
 
     def command_motor_impedance(self, theta0: int, k_val: int, b_val: int):
         '''Commands motor impedance, with theta0 a motor position (int).'''
@@ -346,6 +340,7 @@ class Exo():
             dev_id=self.dev_id, ctrl_mode=fxe.FX_IMPEDANCE, value=int(theta0))
         self.data.commanded_current = None
         self.data.commanded_position = None
+        self.data.commanded_torque = None
 
     def command_torque(self, desired_torque: float, do_return_command_torque=False):
         '''Applies desired torque (Nm) in plantarflexion only (positive torque)'''

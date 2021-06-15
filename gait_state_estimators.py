@@ -191,13 +191,14 @@ class SlipDetectorAP():
                  time_out: float = 5,
                  max_acc_y: float = 0.1,
                  max_acc_z: float = 0.1,
-                 do_filter_accels=True):
+                 do_filter_accels=True,
+                 required_seconds_of_stillness=1.5):
         '''Last working with 0.5, 0.2, 0.2, no filter.'''
         self.data_container = data_container
         self.acc_threshold_x = acc_threshold_x
         self.max_acc_y = max_acc_y
         self.max_acc_z = max_acc_z
-        self.timer = util.DelayTimer(time_out, true_until=True)
+        self.refractory_timer = util.DelayTimer(time_out, true_until=True)
         self.do_filter_accels = do_filter_accels
         self.accel_x_filter = custom_filters.Butterworth(
             N=2, Wn=0.01, btype='high')
@@ -207,6 +208,8 @@ class SlipDetectorAP():
             N=2, Wn=0.01, btype='high')
         self.slip_detect_active = False
         print('slip_detect_active: ', self.slip_detect_active)
+        self.stillness_timer = util.DelayTimer(
+            delay_time=required_seconds_of_stillness)
 
     def detect(self):
         accel_x = self.data_container.accel_x
@@ -220,12 +223,16 @@ class SlipDetectorAP():
             self.data_container.gen_var2 = accel_y
             self.data_container.gen_var3 = accel_z
 
-        if (self.slip_detect_active and
+        if abs(accel_x) > 0.2 or abs(accel_y) > 0.2 or abs(accel_z) > 0.2:
+            self.stillness_timer.start()  # restart the stillness_timer if not still
+
+        if (self.stillness_timer.check() and
+            self.slip_detect_active and
             accel_x < -1*self.acc_threshold_x and
             abs(accel_y) < + self.max_acc_y and
                 abs(accel_z) < self.max_acc_z and
-                not self.timer.check()):
-            self.timer.start()
+                not self.refractory_timer.check()):
+            self.refractory_timer.start()
             self.data_container.did_slip = True
         else:
             self.data_container.did_slip = False

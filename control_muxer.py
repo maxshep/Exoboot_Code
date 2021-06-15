@@ -45,8 +45,10 @@ def get_state_machine(exo: exoboot.Exo,
     '''Uses info from the config option to build a state_machine for a single exo.
     Refactored out of main_loop for readability.'''
     if config.HIGH_LEVEL_CTRL_STYLE == config_util.CtrlStyle.FOURPOINTSPLINE:
-        reel_in_controller = controllers.BallisticReelInController(
-            exo=exo, time_out=config.REEL_IN_TIMEOUT)
+        # reel_in_controller = controllers.BallisticReelInController(
+        #     exo=exo, time_out=config.REEL_IN_TIMEOUT)
+        reel_in_controller = controllers.SmoothReelInController(
+            exo=exo)
         swing_controller = controllers.StalkController(
             exo=exo, desired_slack=config.SWING_SLACK)
         reel_out_controller = controllers.SoftReelOutController(
