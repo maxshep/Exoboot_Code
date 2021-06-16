@@ -15,24 +15,24 @@ import parameter_passers
 import control_muxer
 
 
-file_ID = input(
-    'Other than the date, what would you like added to the filename?')
-
 args = config_util.parse_args()  # args passed via command line
 config = config_util.load_config(args.config)  # loads config from passed fn
+file_ID = input(
+    'Other than the date, what would you like added to the filename?')
 config_saver = config_util.ConfigSaver(
     file_ID=file_ID, config=config)  # Saves config updates
 
 '''Connect to Exos, instantiate Exo objects.'''
 exo_list = exoboot.connect_to_exos(file_ID=file_ID, target_freq=config.TARGET_FREQ,
                                    actpack_freq=config.ACTPACK_FREQ, do_read_fsrs=config.DO_READ_FSRS,
-                                   log_en=config.DO_DEPHY_LOG)
+                                   log_en=config.DO_DEPHY_LOG, max_allowable_current=config.MAX_ALLOWABLE_CURRENT)
 print('Battery Voltage: ', 0.001*exo_list[0].get_batt_voltage(), 'V')
 
 '''Instantiate gait_state_estimator objects, store in list.'''
 gait_state_estimator_list = []
 state_machine_list = []
 for exo in exo_list:
+    exo.setup_data_writer(file_ID=file_ID)  # Saves exo data
     gait_state_estimator_list.append(
         control_muxer.get_gait_state_estimator(exo=exo, config=config))
     state_machine_list.append(
