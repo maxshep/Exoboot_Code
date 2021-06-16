@@ -8,12 +8,14 @@ right_heel_FSR = Button(constants.RIGHT_HEEL_FSR_PIN)
 right_toe_FSR = Button(constants.RIGHT_TOE_FSR_PIN)
 
 while True:
-    if left_heel_FSR.is_pressed:
-        print("Left Heel is pressed")
-    if left_toe_FSR.is_pressed:
-        print("Left Toe is pressed")
+    # if left_heel_FSR.is_pressed:
+    #     print("Left Heel is pressed: ")
+    # if left_toe_FSR.is_pressed:
+    #     print("Left Toe is pressed")
     # if right_heel_FSR.is_pressed:
     #     print("Right Heel is pressed")
     # if right_toe_FSR.is_pressed:
     #     print("Right Toe is pressed")
-    # time.sleep(0.25)
+    print('Left heel: ', left_heel_FSR.is_pressed, 'Left toe: ', left_toe_FSR.is_pressed,
+          'Right heel: ', right_heel_FSR.is_pressed, 'Right toe: ', right_toe_FSR.is_pressed)
+    time.sleep(0.25)

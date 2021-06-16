@@ -27,7 +27,7 @@ def connect_to_exos(file_ID: str = None,
                     do_read_fsrs: bool = False):
     '''Connect to Exos, instantiate Exo objects.'''
 
-    # Load Ports and baude rate
+    # Load Ports and baud rate
     if fxu.is_win():		# Need for WebAgg server to work in Python 3.8
         print('Detected win32')
         import asyncio
