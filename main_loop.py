@@ -92,17 +92,12 @@ while True:
         lock.release()
 
         for exo in exo_list:
-            try:
-                exo.read_data(loop_time=loop_time)
-            except:
-                config.READ_ONLY = True
-                print('config switched to read_only!')
-            # if exo.errored_out is True:
-            #     raise IOError("exo disconnected")
+            exo.read_data(loop_time=loop_time)
         for gait_state_estimator in gait_state_estimator_list:
             gait_state_estimator.detect()
-        for state_machine in state_machine_list:
-            state_machine.step(read_only=config.READ_ONLY)
+        if not config.READ_ONLY:
+            for state_machine in state_machine_list:
+                state_machine.step(read_only=config.READ_ONLY)
         for exo in exo_list:
             exo.write_data(only_write_if_new=not config.READ_ONLY)
     except KeyboardInterrupt:
