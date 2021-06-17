@@ -24,7 +24,8 @@ def connect_to_exos(file_ID: str = None,
                     actpack_freq: int = 200,
                     log_en: bool = False,
                     log_level: int = 3,
-                    do_read_fsrs: bool = False):
+                    do_read_fsrs: bool = False,
+                    max_allowable_current: int = 25000):
     '''Connect to Exos, instantiate Exo objects.'''
 
     # Load Ports and baud rate
@@ -50,7 +51,8 @@ def connect_to_exos(file_ID: str = None,
                 dev_id=dev_id, freq=actpack_freq, log_en=log_en)
             exo_list.append(Exo(dev_id=dev_id, file_ID=file_ID,
                                 target_freq=target_freq,
-                                do_read_fsrs=do_read_fsrs))
+                                do_read_fsrs=do_read_fsrs,
+                                max_allowable_current=max_allowable_current))
         except IOError:
             print('Unable to open exo on port: ', port,
                   ' This is okay if only one exo is connected!')
@@ -63,6 +65,7 @@ def connect_to_exos(file_ID: str = None,
 class Exo():
     def __init__(self,
                  dev_id: int,
+                 max_allowable_current: int,
                  file_ID: str = None,
                  target_freq: float = 200,
                  do_read_fsrs: bool = False):
@@ -72,6 +75,7 @@ class Exo():
             file_ID: str. Unique string added to filename. If None, no file will be saved.
             do_read_dsrs: bool indicating whether to read FSRs '''
         self.dev_id = dev_id
+        self.max_allowable_current = max_allowable_current
         self.file_ID = file_ID
         self.do_read_fsrs = do_read_fsrs
         if self.dev_id is None:
@@ -226,8 +230,6 @@ class Exo():
         self.data.motor_angle = actpack_data.mot_ang
         self.data.motor_velocity = actpack_data.mot_vel
         self.data.motor_current = actpack_data.mot_cur
-        # self.data.ankle_angle = (-1 * self.motor_sign * actpack_data.ank_ang *
-        #                          constants.ENC_CLICKS_TO_DEG + self.ankle_angle_offset)
         self.data.ankle_torque_from_current = self._motor_current_to_ankle_torque(
             self.data.motor_current)
 
@@ -259,7 +261,7 @@ class Exo():
         if file_ID is not None:
             subfolder_name = 'exo_data/'
             filename = subfolder_name + \
-                time.strftime("%Y%m%d_%H%M") + file_ID + \
+                time.strftime("%Y%m%d_%H%M_") + file_ID + \
                 '_' + self.side.name + '.csv'
             self.my_file = open(filename, 'w', newline='')
             self.writer = csv.DictWriter(
@@ -299,10 +301,10 @@ class Exo():
 
     def command_current(self, desired_mA: int):
         '''Commands current (mA), with positive = PF on right, DF on left.'''
-        if abs(desired_mA) > constants.MAX_ALLOWABLE_CURRENT_COMMAND:
+        if abs(desired_mA) > self.max_allowable_current:
             self.command_controller_off()
             raise ValueError(
-                'abs(desired_mA) must be < constants.MAX_ALLOWABLE_CURRENT_COMMAND')
+                'abs(desired_mA) must be < config.max_allowable_current')
         fxs.send_motor_command(
             dev_id=self.dev_id, ctrl_mode=fxe.FX_CURRENT, value=desired_mA)
         self.data.commanded_current = desired_mA
@@ -413,7 +415,7 @@ class Exo():
 
     def calculate_max_allowable_torque(self):
         max_allowable_torque = max(
-            0, self._motor_current_to_ankle_torque(current=self.motor_sign*constants.MAX_ALLOWABLE_CURRENT_COMMAND))
+            0, self._motor_current_to_ankle_torque(current=self.motor_sign*self.max_allowable_current))
         return max_allowable_torque
 
     def _motor_current_to_ankle_torque(self, current: int) -> float:

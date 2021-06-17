@@ -3,8 +3,8 @@ import numpy as np
 from enum import Enum
 
 TARGET_FREQ = 200
-MAX_ANKLE_ANGLE = 83  # degrees, plantarflexion
-MIN_ANKLE_ANGLE = -60  # degrees, dorsiflexion
+MAX_ANKLE_ANGLE = 86  # 83  # degrees, plantarflexion
+MIN_ANKLE_ANGLE = -63  # -60  # degrees, dorsiflexion
 
 # These polynomials are derived from the calibration routine (calibrate.py), analyzed with analysis_tools.py
 LEFT_ANKLE_TO_MOTOR = np.array(

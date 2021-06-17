@@ -35,6 +35,7 @@ class ConfigurableConstants():
     DO_DEPHY_LOG: bool = True
     DEPHY_LOG_LEVEL: int = 4
     HIGH_LEVEL_CTRL_STYLE: Type[CtrlStyle] = CtrlStyle.FOURPOINTSPLINE
+    MAX_ALLOWABLE_CURRENT = 20000  # mA
 
     # Gait State details
     HS_GYRO_THRESHOLD: float = 100
@@ -92,6 +93,15 @@ class ConfigSaver():
 
 def load_config(config_filename) -> Type[ConfigurableConstants]:
     try:
+        # strip extra parts off
+        config_filename = config_filename.lower()
+        if config_filename.endswith('_config'):
+            config_filename = config_filename[:-7]
+        elif config_filename.endswith('_config.csv'):
+            config_filename = config_filename[:-11]
+        elif config_filename.endswith('.csv'):
+            config_filename = config_filename[:-4]
+        config_filename = config_filename + '_config'
         module = importlib.import_module('.' + config_filename,
                                          package='custom_configs')
     except:

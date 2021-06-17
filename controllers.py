@@ -142,7 +142,7 @@ class GenericSplineController(Controller):
                  ff: int = constants.DEFAULT_FF,
                  fade_duration: float = 5):
         self.exo = exo
-        self.spline = None  # Placeholds so update spline can fill self.last_spline
+        self.spline = None  # Placeholds so update_spline can fill self.last_spline
         self.update_spline(spline_x, spline_y, first_call=True)
         self.fade_duration = fade_duration
         super().update_controller_gains(Kp=Kp, Ki=Ki, Kd=Kd, ff=ff)

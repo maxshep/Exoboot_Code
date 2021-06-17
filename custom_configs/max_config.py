@@ -1,12 +1,8 @@
+
 import config_util
 config = config_util.ConfigurableConstants()
-config.READ_ONLY = False
-config.DO_READ_FSRS = True
-config.SPLINE_BIAS = 3
-config.RISE_FRACTION: float = 0.2
-config.PEAK_FRACTION: float = 0.53
-config.FALL_FRACTION: float = 0.63
-config.PEAK_TORQUE: float = 3
+config.HS_GYRO_DELAY = 0.05  # For example
+
 
 ''' Here are the variables that are updatable in config, and their defaults:
 
