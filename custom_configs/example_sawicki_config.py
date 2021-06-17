@@ -2,8 +2,8 @@ import config_util
 config = config_util.ConfigurableConstants()
 
 '''Make your modifications starting here'''
-config.HIGH_LEVEL_CTRL_STYLE = config_util.CtrlStyle.SAWICKIWICKI
-config.TARGET_FREQ = 300
+config.TASK = config_util.Task.WALKING
+config.STANCE_CONTROL_STYLE = config_util.StanceCtrlStyle.SAWICKIWICKI
 
 ''' Here are the variables that are updatable in config, and their defaults:
 
@@ -11,7 +11,8 @@ config.TARGET_FREQ = 300
     ACTPACK_FREQ: float = 200  # Hz
     DO_DEPHY_LOG: bool = True
     DEPHY_LOG_LEVEL: int = 4
-    HIGH_LEVEL_CTRL_STYLE: Type[CtrlStyle] = CtrlStyle.FOURPOINTSPLINE
+    TASK: Type[Task] = Task.WALKING
+    STANCE_CONTROL_STYLE: Type[StanceCtrlStyle] = StanceCtrlStyle.FOURPOINTSPLINE
     MAX_ALLOWABLE_CURRENT = 20000  # mA
 
     # Gait State details
@@ -40,4 +41,4 @@ config.TARGET_FREQ = 300
 
     PRINT_HS = True  # Print heel strikes
     SLIP_DETECT_ACTIVE = False
-    '''
+'''

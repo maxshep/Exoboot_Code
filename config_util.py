@@ -15,6 +15,18 @@ class CtrlStyle(Enum):
     STANDINGPERTURBATION = 3
 
 
+class Task(Enum):
+    WALKING = 0
+    STANDINGPERTURBATION = 1
+
+
+class StanceCtrlStyle(Enum):
+    FOURPOINTSPLINE = 0
+    GENERICSPLINE = 1
+    SAWICKIWICKI = 2
+    GENERICIMPEDANCE = 3
+
+
 @dataclass
 class ConfigurableConstants():
     '''Class that stores configuration-related constants.
@@ -34,7 +46,8 @@ class ConfigurableConstants():
     ACTPACK_FREQ: float = 200  # Hz
     DO_DEPHY_LOG: bool = True
     DEPHY_LOG_LEVEL: int = 4
-    HIGH_LEVEL_CTRL_STYLE: Type[CtrlStyle] = CtrlStyle.FOURPOINTSPLINE
+    TASK: Type[Task] = Task.WALKING
+    STANCE_CONTROL_STYLE: Type[StanceCtrlStyle] = StanceCtrlStyle.FOURPOINTSPLINE
     MAX_ALLOWABLE_CURRENT = 20000  # mA
 
     # Gait State details
@@ -72,7 +85,7 @@ class ConfigSaver():
         self.config = config
         subfolder_name = 'exo_data/'
         filename = subfolder_name + \
-            time.strftime("%Y%m%d-%H%M") + file_ID + \
+            time.strftime("%Y%m%d_%H%M_") + file_ID + \
             '_CONFIG' + '.csv'
         self.my_file = open(filename, 'w', newline='')
         self.writer = csv.DictWriter(

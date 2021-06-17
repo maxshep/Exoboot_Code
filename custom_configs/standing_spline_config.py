@@ -1,12 +1,14 @@
+
 import config_util
 config = config_util.ConfigurableConstants()
-config.READ_ONLY = False
-config.DO_READ_FSRS = True
-config.SPLINE_BIAS = 3
-config.RISE_FRACTION: float = 0.2
-config.PEAK_FRACTION: float = 0.53
-config.FALL_FRACTION: float = 0.63
-config.PEAK_TORQUE: float = 3
+config.TASK = config_util.Task.STANDINGPERTURBATION
+config.STANCE_CONTROL_STYLE = config_util.StanceCtrlStyle.FOURPOINTSPLINE
+RISE_FRACTION: float = 0.01
+PEAK_FRACTION: float = 0.3
+FALL_FRACTION: float = 1
+PEAK_TORQUE: float = 10
+SPLINE_BIAS: float = 3  # Nm
+
 
 ''' Here are the variables that are updatable in config, and their defaults:
 
