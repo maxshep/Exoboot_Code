@@ -1,25 +1,13 @@
-class Car():
-    def __init__(self, year: int, color: str, num_wheels=4):
-        self.color = color
-        self.num_wheels = num_wheels
-        # self.year = year
+from scipy import interpolate
+import numpy as np
+import matplotlib.pyplot as plt
+spline_x = [0, 0.2, 0.5, 0.6]
+spline_y = [2, 2, 5, 2]
+spline = interpolate.pchip(spline_x, spline_y, extrapolate=False)
+x = np.arange(0, 1, 0.01)
+y = spline(x)
 
-    def make_car_older(self, num_years):
-        self.year = self.year - num_years
-        return self.year
-
-    def check_if_old_car(self):
-        if self.year < 1950:
-            return True
-        else:
-            return False
-
-
-KathCar = Car(year=1989, color='red')
-while True:
-    year_rn = KathCar.make_car_older(10)
-    old_car_error = KathCar.check_if_old_car()
-    print(year_rn)
-    if old_car_error:
-        print('ahhh too old')
-        break
+plt.figure()
+plt.plot(x, y)
+plt.show()
+print(y)

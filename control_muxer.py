@@ -11,8 +11,7 @@ def get_gait_state_estimator(exo: exoboot.Exo,
                              config: Type[config_util.ConfigurableConstants]):
     '''Uses info from the config option to build a gait_state_estimator for a single exo.
     Refactored out of main_loop for readability.'''
-    if (config.HIGH_LEVEL_CTRL_STYLE == config_util.CtrlStyle.FOURPOINTSPLINE or
-            config.HIGH_LEVEL_CTRL_STYLE == config_util.CtrlStyle.SAWICKIWICKI):
+    if config.TASK == config_util.Task.WALKING:
         heel_strike_detector = gait_state_estimators.GyroHeelStrikeDetector(
             height=config.HS_GYRO_THRESHOLD,
             gyro_filter=custom_filters.Butterworth(N=config.HS_GYRO_FILTER_N,
@@ -30,12 +29,12 @@ def get_gait_state_estimator(exo: exoboot.Exo,
             toe_off_detector=toe_off_detector,
             do_print_heel_strikes=config.PRINT_HS)
 
-    elif config.HIGH_LEVEL_CTRL_STYLE == config_util.CtrlStyle.STANDINGPERTURBATION:
+    elif config.TASK == config_util.Task.STANDINGPERTURBATION:
         gait_state_estimator = gait_state_estimators.SlipDetectorAP(
             data_container=exo.data)  # acc_threshold_x=0.35, time_out=5, max_acc_y=0.25, max_acc_z=0.25
 
     else:
-        raise ValueError('Unknown CtrlStyle for get_gait_state_estimator')
+        raise ValueError('Unknown TASK for get_gait_state_estimator')
 
     return gait_state_estimator
 
@@ -44,51 +43,47 @@ def get_state_machine(exo: exoboot.Exo,
                       config: Type[config_util.ConfigurableConstants]):
     '''Uses info from the config option to build a state_machine for a single exo.
     Refactored out of main_loop for readability.'''
-    if config.HIGH_LEVEL_CTRL_STYLE == config_util.CtrlStyle.FOURPOINTSPLINE:
-        # reel_in_controller = controllers.BallisticReelInController(
-        #     exo=exo, time_out=config.REEL_IN_TIMEOUT)
+    if config.TASK == config_util.Task.WALKING:
         reel_in_controller = controllers.SmoothReelInController(
             exo=exo, time_out=config.REEL_IN_TIMEOUT)
         swing_controller = controllers.StalkController(
             exo=exo, desired_slack=config.SWING_SLACK)
         reel_out_controller = controllers.SoftReelOutController(
             exo=exo, desired_slack=config.SWING_SLACK)
-        stance_controller = controllers.FourPointSplineController(
-            exo=exo, rise_fraction=config.RISE_FRACTION, peak_torque=config.PEAK_TORQUE,
-            peak_fraction=config.PEAK_FRACTION,
-            fall_fraction=config.FALL_FRACTION,
-            bias_torque=config.SPLINE_BIAS)
-        state_machine = state_machines.StanceSwingReeloutReelinStateMachine(exo=exo,
-                                                                            stance_controller=stance_controller,
-                                                                            swing_controller=swing_controller,
-                                                                            reel_in_controller=reel_in_controller,
-                                                                            reel_out_controller=reel_out_controller)
-    elif config.HIGH_LEVEL_CTRL_STYLE == config_util.CtrlStyle.SAWICKIWICKI:
-        # reel_in_controller = controllers.BallisticReelInController(
-        #     exo=exo, time_out=config.REEL_IN_TIMEOUT)
-        reel_in_controller = controllers.SmoothReelInController(
-            exo=exo, time_out=config.REEL_IN_TIMEOUT)
-        swing_controller = controllers.StalkController(
-            exo=exo, desired_slack=config.SWING_SLACK)
-        reel_out_controller = controllers.SoftReelOutController(
-            exo=exo, desired_slack=config.SWING_SLACK)
-        stance_controller = controllers.SawickiWickiController(
-            exo=exo, k_val=config.K_VAL)
+        if config.STANCE_CONTROL_STYLE == config_util.StanceCtrlStyle.FOURPOINTSPLINE:
+            stance_controller = controllers.FourPointSplineController(
+                exo=exo, rise_fraction=config.RISE_FRACTION, peak_torque=config.PEAK_TORQUE,
+                peak_fraction=config.PEAK_FRACTION,
+                fall_fraction=config.FALL_FRACTION,
+                bias_torque=config.SPLINE_BIAS)
+        elif config.STANCE_CONTROL_STYLE == config_util.StanceCtrlStyle().SAWICKIWICKI:
+            stance_controller = controllers.SawickiWickiController(
+                exo=exo, k_val=config.K_VAL)
         state_machine = state_machines.StanceSwingReeloutReelinStateMachine(exo=exo,
                                                                             stance_controller=stance_controller,
                                                                             swing_controller=swing_controller,
                                                                             reel_in_controller=reel_in_controller,
                                                                             reel_out_controller=reel_out_controller)
 
-    elif config.HIGH_LEVEL_CTRL_STYLE == config_util.CtrlStyle.STANDINGPERTURBATION:
-        slip_controller = controllers.GenericImpedanceController(
-            exo=exo, setpoint=config.SET_POINT, k_val=config.K_VAL)
+    elif config.TASK == config_util.Task.STANDINGPERTURBATION:
         standing_controller = controllers.GenericImpedanceController(
             exo=exo, setpoint=10, k_val=100)
+        if config.STANCE_CONTROL_STYLE == config_util.StanceCtrlStyle.GENERICIMPEDANCE:
+            slip_controller = controllers.GenericImpedanceController(
+                exo=exo, setpoint=config.SET_POINT, k_val=config.K_VAL)
+        elif config.STANCE_CONTROL_STYLE == config_util.StanceCtrlStyle.FOURPOINTSPLINE:
+            slip_controller = controllers.FourPointSplineController(
+                exo=exo, rise_fraction=config.RISE_FRACTION, peak_torque=config.PEAK_TORQUE,
+                peak_fraction=config.PEAK_FRACTION,
+                fall_fraction=config.FALL_FRACTION,
+                bias_torque=config.SPLINE_BIAS,
+                use_gait_phase=False)
+
         state_machine = state_machines.StandingPerturbationResponse(exo=exo,
                                                                     standing_controller=standing_controller,
                                                                     slip_controller=slip_controller)
     else:
-        raise ValueError('Unknown CtrlStyle for get_state_machine')
+        raise ValueError(
+            'Unknown TASK or STANCE_CONTROL_STYLE for get_state_machine')
 
     return state_machine

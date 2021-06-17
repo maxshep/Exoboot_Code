@@ -1,7 +1,8 @@
 
 import config_util
 config = config_util.ConfigurableConstants()
-config.HIGH_LEVEL_CTRL_STYLE = config_util.CtrlStyle.STANDINGPERTURBATION  # For example
+config.TASK = config_util.Task.STANDINGPERTURBATION
+config.STANCE_CONTROL_STYLE = config_util.StanceCtrlStyle.GENERICIMPEDANCE
 config.K_VAL = 500
 config.SET_POINT = 30
 config.READ_ONLY = False
@@ -13,7 +14,8 @@ config.READ_ONLY = False
     ACTPACK_FREQ: float = 200  # Hz
     DO_DEPHY_LOG: bool = True
     DEPHY_LOG_LEVEL: int = 4
-    HIGH_LEVEL_CTRL_STYLE: Type[CtrlStyle] = CtrlStyle.FOURPOINTSPLINE
+    TASK: Type[Task] = Task.WALKING
+    STANCE_CONTROL_STYLE: Type[StanceCtrlStyle] = StanceCtrlStyle.FOURPOINTSPLINE
     MAX_ALLOWABLE_CURRENT = 20000  # mA
 
     # Gait State details
@@ -42,4 +44,4 @@ config.READ_ONLY = False
 
     PRINT_HS = True  # Print heel strikes
     SLIP_DETECT_ACTIVE = False
-    '''
+'''

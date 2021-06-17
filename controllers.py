@@ -140,47 +140,57 @@ class GenericSplineController(Controller):
                  Ki: int = constants.DEFAULT_KI,
                  Kd: int = constants.DEFAULT_KD,
                  ff: int = constants.DEFAULT_FF,
+                 use_gait_phase: bool = True,
                  fade_duration: float = 5):
         self.exo = exo
         self.spline = None  # Placeholds so update_spline can fill self.last_spline
         self.update_spline(spline_x, spline_y, first_call=True)
         self.fade_duration = fade_duration
+        self.use_gait_phase = use_gait_phase
         super().update_controller_gains(Kp=Kp, Ki=Ki, Kd=Kd, ff=ff)
         # Fade timer goes from 0 to fade_duration, active if below fade_duration (starts inactive)
         self.fade_start_time = time.perf_counter()-100
+        self.t0 = None
 
     def command(self, reset=False):
         '''Commands appropriate control. If reset=True, this controller was just switched to.'''
         if reset:
             super().command_gains()
-        if self.exo.data.gait_phase is None:
-            desired_torque = 0
-        elif time.perf_counter() - self.fade_start_time < self.fade_duration:
-            desired_torque = self.fade_splines(
-                gait_phase=self.exo.data.gait_phase, fraction=(time.perf_counter()-self.fade_start_time)/self.fade_duration)
+            self.t0 = time.perf_counter()
+
+        if self.use_gait_phase:
+            phase = self.exo.data.gait_phase
         else:
-            desired_torque = self.spline(self.exo.data.gait_phase)
-        if desired_torque < 0:
-            print('ruh roh')
-            print('gait phase:', self.exo.data.gait_phase)
-            print('desired_torque: ', desired_torque)
+            phase = time.perf_counter()-self.t0
+
+        if phase is None:
+            # Gait phase is sometimes None
+            desired_torque = 0
+        elif phase > self.spline_x[-1]:
+            # If phase (elapsed time) is longer than spline is specified, use last spline point
+            desired_torque = self.spline(self.spline_x)
+        elif time.perf_counter() - self.fade_start_time < self.fade_duration:
+            # If fading splines
+            desired_torque = self.fade_splines(
+                phase=phase, fraction=(time.perf_counter()-self.fade_start_time)/self.fade_duration)
+        else:
+            desired_torque = self.spline(phase)
+
         self.exo.command_torque(desired_torque)
 
     def update_spline(self, spline_x, spline_y, first_call=False):
         if any(x < 0 or x > 1 for x in spline_x):
             raise ValueError('spline_x can only contain values within [0, 1]')
-        # if not first_call:
-        #     self.fade_start_time = time.perf_counter()
         self.fade_start_time = time.perf_counter()
         self.spline_x = spline_x
         self.spline_y = spline_y
         self.last_spline = copy.deepcopy(self.spline)
-        self.spline = interpolate.pchip(spline_x, spline_y)
+        self.spline = interpolate.pchip(spline_x, spline_y, extrapolate=False)
         print('Spline Updated')
 
-    def fade_splines(self, gait_phase, fraction):
-        torque_from_last_spline = self.last_spline(gait_phase)
-        torque_from_current_spline = self.spline(gait_phase)
+    def fade_splines(self, phase, fraction):
+        torque_from_last_spline = self.last_spline(phase)
+        torque_from_current_spline = self.spline(phase)
         desired_torque = (1-fraction)*torque_from_last_spline + \
             fraction*torque_from_current_spline
         return desired_torque
@@ -198,7 +208,8 @@ class FourPointSplineController(GenericSplineController):
                  Kd: int = constants.DEFAULT_KD,
                  ff: int = constants.DEFAULT_FF,
                  fade_duration: float = 5,
-                 bias_torque: float = 5):
+                 bias_torque: float = 5,
+                 use_gait_phase: bool = True):
         '''Inherits from GenericSplineController, and adds a update_spline_with_list function.'''
         self.bias_torque = bias_torque  # Prevents rounding issues near zero and keeps cord taught
         super().__init__(exo=exo,

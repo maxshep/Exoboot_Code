@@ -10,7 +10,8 @@ config.HS_GYRO_DELAY = 0.05  # For example
     ACTPACK_FREQ: float = 200  # Hz
     DO_DEPHY_LOG: bool = True
     DEPHY_LOG_LEVEL: int = 4
-    HIGH_LEVEL_CTRL_STYLE: Type[CtrlStyle] = CtrlStyle.FOURPOINTSPLINE
+    TASK: Type[Task] = Task.WALKING
+    STANCE_CONTROL_STYLE: Type[StanceCtrlStyle] = StanceCtrlStyle.FOURPOINTSPLINE
     MAX_ALLOWABLE_CURRENT = 20000  # mA
 
     # Gait State details
@@ -39,4 +40,4 @@ config.HS_GYRO_DELAY = 0.05  # For example
 
     PRINT_HS = True  # Print heel strikes
     SLIP_DETECT_ACTIVE = False
-    '''
+'''
