@@ -162,12 +162,15 @@ class GenericSplineController(Controller):
             phase = self.exo.data.gait_phase
         else:
             phase = time.perf_counter()-self.t0
+            print(phase)
 
         if phase is None:
             # Gait phase is sometimes None
             desired_torque = 0
+            print('phase is none')
         elif phase > self.spline_x[-1]:
             # If phase (elapsed time) is longer than spline is specified, use last spline point
+            print('phase is longer than specified spline')
             desired_torque = self.spline(self.spline_x)
         elif time.perf_counter() - self.fade_start_time < self.fade_duration:
             # If fading splines
