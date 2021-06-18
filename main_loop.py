@@ -70,6 +70,9 @@ keyboard_thread = parameter_passers.ParameterPasser(
     new_ctrl_params_event=new_ctrl_params_event,
     new_gait_state_params_event=new_gait_state_params_event)
 config_saver.write_data(loop_time=0)  # Write first row on config
+only_write_if_new = not config.READ_ONLY and config.ONLY_LOG_IF_NEW
+print(';only write if new: ', only_write_if_new)
+
 
 while True:
     try:
@@ -99,7 +102,6 @@ while True:
             for state_machine in state_machine_list:
                 state_machine.step(read_only=config.READ_ONLY)
         for exo in exo_list:
-            only_write_if_new = not config.READ_ONLY or config.ONLY_LOG_IF_NEW
             exo.write_data(only_write_if_new=only_write_if_new)
     except KeyboardInterrupt:
         print('Ctrl-C detected, Exiting Gracefully')
