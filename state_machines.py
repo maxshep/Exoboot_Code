@@ -122,11 +122,16 @@ class StanceSwingReeloutReelinStateMachine(HighLevelController):
         self.reel_out_controller = reel_out_controller
         self.reel_in_controller = reel_in_controller
         self.controller_now = self.reel_out_controller
+        self.just_starting = True
 
     def step(self, read_only=False):
         # Check state machine transition criteria, switching controller_now if criteria are met
-        if (self.controller_now == self.swing_controller and
-            self.exo.data.did_heel_strike and
+        if self.just_starting:
+            self.controller_now = self.reel_out_controller
+            self.just_starting = False
+            did_controllers_switch = True
+        elif (self.controller_now == self.swing_controller and
+              self.exo.data.did_heel_strike and
                 self.exo.data.gait_phase is not None):
             self.controller_now = self.reel_in_controller
             did_controllers_switch = True
