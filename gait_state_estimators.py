@@ -227,10 +227,10 @@ class SlipDetectorAP():
 
         if abs(accel_x) > stillness_accel_limit or abs(accel_y) > stillness_accel_limit or abs(accel_z) > stillness_accel_limit:
             self.stillness_timer.start()  # restart the stillness_timer if not still
-            self.data_container.gen_var3 = True
-            print('not still!)')
-        else:
-            self.data_container.gen_var3 = False
+            # self.data_container.gen_var3 = True
+            # print('not still!)')
+        # else:
+        #     self.data_container.gen_var3 = False
         #  self.stillness_timer.check() and
         if (self.slip_detect_active and
             accel_x < -1*self.acc_threshold_x and
@@ -241,8 +241,8 @@ class SlipDetectorAP():
             self.data_container.did_slip = True
         else:
             self.data_container.did_slip = False
-        self.data_container.gen_var1 = self.slip_detect_active
-        self.data_container.gen_var2 = self.stillness_timer.check()
+        # self.data_container.gen_var1 = self.slip_detect_active
+        # self.data_container.gen_var2 = self.stillness_timer.check()
 
     def update_params_from_config(self, config: Type[config_util.ConfigurableConstants]):
         print('slip detection_active: ', config.SLIP_DETECT_ACTIVE)
