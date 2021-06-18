@@ -231,9 +231,8 @@ class SlipDetectorAP():
             print('not still!)')
         else:
             self.data_container.gen_var3 = False
-
-        if (self.stillness_timer.check() and
-            self.slip_detect_active and
+        #  self.stillness_timer.check() and
+        if (self.slip_detect_active and
             accel_x < -1*self.acc_threshold_x and
             abs(accel_y) < + self.max_acc_y and
                 abs(accel_z) < self.max_acc_z and
