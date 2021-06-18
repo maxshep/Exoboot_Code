@@ -6,6 +6,8 @@ config.STANCE_CONTROL_STYLE = config_util.StanceCtrlStyle.GENERICIMPEDANCE
 config.K_VAL = 500
 config.SET_POINT = 30
 config.READ_ONLY = False
+config.DO_READ_FSRS = True
+config.TARGET_FREQ = 300
 
 
 ''' Here are the variables that are updatable in config, and their defaults:
