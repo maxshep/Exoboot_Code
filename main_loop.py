@@ -99,7 +99,8 @@ while True:
             for state_machine in state_machine_list:
                 state_machine.step(read_only=config.READ_ONLY)
         for exo in exo_list:
-            exo.write_data(only_write_if_new=not config.READ_ONLY)
+            only_write_if_new = not config.READ_ONLY or config.ONLY_LOG_IF_NEW
+            exo.write_data(only_write_if_new=only_write_if_new)
     except KeyboardInterrupt:
         print('Ctrl-C detected, Exiting Gracefully')
         break

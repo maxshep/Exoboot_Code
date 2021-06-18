@@ -46,6 +46,8 @@ class ConfigurableConstants():
     ACTPACK_FREQ: float = 200  # Hz
     DO_DEPHY_LOG: bool = True
     DEPHY_LOG_LEVEL: int = 4
+    ONLY_LOG_IF_NEW: bool = True
+
     TASK: Type[Task] = Task.WALKING
     STANCE_CONTROL_STYLE: Type[StanceCtrlStyle] = StanceCtrlStyle.FOURPOINTSPLINE
     MAX_ALLOWABLE_CURRENT = 20000  # mA

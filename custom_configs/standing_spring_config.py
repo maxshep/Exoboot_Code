@@ -8,7 +8,7 @@ config.SET_POINT = 30
 config.READ_ONLY = False
 config.DO_READ_FSRS = True
 config.TARGET_FREQ = 300
-
+config.ONLY_LOG_IF_NEW = False
 
 ''' Here are the variables that are updatable in config, and their defaults:
 
