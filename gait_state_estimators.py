@@ -236,8 +236,8 @@ class SlipDetectorAP():
             self.data_container.did_slip = True
         else:
             self.data_container.did_slip = False
-        self.data.gen_var1 = self.slip_detect_active
-        self.data.gen_var2 = self.stillness_timer.check()
+        self.data_container.gen_var1 = self.slip_detect_active
+        self.data_container.gen_var2 = self.stillness_timer.check()
 
     def update_params_from_config(self, config: Type[config_util.ConfigurableConstants]):
         print('slip detection_active: ', config.SLIP_DETECT_ACTIVE)
