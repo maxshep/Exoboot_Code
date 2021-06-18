@@ -192,7 +192,7 @@ class SlipDetectorAP():
                  max_acc_y: float = 0.1,
                  max_acc_z: float = 0.1,
                  do_filter_accels=True,
-                 required_seconds_of_stillness=1.5):
+                 required_seconds_of_stillness=0):
         '''Last working with 0.5, 0.2, 0.2, no filter.'''
         self.data_container = data_container
         self.acc_threshold_x = acc_threshold_x
