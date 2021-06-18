@@ -5,7 +5,7 @@ config.TASK = config_util.Task.STANDINGPERTURBATION
 config.STANCE_CONTROL_STYLE = config_util.StanceCtrlStyle.FOURPOINTSPLINE
 config.RISE_FRACTION: float = 0.01
 config.PEAK_FRACTION: float = 0.3
-config.FALL_FRACTION: float = 1
+config.FALL_FRACTION: float = 0.95
 config.PEAK_TORQUE: float = 10
 config.SPLINE_BIAS: float = 3  # Nm
 
