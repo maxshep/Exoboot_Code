@@ -57,6 +57,7 @@ class StandingPerturbationResponse(HighLevelController):
             self.slip_ctrl_timer.start()
             self.controller_now = self.slip_controller
             did_controllers_switch = True
+            print(type(self.slip_controller))
         else:
             did_controllers_switch = False
 
