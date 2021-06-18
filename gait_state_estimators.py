@@ -223,11 +223,12 @@ class SlipDetectorAP():
             self.data_container.gen_var2 = accel_y
             self.data_container.gen_var3 = accel_z
 
-        stillness_accel_limit = 0.4
+        stillness_accel_limit = 10
 
         if abs(accel_x) > stillness_accel_limit or abs(accel_y) > stillness_accel_limit or abs(accel_z) > stillness_accel_limit:
             self.stillness_timer.start()  # restart the stillness_timer if not still
             self.data_container.gen_var3 = True
+            print('not still!)')
         else:
             self.data_container.gen_var3 = False
 
