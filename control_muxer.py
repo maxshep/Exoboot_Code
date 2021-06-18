@@ -72,6 +72,7 @@ def get_state_machine(exo: exoboot.Exo,
             slip_controller = controllers.GenericImpedanceController(
                 exo=exo, setpoint=config.SET_POINT, k_val=config.K_VAL)
         elif config.STANCE_CONTROL_STYLE == config_util.StanceCtrlStyle.FOURPOINTSPLINE:
+            print("using a spline based controller!")
             slip_controller = controllers.FourPointSplineController(
                 exo=exo, rise_fraction=config.RISE_FRACTION, peak_torque=config.PEAK_TORQUE,
                 peak_fraction=config.PEAK_FRACTION,
