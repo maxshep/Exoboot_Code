@@ -5,6 +5,7 @@ import sys
 import time
 import warnings
 from dataclasses import dataclass
+from scipy import interpolate
 
 import numpy as np
 
@@ -25,7 +26,7 @@ def connect_to_exos(file_ID: str = None,
                     log_en: bool = False,
                     log_level: int = 3,
                     do_read_fsrs: bool = False,
-                    max_allowable_current: int = 25000):
+                    max_allowable_current: int = 20000):
     '''Connect to Exos, instantiate Exo objects.'''
 
     # Load Ports and baud rate
@@ -129,8 +130,8 @@ class Exo():
                               k_val=0,
                               b_val=0,
                               ff=constants.DEFAULT_FF)
-            self.motor_to_ankle_torque_polynomial = np.polyder(
-                self.ankle_to_motor_angle_polynomial) * constants.ENC_CLICKS_TO_DEG
+        self.TR_from_ankle_angle = interpolate.PchipInterpolator(
+            constants.ANKLE_PTS, self.motor_sign*constants.TR_PTS)
 
     @dataclass
     class DataContainer:
@@ -155,7 +156,7 @@ class Exo():
         did_slip: bool = False
         commanded_current: int = None
         commanded_position: int = None
-        commanded_torque: float = None  # TODO(maxshep) remove
+        commanded_torque: float = None
         slack: int = None
         temperature: int = None
         gen_var1: float = None
@@ -211,7 +212,7 @@ class Exo():
         ankle_angle_temp = (-1 * self.motor_sign * actpack_data.ank_ang *
                             constants.ENC_CLICKS_TO_DEG + self.ankle_angle_offset)
         if ankle_angle_temp > constants.MAX_ANKLE_ANGLE or ankle_angle_temp < constants.MIN_ANKLE_ANGLE:
-            print('Bad packet caught on side: ', self.side,
+            print('Bad packet caught on side: ', self.side, 'ankle_angle: ', ankle_angle_temp,
                   'at time: ', self.data.state_time)
             return  # Exit early
         self.data.ankle_angle = ankle_angle_temp
@@ -361,26 +362,19 @@ class Exo():
             self.is_clipping = True
         else:
             self.is_clipping = False
+
+        # Softly reduce desired torque at high ankle angles when TR approaches 0
+        if self.data.ankle_angle > 45:  # TODO(maxhep) check this works
+            desired_torque = 0
+        elif 40 < self.data.ankle_angle <= 45:
+            desired_torque = desired_torque*(45-self.data.ankle_angle)/5
+
+        # Get desired current from desired torque
         desired_current = self._ankle_torque_to_motor_current(
             torque=desired_torque)
         self.command_current(desired_mA=desired_current)
         if do_return_command_torque:
             return desired_torque
-
-    def command_ankle_angle(self, desired_ankle_angle):
-        '''Controls ankle position (deg), assuming no slack'''
-        raise ValueError('not tested!')
-        if not self.has_calibrated:
-            raise ValueError(
-                'Must perform standing calibration before performing this task')
-        if (desired_ankle_angle > constants.MAX_ANKLE_ANGLE or
-                desired_ankle_angle < constants.MIN_ANKLE_ANGLE):
-            raise ValueError(
-                'Desired angle must within the range dictated in constants.py ')
-        desired_motor_angle = self.ankle_angle_to_motor_angle(
-            desired_ankle_angle)
-        return desired_motor_angle
-        # command position
 
     def command_ankle_impedance(self, theta0_ankle: float, K_ankle: float, B_ankle: float = 0):
         theta0_motor = self.ankle_angle_to_motor_angle(theta0_ankle)
@@ -414,6 +408,7 @@ class Exo():
         return slack
 
     def calculate_max_allowable_torque(self):
+        '''Calculates max allowable torque from self.max_allowable_current and ankle_angle.'''
         max_allowable_torque = max(
             0, self._motor_current_to_ankle_torque(current=self.motor_sign*self.max_allowable_current))
         return max_allowable_torque
@@ -422,16 +417,16 @@ class Exo():
         '''Converts current (mA) to torque (Nm), based on side and transmission ratio (no dynamics)'''
         motor_torque = current*constants.MOTOR_CURRENT_TO_MOTOR_TORQUE
         ankle_torque = motor_torque * \
-            np.polyval(self.motor_to_ankle_torque_polynomial,
-                       self.data.ankle_angle)
+            self.TR_from_ankle_angle(self.data.ankle_angle)
         return ankle_torque
 
     def _ankle_torque_to_motor_current(self, torque: float) -> int:
         '''Converts torque (Nm) to current (mA), based on side and transmission ratio (no dynamics)'''
-        motor_torque = torque / np.polyval(self.motor_to_ankle_torque_polynomial,
-                                           self.data.ankle_angle)
+        motor_torque = torque / \
+            self.TR_from_ankle_angle(self.data.ankle_angle)
         motor_current = int(
             motor_torque / constants.MOTOR_CURRENT_TO_MOTOR_TORQUE)
+
         return motor_current
 
     def ankle_angle_to_motor_angle(self, ankle_angle):
@@ -439,10 +434,6 @@ class Exo():
         if not self.has_calibrated:
             raise ValueError(
                 'Must perform standing calibration before performing this task')
-        # elif ankle_angle > constants.MAX_ANKLE_ANGLE or ankle_angle < constants.MIN_ANKLE_ANGLE:
-        #     print('ankle angle: ', ankle_angle, ' on side: ', self.side)
-        #     raise ValueError(
-        #         'Attempted to convert ankle angle outside allowable bounds--Typically due to disconnection')
         else:
             motor_angle = int(np.polyval(
                 self.ankle_to_motor_angle_polynomial, ankle_angle) + self.motor_offset)
@@ -454,7 +445,7 @@ class Exo():
                              current_threshold: float = 1500,
                              do_zero_ankle_angle: bool = False):
         '''Brings up slack, calibrates ankle and motor offset angles.'''
-        input(['Press any key to calibrate exo on ' + str(self.side)])
+        input(['Press Enter to calibrate exo on ' + str(self.side)])
         time.sleep(0.2)
         print('Calibrating...')
         current_filter = custom_filters.MovingAverage(window_size=10)
@@ -482,45 +473,10 @@ class Exo():
         return calibrated_ankle_angle
 
     def _test_units(self):
-        # self.command_current(-2000)
-        # self.update_gains(Kp=250, Ki=250, Kd=20, ff=100)
         for _ in range(1000):
             time.sleep(0.005)
             self.read_data()
             print(self.data.ankle_angle)
-            # self.command_slack(desired_slack=5000)
-            # print('slack', self.get_slack())
-            self.write_data()
-
-    def _chirp_test(self, peak_freq, duration, magnitude):
-        t0 = time.time()
-        t = 0
-        while t < duration:
-            self.read_data()
-            time.sleep(0.01)
-            t = time.time()-t0
-            desired_torque = magnitude + magnitude * \
-                np.sin(3.14*peak_freq/duration*t**2)
-            self.command_torque(desired_torque=desired_torque)
-            self.data.accel_x = desired_torque  # store here
-            self.write_data()
-
-    def _chirp_test_position(self, peak_freq, duration, magnitude_deg):
-        # roughly equivalent to ankle excursion of magnitude_deg
-        magnitude = magnitude_deg/0.0219 * 14
-        t0 = time.time()
-        t = 0
-
-        self.read_data()
-        starting_motor_angle = self.data.motor_angle
-
-        while t < duration:
-            self.read_data()
-            time.sleep(0.01)
-            t = time.time()-t0
-            desired_angle = starting_motor_angle + magnitude * \
-                np.sin(3.14*peak_freq/duration*t**2)
-            self.command_motor_angle(desired_motor_angle=desired_angle)
             self.write_data()
 
 

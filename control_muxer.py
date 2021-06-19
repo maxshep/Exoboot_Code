@@ -71,6 +71,7 @@ def get_state_machine(exo: exoboot.Exo,
         if config.STANCE_CONTROL_STYLE == config_util.StanceCtrlStyle.GENERICIMPEDANCE:
             slip_controller = controllers.GenericImpedanceController(
                 exo=exo, setpoint=config.SET_POINT, k_val=config.K_VAL)
+            slip_recovery_time = 1.01  # TODO(maxshep)
         elif config.STANCE_CONTROL_STYLE == config_util.StanceCtrlStyle.FOURPOINTSPLINE:
             print("using a spline based controller!")
             slip_controller = controllers.FourPointSplineController(
@@ -79,10 +80,13 @@ def get_state_machine(exo: exoboot.Exo,
                 fall_fraction=config.FALL_FRACTION,
                 bias_torque=config.SPLINE_BIAS,
                 use_gait_phase=False)
+            # slip_recovery_time = config.FALL_FRACTION-0.01
+            slip_recovery_time = 0.99
 
         state_machine = state_machines.StandingPerturbationResponse(exo=exo,
                                                                     standing_controller=standing_controller,
-                                                                    slip_controller=slip_controller)
+                                                                    slip_controller=slip_controller,
+                                                                    slip_recovery_time=slip_recovery_time)
     else:
         raise ValueError(
             'Unknown TASK or STANCE_CONTROL_STYLE for get_state_machine')

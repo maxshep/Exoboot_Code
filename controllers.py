@@ -147,7 +147,6 @@ class GenericSplineController(Controller):
         self.update_spline(spline_x, spline_y, first_call=True)
         self.fade_duration = fade_duration
         self.use_gait_phase = use_gait_phase
-        print('using gait phase: ', self.use_gait_phase)
         super().update_controller_gains(Kp=Kp, Ki=Ki, Kd=Kd, ff=ff)
         # Fade timer goes from 0 to fade_duration, active if below fade_duration (starts inactive)
         self.fade_start_time = time.perf_counter()-100
@@ -155,7 +154,6 @@ class GenericSplineController(Controller):
 
     def command(self, reset=False):
         '''Commands appropriate control. If reset=True, this controller was just switched to.'''
-        print('commanding spline')
         if reset:
             super().command_gains()
             self.t0 = time.perf_counter()
@@ -164,12 +162,10 @@ class GenericSplineController(Controller):
             phase = self.exo.data.gait_phase
         else:
             phase = time.perf_counter()-self.t0
-            print(phase)
 
         if phase is None:
             # Gait phase is sometimes None
             desired_torque = 0
-            print('phase is none')
         elif phase > self.spline_x[-1]:
             # If phase (elapsed time) is longer than spline is specified, use last spline point
             print('phase is longer than specified spline')
@@ -222,7 +218,8 @@ class FourPointSplineController(GenericSplineController):
                              rise_fraction, peak_fraction, fall_fraction),
                          spline_y=self._get_spline_y(peak_torque),
                          Kp=Kp, Ki=Ki, Kd=Kd, ff=ff,
-                         fade_duration=fade_duration)
+                         fade_duration=fade_duration,
+                         use_gait_phase=use_gait_phase)
 
     def update_ctrl_params_from_config(self, config: Type[config_util.ConfigurableConstants]):
         'Updates controller parameters from the config object.'''

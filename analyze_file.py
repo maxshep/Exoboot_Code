@@ -7,13 +7,13 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from scipy import signal
 
-folder = 'exo_data/S03_unkempt'
-filename = "20210602_1749S03_T10_RIGHT.csv"
+folder = 'exo_data/'
+filename = "20210618_1448_Rish3_LEFT.csv"
 
 df = pd.read_csv(folder + '/' + filename)
 
 
-# plt.figure()
+plt.figure()
 # plt.plot(df.loop_time, df.heel_fsr)
 # plt.plot(df.loop_time, df.toe_fsr)
 # plt.plot(df.loop_time, df.ankle_angle)
@@ -21,15 +21,20 @@ plt.plot(df.loop_time, df.commanded_current)
 plt.plot(df.loop_time, df.motor_current)
 # plt.plot(df.loop_time, df.commanded_position*0.001)
 # plt.plot(df.loop_time, df.motor_angle*0.001)
+plt.plot(df.loop_time, -1*df.did_slip*1000)
 
-# b, a = signal.butter(N=2, Wn=0.01, btype='high')
-# accel_x_filter = signal.lfilter(b, a, df.accel_x)
-# accel_y_filter = signal.lfilter(b, a, df.accel_y-1)
-# accel_z_filter = signal.lfilter(b, a, df.accel_z)
+filename = "20210618_1448_Rish3_RIGHT.csv"
+df = pd.read_csv(folder + '/' + filename)
+plt.plot(df.loop_time, df.accel_x*500)
 
-# plt.plot(df.loop_time, accel_x_filter)
-# plt.plot(df.loop_time, accel_y_filter)
-# plt.plot(df.loop_time, accel_z_filter)
+
+# plt.figure()
+# plt.plot(df.loop_time, df.heel_fsr)
+# plt.plot(df.loop_time, df.toe_fsr)
+# # plt.plot(df.loop_time, df.ankle_angle)
+plt.plot(df.loop_time, df.commanded_current)
+plt.plot(df.loop_time, df.motor_current)
+plt.plot(df.loop_time, df.did_slip*1000)
 
 plt.show()
 

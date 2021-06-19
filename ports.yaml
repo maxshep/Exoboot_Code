@@ -10,7 +10,7 @@ baud_rate: 230400
 ports:
   # Windows
   - COM3
-  - COM7
+  - COM9
   # - COM4
 # Ubuntu WSL
 # - /dev/ttyS3
