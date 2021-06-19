@@ -8,6 +8,8 @@ __pycache__/
 flexseapython/
 Datalog/
 DebugLog/
+to_delete/
+exo_data/
 *.csv
 # *.dll
 com.txt
