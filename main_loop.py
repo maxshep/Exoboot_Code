@@ -44,7 +44,7 @@ lock = threading.Lock()
 quit_event = threading.Event()
 new_ctrl_params_event = threading.Event()
 new_gait_state_params_event = threading.Event()
-# v0.2,25,0.53,0.62!
+# v0.01,20,0.05,0.2!
 # k500!
 
 '''Perform standing calibration.'''
