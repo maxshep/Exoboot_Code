@@ -348,7 +348,7 @@ class Exo():
         self.data.commanded_position = None
         self.data.commanded_torque = None
 
-    def command_torque(self, desired_torque: float, do_return_command_torque=False):
+    def command_torque(self, desired_torque: float, do_return_command_torque=False, do_ease_torque_off=True):
         '''Applies desired torque (Nm) in plantarflexion only (positive torque)'''
         self.data.commanded_torque = desired_torque  # TODO(maxshep) remove
         if desired_torque < 0:
@@ -364,14 +364,21 @@ class Exo():
             self.is_clipping = False
 
         # Softly reduce desired torque at high ankle angles when TR approaches 0
-        if self.data.ankle_angle > 45:  # TODO(maxhep) check this works
-            desired_torque = 0
-        elif 40 < self.data.ankle_angle <= 45:
-            desired_torque = desired_torque*(45-self.data.ankle_angle)/5
+        if do_ease_torque_off:
+            reel_in_current = self.motor_sign*1000
+            if self.data.ankle_angle > 45:
+                desired_current = reel_in_current  # A small amount to stay reeled in
+            elif 40 < self.data.ankle_angle <= 45:  # Window of taper
+                desired_torque = desired_torque*(45-self.data.ankle_angle)/5
+                desired_current = max(reel_in_current, self._ankle_torque_to_motor_current(
+                    torque=desired_torque))
+            else:
+                desired_current = self._ankle_torque_to_motor_current(
+                    torque=desired_torque)
+        else:
+            desired_current = self._ankle_torque_to_motor_current(
+                torque=desired_torque)
 
-        # Get desired current from desired torque
-        desired_current = self._ankle_torque_to_motor_current(
-            torque=desired_torque)
         self.command_current(desired_mA=desired_current)
         if do_return_command_torque:
             return desired_torque

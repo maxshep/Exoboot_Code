@@ -71,7 +71,6 @@ keyboard_thread = parameter_passers.ParameterPasser(
     new_gait_state_params_event=new_gait_state_params_event)
 config_saver.write_data(loop_time=0)  # Write first row on config
 only_write_if_new = not config.READ_ONLY and config.ONLY_LOG_IF_NEW
-print(';only write if new: ', only_write_if_new)
 
 
 while True:

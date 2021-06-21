@@ -18,8 +18,9 @@ def run_constant_torque(exo: exoboot.Exo):
         time.sleep(0.01)
         if exo.data.ankle_angle > 44:
             print('ankle angle too high')
-            exo.command_torque(desired_torque=0)
-            break
+            # exo.command_torque(desired_torque=0)
+            # break
+            exo.command_torque(desired_torque=3)
         else:
             exo.command_torque(desired_torque=3)
         exo.read_data()
