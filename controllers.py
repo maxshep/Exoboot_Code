@@ -136,12 +136,12 @@ class GenericSplineController(Controller):
                  exo: Exo,
                  spline_x: list,
                  spline_y: list,
+                 use_gait_phase: bool = True,
+                 fade_duration: float = 5,
                  Kp: int = constants.DEFAULT_KP,
                  Ki: int = constants.DEFAULT_KI,
                  Kd: int = constants.DEFAULT_KD,
-                 ff: int = constants.DEFAULT_FF,
-                 use_gait_phase: bool = True,
-                 fade_duration: float = 5):
+                 ff: int = constants.DEFAULT_FF):
         self.exo = exo
         self.spline = None  # Placeholds so update_spline can fill self.last_spline
         self.update_spline(spline_x, spline_y, first_call=True)
@@ -246,7 +246,7 @@ class SmoothReelInController(Controller):
                  Ki: int = 300,  # 10   50
                  Kd: int = 0,
                  ff: int = 0):
-        '''This controller uses current control to get to zero slack, checking for a cutoff..
+        '''This controller uses voltage control to get to zero slack, checking for a cutoff..
 
         Arguments:
             exo: exo.Exo instance
