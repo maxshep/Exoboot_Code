@@ -4,7 +4,7 @@ import os
 import sys
 import time
 import warnings
-from dataclasses import dataclass
+from dataclasses import dataclass, field, InitVar
 from scipy import interpolate
 
 import numpy as np
@@ -102,7 +102,6 @@ class Exo():
             try:
                 if fxu.is_pi() or fxu.is_pi64():
                     import gpiozero  # pylint: disable=import-error
-                    self.data = self.DataContainerWithFSRs()
                     if self.side == constants.Side.LEFT:
                         self.heel_fsr_detector = gpiozero.InputDevice(
                             pin=constants.LEFT_HEEL_FSR_PIN, pull_up=True)
@@ -116,9 +115,8 @@ class Exo():
 
             except:
                 raise Exception('Can only use FSRs with rapberry pi!')
-        else:
-            self.data = self.DataContainer()
 
+        self.data = self.DataContainer(do_read_fsrs=do_read_fsrs)
         self.has_calibrated = False
         self.is_clipping = False
         if self.file_ID is not None:
@@ -136,6 +134,9 @@ class Exo():
     @dataclass
     class DataContainer:
         '''A nested dataclass within Exo, reserving space for instantaneous data.'''
+        do_include_FSRs: InitVar[bool] = False
+        do_include_did_slip: InitVar[bool] = True
+        do_include_gen_vars: InitVar[bool] = True
         state_time: float = 0
         loop_time: float = 0
         accel_x: float = 0
@@ -153,20 +154,29 @@ class Exo():
         did_heel_strike: bool = False
         gait_phase: float = 0
         did_toe_off: bool = False
-        did_slip: bool = False
         commanded_current: int = None
         commanded_position: int = None
         commanded_torque: float = None
         slack: int = None
         temperature: int = None
-        gen_var1: float = None
-        gen_var2: float = None
-        gen_var3: float = None
+        # Optional fields--init in __post__init__
+        heel_fsr: bool = field(init=False)
+        toe_fsr: bool = field(init=False)
+        did_slip: bool = field(init=False)
+        gen_var1: float = field(init=False)
+        gen_var2: float = field(init=False)
+        gen_var3: float = field(init=False)
 
-    @dataclass
-    class DataContainerWithFSRs(DataContainer):
-        heel_fsr: bool = True
-        toe_fsr: bool = True
+        def __post_init__(self, do_include_FSRs, do_include_did_slip, do_include_gen_vars):
+            if do_include_FSRs:
+                self.heel_fsr = False
+                self.toe_fsr = False
+            if do_include_did_slip:
+                self.did_slip = False
+            if do_include_gen_vars:
+                self.gen_var1 = None
+                self.gen_var2 = None
+                self.gen_var3 = None
 
     def close(self):
         self.command_controller_off()

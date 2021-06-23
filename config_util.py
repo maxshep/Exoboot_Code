@@ -89,7 +89,6 @@ class ConfigSaver():
         self.writer = csv.DictWriter(
             self.my_file, fieldnames=self.config.__dict__.keys())
         self.writer.writeheader()
-        # self.write_data(loop_time=0)
 
     def write_data(self, loop_time):
         '''Writes new row of Config data to Config file.'''
@@ -108,9 +107,9 @@ def load_config(config_filename) -> Type[ConfigurableConstants]:
         config_filename = config_filename.lower()
         if config_filename.endswith('_config'):
             config_filename = config_filename[:-7]
-        elif config_filename.endswith('_config.csv'):
+        elif config_filename.endswith('_config.py'):
             config_filename = config_filename[:-11]
-        elif config_filename.endswith('.csv'):
+        elif config_filename.endswith('.py'):
             config_filename = config_filename[:-4]
         config_filename = config_filename + '_config'
         module = importlib.import_module('.' + config_filename,
