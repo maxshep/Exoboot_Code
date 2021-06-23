@@ -4,7 +4,7 @@ import numpy as np
 
 import constants
 import controllers
-import custom_filters
+import filters
 import gait_state_estimators
 from exoboot import Exo
 import util

@@ -7,7 +7,7 @@ import controllers
 import state_machines
 import gait_state_estimators
 import constants
-import custom_filters
+import filters
 import time
 import util
 import config_util
@@ -95,8 +95,19 @@ while True:
 
         for exo in exo_list:
             exo.read_data(loop_time=loop_time)
+
         for gait_state_estimator in gait_state_estimator_list:
             gait_state_estimator.detect()
+
+        # TODO(maxshep) Make this much cleaner
+        did_slip = False
+        for exo in exo_list:
+            if exo.data.did_slip:
+                did_slip = True
+        if did_slip:
+            for gait_state_estimator in gait_state_estimator_list:
+                gait_state_estimator.detect(did_slip_overwrite=True)
+
         if not config.READ_ONLY:
             for state_machine in state_machine_list:
                 state_machine.step(read_only=config.READ_ONLY)

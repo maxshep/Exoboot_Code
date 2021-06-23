@@ -11,7 +11,7 @@ import numpy as np
 
 import config_util
 import constants
-import custom_filters
+import filters
 from flexsea import fxEnums as fxe
 from flexsea import flexsea as flex
 from flexsea import fxUtils as fxu
@@ -96,7 +96,7 @@ class Exo():
                 'dev_id: ', self.dev_id, 'not found in constants.LEFT_EXO_DEV_IDS or constants.RIGHT_EXO_DEV_IDS')
         self.motor_offset = 0
         # ankle velocity filter is hardcoded for simplicity, but can be factored out if necessary
-        self.ankle_velocity_filter = custom_filters.Butterworth(
+        self.ankle_velocity_filter = filters.Butterworth(
             N=2, Wn=10, fs=target_freq)
         if self.do_read_fsrs:
             try:
@@ -457,7 +457,7 @@ class Exo():
         input(['Press Enter to calibrate exo on ' + str(self.side)])
         time.sleep(0.2)
         print('Calibrating...')
-        current_filter = custom_filters.MovingAverage(window_size=10)
+        current_filter = filters.MovingAverage(window_size=10)
         self.command_voltage(desired_mV=self.motor_sign * calibration_mV)
         t0 = time.time()
         while time.time()-t0 < max_seconds_to_calibrate:
