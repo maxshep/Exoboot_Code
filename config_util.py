@@ -8,19 +8,15 @@ from enum import Enum
 import argparse
 
 
-class CtrlStyle(Enum):
-    FOURPOINTSPLINE = 0
-    SAWICKIWICKI = 1
-    GENERICIMPEDANCE = 2
-    STANDINGPERTURBATION = 3
-
-
 class Task(Enum):
+    '''Used to determine gait_event_detector used and state machines used.'''
     WALKING = 0
     STANDINGPERTURBATION = 1
+    BILATERALSTANDINGPERTURBATION = 2
 
 
 class StanceCtrlStyle(Enum):
+    '''Used to determine behavior during stance.'''
     FOURPOINTSPLINE = 0
     GENERICSPLINE = 1
     SAWICKIWICKI = 2

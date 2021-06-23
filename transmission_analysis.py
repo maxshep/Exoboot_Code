@@ -12,13 +12,13 @@ RIGHT_ANKLE_TO_MOTOR = np.array(
     [6.53412109e-06, -5.10000261e-04, -7.52460274e-02, -1.27584877e+00,
      7.05016223e+02, -1.09811413e+04])
 
-
+folder = 'calibration_files/'
 for filename in ["20210619_0005_calibration2_LEFT.csv"]:
     # filename = "20210616_1945_calibration2_RIGHT.csv"
-    with open(filename) as f:
+    with open(folder + filename) as f:
         motor_angle = [int(row["motor_angle"])
                        for row in csv.DictReader(f)]
-    with open(filename) as f:
+    with open(folder + filename) as f:
         ankle_angle = [np.floor(float(row["ankle_angle"]))
                        for row in csv.DictReader(f)]
     motor_angle = np.array(motor_angle)*constants.ENC_CLICKS_TO_DEG

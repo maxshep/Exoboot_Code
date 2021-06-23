@@ -197,7 +197,9 @@ class Exo():
                       kd=self.Kd, k_val=self.k_val, b_val=self.b_val, ff=self.ff)
 
     def read_data(self, loop_time=None):
-        '''IMU data comes from Dephy in RHR, with positive XYZ pointing
+        '''Read data from Dephy Actpack, store in exo.data Data Container.
+
+        IMU data comes from Dephy in RHR, with positive XYZ pointing
         backwards, downwards, and rightwards on the right side and forwards,
         downwards, and leftwards on the left side. It is converted here
         to LHR on left side and RHR on right side. XYZ axes now point

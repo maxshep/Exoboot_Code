@@ -70,19 +70,32 @@ class GyroHeelStrikeDetector():
         self.gyro_filter = gyro_filter
         self.gyro_history = deque([0, 0, 0], maxlen=3)
         self.delay = delay
-        self.timer_active = False
+        # self.timer_active = False
+        self.timer = util.DelayTimer(delay_time=self.delay)
 
     def detect(self, data: Type[exoboot.Exo.DataContainer]):
         self.gyro_history.appendleft(self.gyro_filter.filter(data.gyro_z))
-        if (self.timer_active is False and
-            self.gyro_history[1] > self.height and
+        # if (self.timer_active is False and
+        #     self.gyro_history[1] > self.height and
+        #     self.gyro_history[1] > self.gyro_history[0] and
+        #         self.gyro_history[1] > self.gyro_history[2]):
+        #     self.timer.start()
+        #     # self.timer_active = True
+        #     # self.time_of_last_heel_strike = time.perf_counter()
+        #     # self.timer.start()
+        #     # if self.timer_active and time.perf_counter() - self.time_of_last_heel_strike >= self.delay:
+        # if self.timer.check():
+        #     # self.timer_active = False
+        #     self.timer.reset()
+        #     return True
+        # else:
+        #     return False
+        if (self.gyro_history[1] > self.height and
             self.gyro_history[1] > self.gyro_history[0] and
                 self.gyro_history[1] > self.gyro_history[2]):
-            self.timer_active = True
-            self.time_of_last_heel_strike = time.perf_counter()
-            return False
-        elif self.timer_active and time.perf_counter() - self.time_of_last_heel_strike > self.delay:
-            self.timer_active = False
+            self.timer.start()
+        if self.timer.check():
+            self.timer.reset()
             return True
         else:
             return False
@@ -192,7 +205,9 @@ class SlipDetectorAP():
                  max_acc_y: float = 0.1,
                  max_acc_z: float = 0.1,
                  do_filter_accels=True,
-                 required_seconds_of_stillness=0):
+                 required_seconds_of_stillness=0,
+                 return_did_slip=False,
+                 start_active=False):
         '''Last working with 0.5, 0.2, 0.2, no filter.'''
         self.data_container = data_container
         self.acc_threshold_x = acc_threshold_x
@@ -200,13 +215,14 @@ class SlipDetectorAP():
         self.max_acc_z = max_acc_z
         self.refractory_timer = util.DelayTimer(time_out, true_until=True)
         self.do_filter_accels = do_filter_accels
+        self.return_did_slip = return_did_slip
         self.accel_x_filter = custom_filters.Butterworth(
             N=2, Wn=0.01, btype='high')
         self.accel_y_filter = custom_filters.Butterworth(
             N=2, Wn=0.01, btype='high')
         self.accel_z_filter = custom_filters.Butterworth(
             N=2, Wn=0.01, btype='high')
-        self.slip_detect_active = False
+        self.slip_detect_active = start_active
         print('slip_detect_active: ', self.slip_detect_active)
         self.stillness_timer = util.DelayTimer(
             delay_time=required_seconds_of_stillness)
@@ -238,9 +254,14 @@ class SlipDetectorAP():
                 abs(accel_z) < self.max_acc_z and
                 not self.refractory_timer.check()):
             self.refractory_timer.start()
-            self.data_container.did_slip = True
+            did_slip = True
         else:
-            self.data_container.did_slip = False
+            did_slip = False
+
+        if self.return_did_slip:
+            return did_slip
+        else:
+            self.data_container.did_slip = did_slip
         # self.data_container.gen_var1 = self.slip_detect_active
         # self.data_container.gen_var2 = self.stillness_timer.check()
 
