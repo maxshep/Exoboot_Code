@@ -3,7 +3,7 @@ from exoboot import Exo
 from scipy import signal, interpolate
 import time
 import copy
-import custom_filters
+import filters
 import config_util
 import util
 from collections import deque
@@ -54,7 +54,7 @@ class SawickiWickiController(Controller):
         self.b_val = b_val
         super().update_controller_gains(Kp=Kp, Ki=Ki, Kd=Kd, ff=ff)
         self.ankle_angles = deque(maxlen=3)  # looking for peak in pf
-        self.ankle_angle_filter = custom_filters.Butterworth(N=2, Wn=0.2)
+        self.ankle_angle_filter = filters.Butterworth(N=2, Wn=0.2)
 
     def command(self, reset=False):
         self.ankle_angles.append(

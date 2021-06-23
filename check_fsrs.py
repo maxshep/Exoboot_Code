@@ -1,4 +1,4 @@
-from gpiozero import Button
+from gpiozero import Button  # pylint: disable=import-error
 import constants
 import time
 

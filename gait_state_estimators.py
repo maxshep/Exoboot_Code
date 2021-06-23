@@ -1,5 +1,5 @@
 import numpy as np
-import custom_filters
+import filters
 import exoboot
 from scipy import signal
 from collections import deque
@@ -65,7 +65,7 @@ class MLGaitStateEstimator():
 
 
 class GyroHeelStrikeDetector():
-    def __init__(self, height: float, gyro_filter: Type[custom_filters.Filter], delay=0):
+    def __init__(self, height: float, gyro_filter: Type[filters.Filter], delay=0):
         self.height = height
         self.gyro_filter = gyro_filter
         self.gyro_history = deque([0, 0, 0], maxlen=3)
@@ -107,7 +107,7 @@ class AnkleAngleBasedToeOffDetector():
         self.threshold = threshold
         self.min_phase = min_phase
         self.ankle_angle_history = deque([0, 0, 0], maxlen=3)
-        self.ankle_angle_filter = custom_filters.Butterworth(
+        self.ankle_angle_filter = filters.Butterworth(
             N=2, Wn=10/(target_freq/2))
 
     def detect(self, data: Type[exoboot.Exo.DataContainer]):
@@ -173,7 +173,7 @@ class StrideAverageGaitPhaseEstimator():
         self.time_of_last_heel_strike = 0  # something a long time ago
         self.last_stride_durations = deque(
             [1000] * self.num_strides_required, maxlen=self.num_strides_required)
-        self.stride_duration_filter = custom_filters.MovingAverage(
+        self.stride_duration_filter = filters.MovingAverage(
             window_size=num_strides_to_average)
 
     def estimate(self, data: Type[exoboot.Exo.DataContainer]):
@@ -216,18 +216,18 @@ class SlipDetectorAP():
         self.refractory_timer = util.DelayTimer(time_out, true_until=True)
         self.do_filter_accels = do_filter_accels
         self.return_did_slip = return_did_slip
-        self.accel_x_filter = custom_filters.Butterworth(
+        self.accel_x_filter = filters.Butterworth(
             N=2, Wn=0.01, btype='high')
-        self.accel_y_filter = custom_filters.Butterworth(
+        self.accel_y_filter = filters.Butterworth(
             N=2, Wn=0.01, btype='high')
-        self.accel_z_filter = custom_filters.Butterworth(
+        self.accel_z_filter = filters.Butterworth(
             N=2, Wn=0.01, btype='high')
         self.slip_detect_active = start_active
         print('slip_detect_active: ', self.slip_detect_active)
         self.stillness_timer = util.DelayTimer(
             delay_time=required_seconds_of_stillness)
 
-    def detect(self):
+    def detect(self, did_slip_overwrite=False):
         accel_x = self.data_container.accel_x
         accel_y = self.data_container.accel_y-1  # Remove effect of gravity
         accel_z = self.data_container.accel_z
@@ -248,11 +248,11 @@ class SlipDetectorAP():
         # else:
         #     self.data_container.gen_var3 = False
         #  self.stillness_timer.check() and
-        if (self.slip_detect_active and
-            accel_x < -1*self.acc_threshold_x and
-            abs(accel_y) < + self.max_acc_y and
-                abs(accel_z) < self.max_acc_z and
-                not self.refractory_timer.check()):
+        if did_slip_overwrite or (self.slip_detect_active and
+                                  accel_x < -1*self.acc_threshold_x and
+                                  abs(accel_y) < + self.max_acc_y and
+                                  abs(accel_z) < self.max_acc_z and
+                                  not self.refractory_timer.check()):
             self.refractory_timer.start()
             did_slip = True
         else:

@@ -3,7 +3,7 @@ import gait_state_estimators
 import unittest
 import matplotlib.pyplot as plt
 from exoboot import Exo
-import custom_filters
+import filters
 
 
 class TestGaitEventDetectors(unittest.TestCase):
@@ -12,7 +12,7 @@ class TestGaitEventDetectors(unittest.TestCase):
         data = Exo.DataContainer()
         gyro_signal = [0, 0, 0, 1, 3, 5, 1, 2, 0, 0, 0]
         heel_strike_detector = gait_state_estimators.GyroHeelStrikeDetector(
-            height=2.5, gyro_filter=custom_filters.PassThroughFilter())
+            height=2.5, gyro_filter=filters.PassThroughFilter())
         did_heel_strikes = []
         for gyro_val in gyro_signal:
             data.gyro_z = gyro_val
@@ -33,7 +33,7 @@ class TestGaitEventDetectors(unittest.TestCase):
         gyro_values = np.append(gyro_values, [0]*300)
 
         heel_strike_detector = gait_state_estimators.GyroHeelStrikeDetector(
-            height=0.3, gyro_filter=custom_filters.Butterworth(N=2, Wn=0.4))
+            height=0.3, gyro_filter=filters.Butterworth(N=2, Wn=0.4))
         gait_phase_estimator = gait_state_estimators.StrideAverageGaitPhaseEstimator(
             num_strides_required=4, min_allowable_stride_duration=0.6, max_allowable_stride_duration=1.3)
         toe_off_detector = gait_state_estimators.GaitPhaseBasedToeOffDetector(

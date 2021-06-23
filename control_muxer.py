@@ -3,7 +3,7 @@ import config_util
 import state_machines
 import gait_state_estimators
 import exoboot
-import custom_filters
+import filters
 import controllers
 
 
@@ -14,9 +14,9 @@ def get_gait_state_estimator(exo: exoboot.Exo,
     if config.TASK == config_util.Task.WALKING:
         heel_strike_detector = gait_state_estimators.GyroHeelStrikeDetector(
             height=config.HS_GYRO_THRESHOLD,
-            gyro_filter=custom_filters.Butterworth(N=config.HS_GYRO_FILTER_N,
-                                                   Wn=config.HS_GYRO_FILTER_WN,
-                                                   fs=config.TARGET_FREQ),
+            gyro_filter=filters.Butterworth(N=config.HS_GYRO_FILTER_N,
+                                            Wn=config.HS_GYRO_FILTER_WN,
+                                            fs=config.TARGET_FREQ),
             delay=config.HS_GYRO_DELAY)
         gait_phase_estimator = gait_state_estimators.StrideAverageGaitPhaseEstimator()
         toe_off_detector = gait_state_estimators.GaitPhaseBasedToeOffDetector(

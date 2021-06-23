@@ -7,7 +7,7 @@ class Filter(object):
     '''Parent class for filters, to help with type hinting. 
 
     Note: for filter modularity, all child classes should have a filter() 
-    function that takes only the most recent value. This way, different custom_filters 
+    function that takes only the most recent value. This way, different filters 
     can be passed to objects constructors without replacing that class's code'''
 
     def filter(self, new_val):
@@ -20,7 +20,7 @@ class PassThroughFilter(Filter):
 
 
 class Butterworth(Filter):
-    '''Implements a real-time Butterworth filter using second orded cascaded custom_filters.'''
+    '''Implements a real-time Butterworth filter using second orded cascaded filters.'''
 
     def __init__(self, N: int, Wn: float, btype='low', fs=None):
         ''' 

@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from scipy import signal
 from scipy import interpolate
 import constants
-import custom_filters
+import filters
 import exoboot
 import analysis_util
 import gait_state_estimators
