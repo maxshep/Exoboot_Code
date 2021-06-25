@@ -133,4 +133,10 @@ def parse_args():
                            type=str, required=False, default='default_config')
     # Execute the parse_args() method
     args = my_parser.parse_args()
-    return(args)
+    return args
+
+
+def load_config_from_args():
+    args = parse_args()
+    config = load_config(config_filename=args.config)
+    return config

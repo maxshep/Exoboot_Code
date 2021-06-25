@@ -8,6 +8,7 @@ import constants
 from typing import Type
 import util
 import config_util
+import data_util
 
 
 class GaitStateEstimator():
@@ -195,6 +196,20 @@ class StrideAverageGaitPhaseEstimator():
         else:
             gait_phase = None
         return gait_phase
+
+
+class BilateralSlipDetector():
+    def __init__(self,
+                 bilateral_data_container: Type[data_util.BilateralDataContainer],
+                 acc_threshold_x: float = 0.2,
+                 time_out: float = 5,
+                 max_acc_y: float = 0.1,
+                 max_acc_z: float = 0.1,
+                 do_filter_accels=True,
+                 required_seconds_of_stillness=0,
+                 return_did_slip=False,
+                 start_active=False):
+        pass
 
 
 class SlipDetectorAP():

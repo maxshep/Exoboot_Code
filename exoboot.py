@@ -99,24 +99,23 @@ class Exo():
         self.ankle_velocity_filter = filters.Butterworth(
             N=2, Wn=10, fs=target_freq)
         if self.do_read_fsrs:
-            try:
-                if fxu.is_pi() or fxu.is_pi64():
-                    import gpiozero  # pylint: disable=import-error
-                    if self.side == constants.Side.LEFT:
-                        self.heel_fsr_detector = gpiozero.InputDevice(
-                            pin=constants.LEFT_HEEL_FSR_PIN, pull_up=True)
-                        self.toe_fsr_detector = gpiozero.InputDevice(
-                            pin=constants.LEFT_TOE_FSR_PIN, pull_up=True)
-                    else:
-                        self.heel_fsr_detector = gpiozero.InputDevice(
-                            pin=constants.RIGHT_HEEL_FSR_PIN, pull_up=True)
-                        self.toe_fsr_detector = gpiozero.InputDevice(
-                            pin=constants.RIGHT_TOE_FSR_PIN, pull_up=True)
-
-            except:
+            print('do_read_fsrs: True. Checking if rpi')
+            if fxu.is_pi() or fxu.is_pi64():
+                import gpiozero  # pylint: disable=import-error
+                if self.side == constants.Side.LEFT:
+                    self.heel_fsr_detector = gpiozero.InputDevice(
+                        pin=constants.LEFT_HEEL_FSR_PIN, pull_up=True)
+                    self.toe_fsr_detector = gpiozero.InputDevice(
+                        pin=constants.LEFT_TOE_FSR_PIN, pull_up=True)
+                else:
+                    self.heel_fsr_detector = gpiozero.InputDevice(
+                        pin=constants.RIGHT_HEEL_FSR_PIN, pull_up=True)
+                    self.toe_fsr_detector = gpiozero.InputDevice(
+                        pin=constants.RIGHT_TOE_FSR_PIN, pull_up=True)
+            else:
                 raise Exception('Can only use FSRs with rapberry pi!')
 
-        self.data = self.DataContainer(do_read_fsrs=do_read_fsrs)
+        self.data = self.DataContainer(do_include_FSRs=do_read_fsrs)
         self.has_calibrated = False
         self.is_clipping = False
         if self.file_ID is not None:
@@ -152,7 +151,7 @@ class Exo():
         ankle_velocity: float = 0
         ankle_torque_from_current: float = 0
         did_heel_strike: bool = False
-        gait_phase: float = 0
+        gait_phase: float = None
         did_toe_off: bool = False
         commanded_current: int = None
         commanded_position: int = None

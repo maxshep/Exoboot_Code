@@ -13,20 +13,29 @@ import util
 import config_util
 import parameter_passers
 import control_muxer
+import data_util
 
 
-args = config_util.parse_args()  # args passed via command line
-config = config_util.load_config(args.config)  # loads config from passed fn
+config = config_util.load_config_from_args()  # loads config from passed args
 file_ID = input(
     'Other than the date, what would you like added to the filename?')
-config_saver = config_util.ConfigSaver(
-    file_ID=file_ID, config=config)  # Saves config updates
 
 '''Connect to Exos, instantiate Exo objects.'''
 exo_list = exoboot.connect_to_exos(file_ID=file_ID, target_freq=config.TARGET_FREQ,
                                    actpack_freq=config.ACTPACK_FREQ, do_read_fsrs=config.DO_READ_FSRS,
                                    log_en=config.DO_DEPHY_LOG, max_allowable_current=config.MAX_ALLOWABLE_CURRENT)
 print('Battery Voltage: ', 0.001*exo_list[0].get_batt_voltage(), 'V')
+
+config_saver = config_util.ConfigSaver(
+    file_ID=file_ID, config=config)  # Saves config updates
+
+use_bilateral_data = True
+if use_bilateral_data:
+    fields_to_disclude = ['accel_x']
+    bilateral_data = data_util.get_big_data_container_from_exo_list(
+        exo_list, fields_to_disclude)
+    bilateral_data_saver = data_util.BilateralDataSaver(
+        file_ID=file_ID, data=bilateral_data)
 
 '''Instantiate gait_state_estimator objects, store in list.'''
 gait_state_estimator_list = []
@@ -95,24 +104,18 @@ while True:
 
         for exo in exo_list:
             exo.read_data(loop_time=loop_time)
-
         for gait_state_estimator in gait_state_estimator_list:
             gait_state_estimator.detect()
-
-        # TODO(maxshep) Make this much cleaner
-        did_slip = False
-        for exo in exo_list:
-            if exo.data.did_slip:
-                did_slip = True
-        if did_slip:
-            for gait_state_estimator in gait_state_estimator_list:
-                gait_state_estimator.detect(did_slip_overwrite=True)
 
         if not config.READ_ONLY:
             for state_machine in state_machine_list:
                 state_machine.step(read_only=config.READ_ONLY)
         for exo in exo_list:
             exo.write_data(only_write_if_new=only_write_if_new)
+        if use_bilateral_data:
+            bilateral_data.update_dict()
+            bilateral_data_saver.write_data(loop_time=loop_time)
+
     except KeyboardInterrupt:
         print('Ctrl-C detected, Exiting Gracefully')
         break

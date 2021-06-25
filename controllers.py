@@ -133,7 +133,7 @@ class StalkController(Controller):
 
 class GenericSplineController(Controller):
     def __init__(self,
-                 exo: Exo,
+                 exo: Type[Exo],
                  spline_x: list,
                  spline_y: list,
                  use_gait_phase: bool = True,
