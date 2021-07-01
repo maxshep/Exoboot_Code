@@ -7,7 +7,10 @@ config.STANCE_CONTROL_STYLE = config_util.StanceCtrlStyle.SAWICKIWICKI
 config.K_VAL = 1000
 config.HS_GYRO_DELAY = 0.01
 config.TOE_OFF_FRACTION = 0.68
-config.REEL_IN_TIMEOUT = 0.1
+config.REEL_IN_TIMEOUT = 0.2
+config.SWING_SLACK = 6000
+config.REEL_IN_SLACK_CUTOFF = 1000
+config.B_VAL = 0  # 2000 helped
 
 ''' Here are the variables that are updatable in config, and their defaults:
 

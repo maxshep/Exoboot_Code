@@ -18,7 +18,6 @@ class GaitStateEstimator():
                  gait_phase_estimator,
                  toe_off_detector,
                  do_print_heel_strikes: bool = False,
-                 do_print_toe_offs: bool = False,
                  side: Type[constants.Side] = constants.Side.NONE):
         '''Looks at the exo data, applies logic to detect HS, gait phase, and TO, and adds to exo.data'''
         self.side = side
@@ -27,7 +26,6 @@ class GaitStateEstimator():
         self.gait_phase_estimator = gait_phase_estimator
         self.toe_off_detector = toe_off_detector
         self.do_print_heel_strikes = do_print_heel_strikes
-        self.do_print_toe_offs = do_print_toe_offs
 
     def detect(self):
         data = self.data_container  # For convenience
@@ -35,9 +33,8 @@ class GaitStateEstimator():
         data.gait_phase = self.gait_phase_estimator.estimate(data)
         data.did_toe_off = self.toe_off_detector.detect(data)
         if self.do_print_heel_strikes and data.did_heel_strike:
-            print('heel strike detected on side: ', self.side)
-        if self.do_print_toe_offs and data.did_toe_off:
-            print('toe off detected on side: ', self.side)
+            print('heel strike detected on side: %-*s  at time: %s' %
+                  (10, self.side, data.loop_time))
 
 
 class MLGaitStateEstimator():
@@ -54,15 +51,13 @@ class MLGaitStateEstimator():
         self.gait_phase_estimator = gait_phase_estimator
         self.toe_off_detector = toe_off_detector
 
-    def detect(self, data: Type[exoboot.Exo.DataContainer], do_print_heel_strikes=True, do_print_toe_offs=False):
+    def detect(self, data: Type[exoboot.Exo.DataContainer], do_print_heel_strikes=True):
         data = self.data_container  # For convenience
         data.did_heel_strike = self.heel_strike_detector.detect(data)
         data.gait_phase = self.gait_phase_estimator.estimate(data)
         data.did_toe_off = self.toe_off_detector.detect(data)
         if do_print_heel_strikes and data.did_heel_strike:
             print('heel strike detected on side: ', self.side)
-        if do_print_toe_offs and data.did_toe_off:
-            print('toe off detected on side: ', self.side)
 
 
 class GyroHeelStrikeDetector():
@@ -200,16 +195,76 @@ class StrideAverageGaitPhaseEstimator():
 
 class BilateralSlipDetector():
     def __init__(self,
-                 bilateral_data_container: Type[data_util.BilateralDataContainer],
-                 acc_threshold_x: float = 0.2,
+                 exo_1: Type[exoboot.Exo],
+                 exo_2: Type[exoboot.Exo],
+                 acc_threshold_x: float = 0.2,  # 0.2
                  time_out: float = 5,
-                 max_acc_y: float = 0.1,
-                 max_acc_z: float = 0.1,
+                 max_acc_y: float = 0.1,  # 0.1
+                 max_acc_z: float = 0.1,  # 0.1
                  do_filter_accels=True,
                  required_seconds_of_stillness=0,
                  return_did_slip=False,
                  start_active=False):
-        pass
+        self.exo_list = [exo_1, exo_2]
+        self.acc_threshold_x = acc_threshold_x
+        self.max_acc_y = max_acc_y
+        self.max_acc_z = max_acc_z
+        self.refractory_timer = util.DelayTimer(time_out, true_until=True)
+        self.do_filter_accels = do_filter_accels
+        self.return_did_slip = return_did_slip
+        self.filter_list = [[
+            filters.Butterworth(N=2, Wn=0.01, btype='high'),
+            filters.Butterworth(N=2, Wn=0.01, btype='high'),
+            filters.Butterworth(N=2, Wn=0.01, btype='high')],
+            [filters.Butterworth(N=2, Wn=0.01, btype='high'),
+             filters.Butterworth(N=2, Wn=0.01, btype='high'),
+             filters.Butterworth(N=2, Wn=0.01, btype='high')]]
+        self.slip_detect_active = start_active
+        print('slip_detect_active: ', self.slip_detect_active)
+        self.shuffling_timer = util.DelayTimer(
+            delay_time=required_seconds_of_stillness,
+            true_until=True)
+        self.print_counter = 0
+
+    def detect(self, did_slip_overwrite=False):
+        for exo, filt in zip(self.exo_list, self.filter_list):
+            data = exo.data
+            accel_x = filt[0].filter(data.accel_x)
+            accel_y = filt[1].filter(data.accel_y-1)
+            accel_z = filt[2].filter(data.accel_z)
+            data.gen_var1 = accel_x
+            data.gen_var2 = accel_y
+            data.gen_var3 = accel_z
+
+            stillness_accel_limit = 10
+            if abs(accel_x) > stillness_accel_limit or abs(accel_y-1) > stillness_accel_limit or abs(accel_z) > stillness_accel_limit:
+                print('stop moving homie')
+                self.shuffling_timer.start()  # restart the shuffling_timer if not still
+            if not self.shuffling_timer.check():  # If not shuffling (if still)
+                if (accel_x < -1*self.acc_threshold_x and
+                    abs(accel_y) < self.max_acc_y and
+                    abs(accel_z) < self.max_acc_z and
+                        not self.refractory_timer.check()):
+                    self.refractory_timer.start()
+                    did_slip = True
+                    break
+                else:
+                    did_slip = False
+            else:
+                did_slip = False
+
+        for exo in self.exo_list:
+            if did_slip:
+                if not self.slip_detect_active:
+                    print('slip detected, but detector inactive')
+                else:
+                    exo.data.did_slip = did_slip
+            else:
+                exo.data.did_slip = did_slip
+
+    def update_params_from_config(self, config: Type[config_util.ConfigurableConstants]):
+        print('slip detection_active: ', config.SLIP_DETECT_ACTIVE)
+        self.slip_detect_active = config.SLIP_DETECT_ACTIVE
 
 
 class SlipDetectorAP():
@@ -239,7 +294,7 @@ class SlipDetectorAP():
             N=2, Wn=0.01, btype='high')
         self.slip_detect_active = start_active
         print('slip_detect_active: ', self.slip_detect_active)
-        self.stillness_timer = util.DelayTimer(
+        self.shuffling_timer = util.DelayTimer(
             delay_time=required_seconds_of_stillness)
 
     def detect(self, did_slip_overwrite=False):
@@ -257,12 +312,12 @@ class SlipDetectorAP():
         stillness_accel_limit = 10
 
         if abs(accel_x) > stillness_accel_limit or abs(accel_y) > stillness_accel_limit or abs(accel_z) > stillness_accel_limit:
-            self.stillness_timer.start()  # restart the stillness_timer if not still
+            self.shuffling_timer.start()  # restart the shuffling_timer if not still
             # self.data_container.gen_var3 = True
             # print('not still!)')
         # else:
         #     self.data_container.gen_var3 = False
-        #  self.stillness_timer.check() and
+        #  self.shuffling_timer.check() and
         if did_slip_overwrite or (self.slip_detect_active and
                                   accel_x < -1*self.acc_threshold_x and
                                   abs(accel_y) < + self.max_acc_y and
@@ -278,7 +333,7 @@ class SlipDetectorAP():
         else:
             self.data_container.did_slip = did_slip
         # self.data_container.gen_var1 = self.slip_detect_active
-        # self.data_container.gen_var2 = self.stillness_timer.check()
+        # self.data_container.gen_var2 = self.shuffling_timer.check()
 
     def update_params_from_config(self, config: Type[config_util.ConfigurableConstants]):
         print('slip detection_active: ', config.SLIP_DETECT_ACTIVE)

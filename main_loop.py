@@ -29,24 +29,9 @@ print('Battery Voltage: ', 0.001*exo_list[0].get_batt_voltage(), 'V')
 config_saver = config_util.ConfigSaver(
     file_ID=file_ID, config=config)  # Saves config updates
 
-use_bilateral_data = True
-if use_bilateral_data:
-    fields_to_disclude = ['accel_x']
-    bilateral_data = data_util.get_big_data_container_from_exo_list(
-        exo_list, fields_to_disclude)
-    bilateral_data_saver = data_util.BilateralDataSaver(
-        file_ID=file_ID, data=bilateral_data)
-
-'''Instantiate gait_state_estimator objects, store in list.'''
-gait_state_estimator_list = []
-state_machine_list = []
-for exo in exo_list:
-    exo.setup_data_writer(file_ID=file_ID)  # Saves exo data
-    gait_state_estimator_list.append(
-        control_muxer.get_gait_state_estimator(exo=exo, config=config))
-    state_machine_list.append(
-        control_muxer.get_state_machine(exo=exo, config=config))
-
+'''Instantiate gait_state_estimator and state_machine objects, store in lists.'''
+gait_state_estimator_list, state_machine_list = control_muxer.get_gse_and_sm_lists(
+    exo_list=exo_list, config=config)
 
 '''Prep parameter passing.'''
 lock = threading.Lock()
@@ -106,15 +91,11 @@ while True:
             exo.read_data(loop_time=loop_time)
         for gait_state_estimator in gait_state_estimator_list:
             gait_state_estimator.detect()
-
         if not config.READ_ONLY:
             for state_machine in state_machine_list:
                 state_machine.step(read_only=config.READ_ONLY)
         for exo in exo_list:
             exo.write_data(only_write_if_new=only_write_if_new)
-        if use_bilateral_data:
-            bilateral_data.update_dict()
-            bilateral_data_saver.write_data(loop_time=loop_time)
 
     except KeyboardInterrupt:
         print('Ctrl-C detected, Exiting Gracefully')

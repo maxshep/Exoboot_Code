@@ -1,7 +1,7 @@
 
 import config_util
 config = config_util.ConfigurableConstants()
-config.TASK = config_util.Task.STANDINGPERTURBATION
+config.TASK = config_util.Task.BILATERALSTANDINGPERTURBATION
 config.STANCE_CONTROL_STYLE = config_util.StanceCtrlStyle.FOURPOINTSPLINE
 config.RISE_FRACTION: float = 0.01
 config.PEAK_FRACTION: float = 0.05

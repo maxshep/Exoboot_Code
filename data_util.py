@@ -5,7 +5,7 @@ import csv
 import constants
 
 
-def get_big_data_container_from_exo_list(exo_list, fields_to_disclude):
+def get_big_data_container_from_exo_list(exo_list, fields_to_disclude=None):
     left_exo = None
     right_exo = None
     for exo in exo_list:
@@ -24,11 +24,14 @@ class BilateralDataContainer():
     def __init__(self,
                  left_exo_data: Type[exoboot.Exo.DataContainer],
                  right_exo_data: Type[exoboot.Exo.DataContainer],
-                 fields_to_disclude: list = []):
+                 fields_to_disclude: None):
 
         self.left = left_exo_data
         self.right = right_exo_data
-        self.fields_to_disclude = fields_to_disclude
+        if fields_to_disclude is None:
+            self.fields_to_disclude = []
+        else:
+            self.fields_to_disclude = fields_to_disclude
         self.loop_time = 0
         self.did_slip = False
         self.big_dict = {}

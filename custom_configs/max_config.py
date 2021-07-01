@@ -1,7 +1,9 @@
 
 import config_util
 config = config_util.ConfigurableConstants()
-config.HS_GYRO_DELAY = 0.05  # For example
+config.SWING_SLACK = 8000
+config.TASK = config_util.Task.BILATERALSTANDINGPERTURBATION
+config.STANCE_CONTROL_STYLE = config_util.StanceCtrlStyle.FOURPOINTSPLINE
 
 
 ''' Here are the variables that are updatable in config, and their defaults:

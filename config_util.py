@@ -55,6 +55,8 @@ class ConfigurableConstants():
     HS_GYRO_DELAY: float = 0.05
     SWING_SLACK: int = 10000
     TOE_OFF_FRACTION: float = 0.62
+    REEL_IN_MV: int = 1200
+    REEL_IN_SLACK_CUTOFF: int = 1200
     REEL_IN_TIMEOUT: float = 0.2
 
     # 4 point Spline
