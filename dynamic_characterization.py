@@ -48,9 +48,9 @@ def run_test(exo: exoboot.Exo):
 
 
 if __name__ == '__main__':
+    setup_GPIO()
     hx1 = HX711(dout_pin=21, pd_sck_pin=20,
                 gain_channel_A=64, select_channel='A')
-    setup_GPIO
     exo_list = exoboot.connect_to_exos(file_ID='dyn_char')
     if len(exo_list) > 1:
         raise ValueError("Just turn on one exo for calibration")
