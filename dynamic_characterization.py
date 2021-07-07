@@ -30,7 +30,7 @@ def close_GPIO():
     GPIO.cleanup()
 
 
-def run_test(exo: exoboot.Exo):
+def run_test(exo: exoboot.Exo, desired_current=0):
     '''This routine can be used to manually calibrate the relationship
     between ankle and motor angles. Move through the full RoM!!!'''
     exo.update_gains(Kp=constants.DEFAULT_KP, Ki=constants.DEFAULT_KI,
@@ -39,7 +39,8 @@ def run_test(exo: exoboot.Exo):
     print('begin!')
     for _ in range(500):
         time.sleep(0.01)
-        exo.command_torque(desired_torque=3)
+        # exo.command_torque(desired_torque=3)
+        exo.command_current(desired_mA=desired_current)
         exo.read_data()
         load_cell_data = read_load_cell_data()
         exo.data.gen_var1 = load_cell_data
