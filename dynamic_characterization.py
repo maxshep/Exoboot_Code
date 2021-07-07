@@ -30,14 +30,14 @@ def close_GPIO():
     GPIO.cleanup()
 
 
-def run_test(exo: exoboot.Exo, desired_current=0):
+def run_test(exo: exoboot.Exo, desired_current=0, duration=1):
     '''This routine can be used to manually calibrate the relationship
     between ankle and motor angles. Move through the full RoM!!!'''
     exo.update_gains(Kp=constants.DEFAULT_KP, Ki=constants.DEFAULT_KI,
                      Kd=constants.DEFAULT_KD, ff=constants.DEFAULT_FF)
 
     print('begin!')
-    for _ in range(500):
+    for _ in range(100*duration):
         time.sleep(0.01)
         # exo.command_torque(desired_torque=3)
         exo.command_current(desired_mA=desired_current)
@@ -49,6 +49,8 @@ def run_test(exo: exoboot.Exo, desired_current=0):
 
 
 if __name__ == '__main__':
+    duration = input('how long do you want to run for?')
+    desired_current = input('how much current do you want to apply?')
     setup_GPIO()
     hx1 = HX711(dout_pin=21, pd_sck_pin=20,
                 gain_channel_A=64, select_channel='A')
@@ -56,7 +58,8 @@ if __name__ == '__main__':
     if len(exo_list) > 1:
         raise ValueError("Just turn on one exo for calibration")
     exo = exo_list[0]
-    exo.standing_calibration()
-    run_test(exo=exo)
+    if current > 0:
+        exo.standing_calibration()
+    run_test(exo=exo, duration=duration, desired_current=desired_current)
     exo.close()
     close_GPIO()
