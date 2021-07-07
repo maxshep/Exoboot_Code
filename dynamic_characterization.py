@@ -42,7 +42,7 @@ def run_test(exo: exoboot.Exo):
         exo.command_torque(desired_torque=3)
         exo.read_data()
         load_cell_data = read_load_cell_data()
-        exo.gen_var1 = load_cell_data
+        exo.data.gen_var1 = load_cell_data
         exo.write_data()
     print('Done! File saved.')
 
