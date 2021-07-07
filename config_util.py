@@ -21,6 +21,7 @@ class StanceCtrlStyle(Enum):
     GENERICSPLINE = 1
     SAWICKIWICKI = 2
     GENERICIMPEDANCE = 3
+    FIVEPOINTSPLINE = 4
 
 
 @dataclass

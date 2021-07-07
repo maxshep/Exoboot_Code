@@ -8,7 +8,7 @@ import pandas as pd
 from scipy import signal
 
 folder = 'exo_data/'
-filename = "20210701_1832_testbigainz_RIGHT.csv"
+filename = "20210702_1513_test5pt2_RIGHT.csv"
 
 df = pd.read_csv(folder + '/' + filename)
 
@@ -24,17 +24,17 @@ df = pd.read_csv(folder + '/' + filename)
 # plt.plot(df.loop_time, -1*df.did_slip*1000)
 
 
-# plt.figure(2)
-# plt.plot(df.gait_phase, df.commanded_current, marker='o')
-# plt.show()
+plt.figure(2)
+plt.plot(df.loop_time, df.commanded_torque, marker='o')
+plt.show()
 
 
-plt.figure()
-plt.plot(df.loop_time, df.accel_x)
-plt.plot(df.loop_time, df.accel_y, 'k-')
-plt.plot(df.loop_time, df.accel_z, 'k-')
-plt.plot(df.loop_time, df.gen_var1, 'b--')
-plt.plot(df.loop_time, df.gen_var2, 'k--')
-plt.plot(df.loop_time, df.gen_var3, 'k--')
+# plt.figure()
+# plt.plot(df.loop_time, df.accel_x)
+# plt.plot(df.loop_time, df.accel_y, 'k-')
+# plt.plot(df.loop_time, df.accel_z, 'k-')
+# plt.plot(df.loop_time, df.gen_var1, 'b--')
+# plt.plot(df.loop_time, df.gen_var2, 'k--')
+# plt.plot(df.loop_time, df.gen_var3, 'k--')
 
 plt.show()

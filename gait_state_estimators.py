@@ -253,14 +253,36 @@ class BilateralSlipDetector():
             else:
                 did_slip = False
 
-        for exo in self.exo_list:
+        if self.slip_detect_active and did_slip:
+            print('slip detected!')
+            for exo in self.exo_list:
+                exo.data.did_slip = True
+        elif self.slip_detect_active and not did_slip:
+            for exo in self.exo_list:
+                exo.data.did_slip = False
+        elif not self.slip_detect_active:
             if did_slip:
-                if not self.slip_detect_active:
-                    print('slip detected, but detector inactive')
-                else:
-                    exo.data.did_slip = did_slip
-            else:
-                exo.data.did_slip = did_slip
+                print('slip detected, but detector inactive')
+            for exo in self.exo_list:
+                exo.data.did_slip = False
+
+        # if did_slip:
+        #     print('slip detected!')
+        #     for exo in self.exo_list:
+        #         if self.slip_detect_active:
+        #             exo.data.did_slip = True
+        #         else:
+        #             exo.data.did_slip = False
+
+        # for exo in self.exo_list:
+        #     if did_slip:
+        #         if not self.slip_detect_active:
+        #             exo.data.did_slip = False
+        #             print('slip detected, but detector inactive')
+        #         else:
+        #             exo.data.did_slip = did_slip
+        #     else:
+        #         exo.data.did_slip = did_slip
 
     def update_params_from_config(self, config: Type[config_util.ConfigurableConstants]):
         print('slip detection_active: ', config.SLIP_DETECT_ACTIVE)

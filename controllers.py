@@ -210,9 +210,11 @@ class FourPointSplineController(GenericSplineController):
                  ff: int = constants.DEFAULT_FF,
                  fade_duration: float = 5,
                  bias_torque: float = 5,
-                 use_gait_phase: bool = True):
+                 use_gait_phase: bool = True,
+                 peak_hold_time: float = 0):
         '''Inherits from GenericSplineController, and adds a update_spline_with_list function.'''
         self.bias_torque = bias_torque  # Prevents rounding issues near zero and keeps cord taught
+        self.peak_hold_time = peak_hold_time  # can be used to hold a peak
         super().__init__(exo=exo,
                          spline_x=self._get_spline_x(
                              rise_fraction, peak_fraction, fall_fraction),
@@ -230,10 +232,16 @@ class FourPointSplineController(GenericSplineController):
                               spline_y=self._get_spline_y(peak_torque=config.PEAK_TORQUE))
 
     def _get_spline_x(self, rise_fraction, peak_fraction, fall_fraction) -> list:
-        return [0, rise_fraction, peak_fraction, fall_fraction, 1]
+        if self.peak_hold_time > 0:
+            return [0, rise_fraction, peak_fraction, peak_fraction+self.peak_hold_time, fall_fraction, 1]
+        else:
+            return [0, rise_fraction, peak_fraction, fall_fraction, 1]
 
     def _get_spline_y(self, peak_torque) -> list:
-        return [self.bias_torque, self.bias_torque, peak_torque, self.bias_torque, self.bias_torque]
+        if self.peak_hold_time > 0:
+            return [self.bias_torque, self.bias_torque, peak_torque, peak_torque, self.bias_torque, self.bias_torque]
+        else:
+            return [self.bias_torque, self.bias_torque, peak_torque, self.bias_torque, self.bias_torque]
 
 
 class SmoothReelInController(Controller):

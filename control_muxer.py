@@ -83,6 +83,16 @@ def get_gse_and_sm_lists(exo_list, config: Type[config_util.ConfigurableConstant
                     use_gait_phase=False)
                 # slip_recovery_time = config.FALL_FRACTION-0.01
                 slip_recovery_time = 0.99
+            elif config.STANCE_CONTROL_STYLE == config_util.StanceCtrlStyle.FIVEPOINTSPLINE:
+                print("using a spline based controller!")
+                slip_controller = controllers.FourPointSplineController(
+                    exo=exo, rise_fraction=config.RISE_FRACTION, peak_torque=config.PEAK_TORQUE,
+                    peak_fraction=config.PEAK_FRACTION,
+                    fall_fraction=config.FALL_FRACTION,
+                    bias_torque=config.SPLINE_BIAS,
+                    use_gait_phase=False,
+                    peak_hold_time=0.1)
+                slip_recovery_time = 0.99
 
             state_machine = state_machines.StandingPerturbationResponse(exo=exo,
                                                                         standing_controller=standing_controller,
@@ -113,6 +123,17 @@ def get_gse_and_sm_lists(exo_list, config: Type[config_util.ConfigurableConstant
                     bias_torque=config.SPLINE_BIAS,
                     use_gait_phase=False)
                 # slip_recovery_time = config.FALL_FRACTION-0.01
+                slip_recovery_time = 0.99
+
+            elif config.STANCE_CONTROL_STYLE == config_util.StanceCtrlStyle.FIVEPOINTSPLINE:
+                print("using a spline based controller!")
+                slip_controller = controllers.FourPointSplineController(
+                    exo=exo, rise_fraction=config.RISE_FRACTION, peak_torque=config.PEAK_TORQUE,
+                    peak_fraction=config.PEAK_FRACTION,
+                    fall_fraction=config.FALL_FRACTION,
+                    bias_torque=config.SPLINE_BIAS,
+                    use_gait_phase=False,
+                    peak_hold_time=0.1)
                 slip_recovery_time = 0.99
 
             state_machine = state_machines.StandingPerturbationResponse(exo=exo,
