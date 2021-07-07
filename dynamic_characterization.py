@@ -58,8 +58,8 @@ if __name__ == '__main__':
     if len(exo_list) > 1:
         raise ValueError("Just turn on one exo for calibration")
     exo = exo_list[0]
-    if desired_current > 0:
-        exo.standing_calibration()
+    # if desired_current > 0:
+    exo.standing_calibration()
     run_test(exo=exo, duration=duration, desired_current=desired_current)
     exo.close()
     close_GPIO()
