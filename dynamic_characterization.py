@@ -25,12 +25,12 @@ hx1 = HX711(dout_pin=21, pd_sck_pin=20, gain_channel_A=64, select_channel='A')
 # HX711 can read 10 readings/sec, so we take 10 readings over 1 second and average them
 for i in range(50):
     time.sleep(0.1)
-data = hx1.get_raw_data_mean(readings=1)
+    data = hx1.get_raw_data_mean(readings=1)
 
-if data:
-    print('Raw data:', data)
-else:
-    print('invalid data')
+    if data:
+        print('Raw data:', data)
+    else:
+        print('invalid data')
 
 GPIO.cleanup()
 
