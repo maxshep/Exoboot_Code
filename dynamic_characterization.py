@@ -44,7 +44,7 @@ def run_test(exo: exoboot.Exo, desired_current=0, duration=1):
         exo.read_data()
         load_cell_data = read_load_cell_data()
         exo.data.gen_var1 = load_cell_data
-        exo.data.gen_var2 = 8.563176e-04*load_cell_data + 4.750486e+04
+        exo.data.gen_var2 = 8.563176e-04*(load_cell_data + 4.750486e+04)
         exo.write_data()
     print('Done! File saved.')
 
