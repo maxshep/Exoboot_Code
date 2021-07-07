@@ -49,7 +49,7 @@ def run_test(exo: exoboot.Exo, desired_current=0, duration=1):
 
 
 if __name__ == '__main__':
-    duration = input('how long do you want to run for?')
+    duration = int(input('how long do you want to run for?'))
     desired_current = int(input('how much current do you want to apply?'))
     setup_GPIO()
     hx1 = HX711(dout_pin=21, pd_sck_pin=20,
