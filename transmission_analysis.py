@@ -59,21 +59,22 @@ for filename in ["20210619_0005_calibration2_LEFT.csv"]:
     plt.figure(2)
     p_deriv = np.polyder(p)
     TR_from_polyfit = np.polyval(p_deriv, ankle_angle)
-    plt.plot(ankle_angle, -TR_from_polyfit)
+    # plt.plot(ankle_angle, -TR_from_polyfit)
 
     p = np.polyfit(ankle_angle, TR, deg=4)
     deriv_left2 = np.polyval(p, ankle_angle)
 
-    plt.plot(ankle_angle, -TR)
+    # plt.plot(ankle_angle, -TR)
 
     ankle_pts = [-60, -40, 0, 10, 20, 30, 40, 45.6, 55, 80]
     deriv_pts = [16, 16, 15, 14.5, 14, 11.5, 5, 0, -6.5, -12]
 
     deriv_spline_fit = interpolate.pchip_interpolate(
         ankle_pts, deriv_pts, ankle_angle)
-    plt.plot(ankle_angle, deriv_spline_fit)
+    plt.plot(ankle_angle, deriv_spline_fit, linewidth=5)
     plt.xlim([-50, 80])
     plt.ylim([-22, 22])
     plt.ylabel('Transmission Ratio')
     plt.xlabel('Ankle Angle')
+
 plt.show()
