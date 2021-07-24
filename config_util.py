@@ -72,11 +72,12 @@ class ConfigurableConstants():
     B_VAL: int = 0
     SET_POINT: float = 0  # Deg
 
-    READ_ONLY = False  # Does not require Lipos
-    DO_READ_FSRS = False
+    READ_ONLY: bool = False  # Does not require Lipos
+    DO_READ_FSRS: bool = False
 
-    PRINT_HS = True  # Print heel strikes
-    SLIP_DETECT_ACTIVE = False
+    PRINT_HS: bool = True  # Print heel strikes
+    SLIP_DETECT_ACTIVE: bool = False
+    EXPERIMENTER_NOTES: str = 'Experimenter notes go here'
 
 
 class ConfigSaver():

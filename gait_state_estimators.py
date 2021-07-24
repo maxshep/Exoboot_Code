@@ -36,6 +36,9 @@ class GaitStateEstimator():
             print('heel strike detected on side: %-*s  at time: %s' %
                   (10, self.side, data.loop_time))
 
+    def update_params_from_config(self, config: Type[config_util.ConfigurableConstants]):
+        pass
+
 
 class MLGaitStateEstimator():
     def __init__(self,
@@ -59,6 +62,9 @@ class MLGaitStateEstimator():
         if do_print_heel_strikes and data.did_heel_strike:
             print('heel strike detected on side: ', self.side)
 
+    def update_params_from_config(self, config: Type[config_util.ConfigurableConstants]):
+        pass
+
 
 class GyroHeelStrikeDetector():
     def __init__(self, height: float, gyro_filter: Type[filters.Filter], delay=0):
@@ -71,21 +77,6 @@ class GyroHeelStrikeDetector():
 
     def detect(self, data: Type[exoboot.Exo.DataContainer]):
         self.gyro_history.appendleft(self.gyro_filter.filter(data.gyro_z))
-        # if (self.timer_active is False and
-        #     self.gyro_history[1] > self.height and
-        #     self.gyro_history[1] > self.gyro_history[0] and
-        #         self.gyro_history[1] > self.gyro_history[2]):
-        #     self.timer.start()
-        #     # self.timer_active = True
-        #     # self.time_of_last_heel_strike = time.perf_counter()
-        #     # self.timer.start()
-        #     # if self.timer_active and time.perf_counter() - self.time_of_last_heel_strike >= self.delay:
-        # if self.timer.check():
-        #     # self.timer_active = False
-        #     self.timer.reset()
-        #     return True
-        # else:
-        #     return False
         if (self.gyro_history[1] > self.height and
             self.gyro_history[1] > self.gyro_history[0] and
                 self.gyro_history[1] > self.gyro_history[2]):
@@ -95,31 +86,6 @@ class GyroHeelStrikeDetector():
             return True
         else:
             return False
-
-
-class AnkleAngleBasedToeOffDetector():
-    def __init__(self, target_freq, threshold: float = 4, min_phase: float = 0.5):
-        '''Uses peak plantarflexion angle to determine toe-off. Warning--does not work well when actuated!'''
-        self.threshold = threshold
-        self.min_phase = min_phase
-        self.ankle_angle_history = deque([0, 0, 0], maxlen=3)
-        self.ankle_angle_filter = filters.Butterworth(
-            N=2, Wn=10/(target_freq/2))
-
-    def detect(self, data: Type[exoboot.Exo.DataContainer]):
-        self.ankle_angle_history.appendleft(
-            self.ankle_angle_filter.filter(data.ankle_angle))
-        data.accel_x = self.ankle_angle_history[0]
-        if data.gait_phase is None:
-            did_toe_off = False
-        elif (data.gait_phase > self.min_phase and
-              self.ankle_angle_history[1] > self.threshold and
-                self.ankle_angle_history[1] > self.ankle_angle_history[0] and
-              self.ankle_angle_history[1] > self.ankle_angle_history[2]):
-            did_toe_off = True
-        else:
-            did_toe_off = False
-        return did_toe_off
 
 
 class GaitPhaseBasedToeOffDetector():
@@ -266,24 +232,6 @@ class BilateralSlipDetector():
             for exo in self.exo_list:
                 exo.data.did_slip = False
 
-        # if did_slip:
-        #     print('slip detected!')
-        #     for exo in self.exo_list:
-        #         if self.slip_detect_active:
-        #             exo.data.did_slip = True
-        #         else:
-        #             exo.data.did_slip = False
-
-        # for exo in self.exo_list:
-        #     if did_slip:
-        #         if not self.slip_detect_active:
-        #             exo.data.did_slip = False
-        #             print('slip detected, but detector inactive')
-        #         else:
-        #             exo.data.did_slip = did_slip
-        #     else:
-        #         exo.data.did_slip = did_slip
-
     def update_params_from_config(self, config: Type[config_util.ConfigurableConstants]):
         print('slip detection_active: ', config.SLIP_DETECT_ACTIVE)
         self.slip_detect_active = config.SLIP_DETECT_ACTIVE
@@ -354,8 +302,6 @@ class SlipDetectorAP():
             return did_slip
         else:
             self.data_container.did_slip = did_slip
-        # self.data_container.gen_var1 = self.slip_detect_active
-        # self.data_container.gen_var2 = self.shuffling_timer.check()
 
     def update_params_from_config(self, config: Type[config_util.ConfigurableConstants]):
         print('slip detection_active: ', config.SLIP_DETECT_ACTIVE)

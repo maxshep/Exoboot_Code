@@ -91,7 +91,9 @@ class SawickiWickiController(Controller):
 
     def update_ctrl_params_from_config(self, config: Type[config_util.ConfigurableConstants]):
         'Updates controller parameters from the config object.'''
-        self.k_val = config.K_VAL
+        if self.k_val != config.K_VAL:
+            self.k_val = config.K_VAL
+            print('K updated to: ', self.k_val)
         self.b_val = config.B_VAL
 
 
@@ -182,12 +184,14 @@ class GenericSplineController(Controller):
     def update_spline(self, spline_x, spline_y, first_call=False):
         if any(x < 0 or x > 1 for x in spline_x):
             raise ValueError('spline_x can only contain values within [0, 1]')
-        self.fade_start_time = time.perf_counter()
-        self.spline_x = spline_x
-        self.spline_y = spline_y
-        self.last_spline = copy.deepcopy(self.spline)
-        self.spline = interpolate.pchip(spline_x, spline_y, extrapolate=False)
-        print('Spline Updated')
+        if first_call or self.spline_x != spline_x or self.spline_y != spline_y:
+            self.spline_x = spline_x
+            self.spline_y = spline_y
+            print('Splines updated: ', 'x = ', spline_x, 'y = ', spline_y)
+            self.fade_start_time = time.perf_counter()
+            self.last_spline = copy.deepcopy(self.spline)
+            self.spline = interpolate.pchip(
+                spline_x, spline_y, extrapolate=False)
 
     def fade_splines(self, phase, fraction):
         torque_from_last_spline = self.last_spline(phase)
@@ -225,7 +229,6 @@ class FourPointSplineController(GenericSplineController):
 
     def update_ctrl_params_from_config(self, config: Type[config_util.ConfigurableConstants]):
         'Updates controller parameters from the config object.'''
-        print('Updating spline...')
         super().update_spline(spline_x=self._get_spline_x(rise_fraction=config.RISE_FRACTION,
                                                           peak_fraction=config.PEAK_FRACTION,
                                                           fall_fraction=config.FALL_FRACTION),

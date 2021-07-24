@@ -8,8 +8,7 @@ class ParameterPasser(threading.Thread):
                  lock: Type[threading.Lock],
                  config: Type[config_util.ConfigurableConstants],
                  quit_event: Type[threading.Event],
-                 new_ctrl_params_event: Type[threading.Event],
-                 new_gait_state_params_event: Type[threading.Event],
+                 new_params_event: Type[threading.Event],
                  name='keyboard-input-thread'):
         '''This class passes parameters via user input and a parallel thread.
 
@@ -22,8 +21,7 @@ class ParameterPasser(threading.Thread):
         self.lock = lock
         self.config = config
         self.quit_event = quit_event
-        self.new_ctrl_params_event = new_ctrl_params_event
-        self.new_gait_state_params_event = new_gait_state_params_event
+        self.new_params_event = new_params_event
         self.start()  # Starts the run() function
 
     # This run function overrides the run() function in threading.Thread
@@ -33,7 +31,7 @@ class ParameterPasser(threading.Thread):
             if msg == 'a':
                 self.lock.acquire()
                 self.config.SLIP_DETECT_ACTIVE = not self.config.SLIP_DETECT_ACTIVE
-                self.new_gait_state_params_event.set()
+                self.new_params_event.set()
                 self.lock.release()
             elif len(msg) < 3:
                 print('Message must be either "quit" or a string of parameters'
@@ -59,7 +57,6 @@ class ParameterPasser(threading.Thread):
                         self.config.PEAK_TORQUE = param_list[1]
                         self.config.PEAK_FRACTION = param_list[2]
                         self.config.FALL_FRACTION = param_list[3]
-                        print('Parameters sent')
                 elif first_letter == 'k':
                     if msg_content.isdigit():
                         self.config.K_VAL = int(msg_content)
@@ -76,11 +73,14 @@ class ParameterPasser(threading.Thread):
                     if msg_content.isdigit():
                         if 0 <= int(msg_content) <= 40:
                             self.config.PEAK_TORQUE = int(msg_content)
-                            print('peak torque set to: ',
+                            print('Peak torque set to: ',
                                   self.config.PEAK_TORQUE)
                     else:
                         print('Must provide single integer to update PEAK_TORQUE')
-                self.new_ctrl_params_event.set()
+                elif first_letter == '-':
+                    self.config.EXPERIMENTER_NOTES = msg_content
+                    print('Added that message to the config.')
+                self.new_params_event.set()
                 self.lock.release()
 
             else:

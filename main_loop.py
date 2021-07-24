@@ -36,8 +36,7 @@ gait_state_estimator_list, state_machine_list = control_muxer.get_gse_and_sm_lis
 '''Prep parameter passing.'''
 lock = threading.Lock()
 quit_event = threading.Event()
-new_ctrl_params_event = threading.Event()
-new_gait_state_params_event = threading.Event()
+new_params_event = threading.Event()
 # v0.01,20,0.05,0.2!
 # k500!
 
@@ -61,8 +60,7 @@ timer = util.FlexibleTimer(
 t0 = time.perf_counter()
 keyboard_thread = parameter_passers.ParameterPasser(
     lock=lock, config=config, quit_event=quit_event,
-    new_ctrl_params_event=new_ctrl_params_event,
-    new_gait_state_params_event=new_gait_state_params_event)
+    new_params_event=new_params_event)
 config_saver.write_data(loop_time=0)  # Write first row on config
 only_write_if_new = not config.READ_ONLY and config.ONLY_LOG_IF_NEW
 
@@ -73,16 +71,13 @@ while True:
         loop_time = time.perf_counter() - t0
 
         lock.acquire()
-        if new_ctrl_params_event.is_set():
+        if new_params_event.is_set():
             config_saver.write_data(loop_time=loop_time)  # Update config file
-            for state_machine in state_machine_list:
+            for state_machine in state_machine_list:  # Make sure up to date
                 state_machine.update_ctrl_params_from_config(config=config)
-            new_ctrl_params_event.clear()
-        if new_gait_state_params_event.is_set():
-            config_saver.write_data(loop_time=loop_time)  # Update config file
-            for gait_state_estimator in gait_state_estimator_list:
+            for gait_state_estimator in gait_state_estimator_list:  # Make sure up to date
                 gait_state_estimator.update_params_from_config(config=config)
-            new_gait_state_params_event.clear()
+            new_params_event.clear()
         if quit_event.is_set():  # If user enters "quit"
             break
         lock.release()

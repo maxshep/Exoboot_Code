@@ -68,53 +68,6 @@ class StandingPerturbationResponse(HighLevelController):
         self.slip_controller.update_ctrl_params_from_config(config=config)
 
 
-class BilateralSlipStateMachine(HighLevelController):
-    '''Bilateral state machine that takes in 2 data containers and applies control.'''
-
-    def __init__(self,
-                 left_exo: Type[Exo],
-                 right_exo: Type[Exo],
-                 left_standing_controller: Type[controllers.Controller],
-                 right_standing_controller: Type[controllers.Controller],
-                 left_slip_controller: Type[controllers.Controller],
-                 right_slip_controller: Type[controllers.Controller],
-                 slip_recovery_time: float = 1.5):
-        self.left_exo = left_exo
-        self.right_exo = right_exo
-        self.left_standing_controller = left_standing_controller
-        self.right_standing_controller = left_standing_controller
-        self.left_slip_controller = left_slip_controller
-        self.right_slip_controller = right_slip_controller
-        self.slip_ctrl_timer = util.DelayTimer(delay_time=slip_recovery_time)
-        self.left_controller_now = self.left_standing_controller
-        self.right_controller_now = self.right_standing_controller
-
-    def step(self, read_only):
-        '''uses slip detector to detect slip onset, uses timer to stop slip controller.'''
-
-        if self.slip_ctrl_timer.check():
-            print('Slip timeout--ready now')
-            # If slip controller time has elapsed (goes True) and we need to switch back
-            self.slip_ctrl_timer.reset()
-            self.left_controller_now = self.left_standing_controller
-            self.right_controller_now = self.right_standing_controller
-            did_controllers_switch = True
-        elif self.left_exo.data.did_slip or self.right_exo.data.did_slip:
-            print('Slip detected, moving to slip controller')
-            self.left_exo.data.did_slip = True  # Set both to True
-            self.right_exo.data.did_slip = True  # Set both to True
-            self.slip_ctrl_timer.start()
-            self.left_controller_now = self.left_slip_controller
-            self.right_controller_now = self.right_slip_controller
-            did_controllers_switch = True
-        else:
-            did_controllers_switch = False
-
-        if not read_only:
-            self.left_controller_now.command(reset=did_controllers_switch)
-            self.right_controller_now.command(reset=did_controllers_switch)
-
-
 class StanceSwingStateMachine(HighLevelController):
     '''Unilateral state machine that takes in data, segments strides, and applies controllers'''
 
