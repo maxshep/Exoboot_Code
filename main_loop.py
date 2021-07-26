@@ -14,6 +14,7 @@ import config_util
 import parameter_passers
 import control_muxer
 import data_util
+import plotters
 
 
 config = config_util.load_config_from_args()  # loads config from passed args
@@ -99,8 +100,11 @@ while True:
         print("Unexpected error:", err)
         break
 
-'''Safely close files and stop streaming.'''
+'''Safely close files, stop streaming, optionally saves plots'''
 config_saver.close_file()
 for exo in exo_list:
     exo.close()
+if config.VARS_TO_PLOT:
+    plotters.save_plot(filename=exo_list[0].filename.replace('_LEFT.csv','').replace('_RIGHT.csv',''), vars_to_plot=config.VARS_TO_PLOT)
+
 print('Done!!!')

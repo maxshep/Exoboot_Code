@@ -2,6 +2,7 @@
 import config_util
 config = config_util.ConfigurableConstants()
 config.DO_READ_FSRS = True
+config.VARS_TO_PLOT = ['heel_fsr', 'toe_fsr']
 
 
 ''' Here are the variables that are updatable in config, and their defaults:

@@ -1,11 +1,12 @@
 from typing import Type
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import time
 import csv
 import sys
 import importlib
 from enum import Enum
 import argparse
+from typing import List
 
 
 class Task(Enum):
@@ -76,6 +77,7 @@ class ConfigurableConstants():
     DO_READ_FSRS: bool = False
 
     PRINT_HS: bool = True  # Print heel strikes
+    VARS_TO_PLOT: List = field(default_factory=lambda: [])
     SLIP_DETECT_ACTIVE: bool = False
     EXPERIMENTER_NOTES: str = 'Experimenter notes go here'
 

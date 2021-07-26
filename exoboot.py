@@ -272,10 +272,10 @@ class Exo():
         '''file_ID is used as a custom file identifier after date.'''
         if file_ID is not None:
             subfolder_name = 'exo_data/'
-            filename = subfolder_name + \
+            self.filename = subfolder_name + \
                 time.strftime("%Y%m%d_%H%M_") + file_ID + \
                 '_' + self.side.name + '.csv'
-            self.my_file = open(filename, 'w', newline='')
+            self.my_file = open(self.filename, 'w', newline='')
             self.writer = csv.DictWriter(
                 self.my_file, fieldnames=self.data.__dict__.keys())
             self.writer.writeheader()
