@@ -3,6 +3,7 @@ import config_util
 config = config_util.ConfigurableConstants()
 config.DO_READ_FSRS = True
 config.VARS_TO_PLOT = ['heel_fsr', 'toe_fsr']
+config.NUM_STRIDES_REQUIRED = 3
 
 
 ''' Here are the variables that are updatable in config, and their defaults:

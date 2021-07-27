@@ -27,7 +27,7 @@ def get_gse_and_sm_lists(exo_list, config: Type[config_util.ConfigurableConstant
                                                 Wn=config.HS_GYRO_FILTER_WN,
                                                 fs=config.TARGET_FREQ),
                 delay=config.HS_GYRO_DELAY)
-            gait_phase_estimator = gait_state_estimators.StrideAverageGaitPhaseEstimator()
+            gait_phase_estimator = gait_state_estimators.StrideAverageGaitPhaseEstimator(num_strides_required=config.NUM_STRIDES_REQUIRED)
             toe_off_detector = gait_state_estimators.GaitPhaseBasedToeOffDetector(
                 fraction_of_gait=config.TOE_OFF_FRACTION)
             gait_state_estimator = gait_state_estimators.GaitStateEstimator(

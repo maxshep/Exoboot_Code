@@ -60,6 +60,7 @@ class ConfigurableConstants():
     REEL_IN_MV: int = 1200
     REEL_IN_SLACK_CUTOFF: int = 1200
     REEL_IN_TIMEOUT: float = 0.2
+    NUM_STRIDES_REQUIRED: int = 2
 
     # 4 point Spline
     RISE_FRACTION: float = 0.2
