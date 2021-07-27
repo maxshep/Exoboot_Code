@@ -31,6 +31,7 @@ class ParameterPasser(threading.Thread):
             if msg == 'a':
                 self.lock.acquire()
                 self.config.SLIP_DETECT_ACTIVE = not self.config.SLIP_DETECT_ACTIVE
+                self.config.SWING_ONLY = not self.config.SWING_ONLY
                 self.new_params_event.set()
                 self.lock.release()
             elif len(msg) < 3:
