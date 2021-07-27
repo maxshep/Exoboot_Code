@@ -162,4 +162,6 @@ class StanceSwingReeloutReelinStateMachine(HighLevelController):
 
     def update_ctrl_params_from_config(self, config):
         self.stance_controller.update_ctrl_params_from_config(config=config)
-        self.swing_only = config.SWING_ONLY
+        if self.swing_only != config.SWING_ONLY:
+            self.swing_only = config.SWING_ONLY
+            print('Updated swing only to: ', self.swing_only)

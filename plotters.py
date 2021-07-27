@@ -18,7 +18,7 @@ def save_plot(filename: str, vars_to_plot: list, save = True, max_file_len = 240
                 axs[i].plot(df.loop_time, data, label=sides[i]+'_'+var_name)
             axs[i].legend()
         except:
-            print(fn, ' not found for plotting')
+            print(filenames[i], ' not found for plotting')
             pass 
     if save:
         plt.savefig(filename +'_plot.png')
