@@ -37,14 +37,19 @@ def run_test(exo: exoboot.Exo, desired_torque=0, duration=1):
                      Kd=constants.DEFAULT_KD, ff=constants.DEFAULT_FF)
 
     print('begin!')
-    for _ in range(100*duration):
+    desired_torque = 0  # DELETE
+    for i in range(100*duration):
+        if i > 100:  # DELETE
+            desired_torque = desired_torque + 1
+        if desired_torque > 20:
+            break
         time.sleep(0.01)
         exo.command_torque(desired_torque=desired_torque)
         exo.read_data()
         load_cell_data = read_load_cell_data()
         exo.data.gen_var1 = load_cell_data
         if load_cell_data is not None:
-            exo.data.gen_var2 = 8.563176e-04*(load_cell_data + 4.750486e+04)
+            exo.data.gen_var2 = 0.00095069*(load_cell_data + 4.750486e+04)
         exo.write_data()
     print('Done! File saved.')
 

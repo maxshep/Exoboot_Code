@@ -8,7 +8,7 @@ import pandas as pd
 from scipy import signal
 
 folder = 'exo_data/'
-filename = "20210702_1513_test5pt2_RIGHT.csv"
+filename = "20210727_1750_dyn_char_LEFT.csv"
 
 df = pd.read_csv(folder + '/' + filename)
 
@@ -25,7 +25,7 @@ df = pd.read_csv(folder + '/' + filename)
 
 
 plt.figure(2)
-plt.plot(df.loop_time, df.commanded_torque, marker='o')
+plt.plot(df.state_time, df.slack)
 plt.show()
 
 
