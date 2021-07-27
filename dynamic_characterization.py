@@ -39,7 +39,7 @@ def run_test(exo: exoboot.Exo, desired_torque=0, duration=1):
     print('begin!')
     desired_torque = 0  # DELETE
     for i in range(100*duration):
-        if i > 100:  # DELETE
+        if i % 100 == 0:  # DELETE
             desired_torque = desired_torque + 1
         if desired_torque > 20:
             break
