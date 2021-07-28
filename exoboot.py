@@ -99,7 +99,6 @@ class Exo():
         self.ankle_velocity_filter = filters.Butterworth(
             N=2, Wn=10, fs=target_freq)
         if self.do_read_fsrs:
-            print('do_read_fsrs: True. Checking if rpi')
             if fxu.is_pi() or fxu.is_pi64():
                 import gpiozero  # pylint: disable=import-error
                 if self.side == constants.Side.LEFT:
