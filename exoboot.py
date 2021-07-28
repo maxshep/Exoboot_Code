@@ -177,6 +177,9 @@ class Exo():
                 self.gen_var3 = None
 
     def close(self):
+        self.update_gains()
+        self.command_current(desired_mA=0)
+        time.sleep(0.1)
         self.command_controller_off()
         time.sleep(0.05)
         fxs.stop_streaming(self.dev_id)
