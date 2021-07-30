@@ -56,7 +56,9 @@ class FlexibleTimer():
             self.over_time = max(0, self.over_time - 5)
             # Error out if target freqeuncy is not being hit
         if self.over_time > 20:
-            raise Exception('Target Frequency is not being hit')
+            # raise Exception('Target Frequency is not being hit')
+            print('Target Frequency is not being hit!')
+            self.over_time = 0
         while time.perf_counter()-self.last_time < self.target_period:
             pass
         self.last_time = time.perf_counter()
