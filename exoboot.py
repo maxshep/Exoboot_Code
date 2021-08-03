@@ -26,6 +26,7 @@ def connect_to_exos(file_ID: str = None,
                     log_en: bool = False,
                     log_level: int = 3,
                     do_read_fsrs: bool = False,
+                    do_read_sync: bool = False,
                     max_allowable_current: int = 20000):
     '''Connect to Exos, instantiate Exo objects.'''
 
@@ -53,6 +54,7 @@ def connect_to_exos(file_ID: str = None,
             exo_list.append(Exo(dev_id=dev_id, file_ID=file_ID,
                                 target_freq=target_freq,
                                 do_read_fsrs=do_read_fsrs,
+                                do_read_sync=do_read_sync,
                                 max_allowable_current=max_allowable_current))
         except IOError:
             print('Unable to open exo on port: ', port,
@@ -69,16 +71,19 @@ class Exo():
                  max_allowable_current: int,
                  file_ID: str = None,
                  target_freq: float = 200,
-                 do_read_fsrs: bool = False):
+                 do_read_fsrs: bool = False,
+                 do_read_sync: bool = False):
         '''Exo object is the primary interface with the Dephy ankle exos, and corresponds to a single physical exoboot.
         Args:
             dev_id: int. Unique integer to identify the exo in flexsea's library. Returned by connect_to_exo
             file_ID: str. Unique string added to filename. If None, no file will be saved.
-            do_read_dsrs: bool indicating whether to read FSRs '''
+            do_read_fsrs: bool indicating whether to read FSRs.
+            dy_sync: bool indicating whether to read GPIO for sync cable '''
         self.dev_id = dev_id
         self.max_allowable_current = max_allowable_current
         self.file_ID = file_ID
         self.do_read_fsrs = do_read_fsrs
+        self.do_read_sync = do_read_sync
         if self.dev_id is None:
             print('Exo obj created but no exoboot connected. Some methods available')
         elif self.dev_id in constants.LEFT_EXO_DEV_IDS:
@@ -113,6 +118,11 @@ class Exo():
                         pin=constants.RIGHT_TOE_FSR_PIN, pull_up=True)
             else:
                 raise Exception('Can only use FSRs with rapberry pi!')
+        if self.do_read_sync:
+            if fxu.is_pi() or fxu.is_pi64():
+                import gpiozero  # pylint: disable=import-error
+                self.sync_detector = gpiozero.InputDevice(
+                    pin=constants.SYNC_PIN, pull_up=True)
 
         self.data = self.DataContainer(do_include_FSRs=do_read_fsrs)
         self.has_calibrated = False
@@ -133,6 +143,7 @@ class Exo():
     class DataContainer:
         '''A nested dataclass within Exo, reserving space for instantaneous data.'''
         do_include_FSRs: InitVar[bool] = False
+        do_include_sync: InitVar[bool] = False
         do_include_did_slip: InitVar[bool] = True
         do_include_gen_vars: InitVar[bool] = True
         state_time: float = 0
@@ -161,11 +172,12 @@ class Exo():
         heel_fsr: bool = field(init=False)
         toe_fsr: bool = field(init=False)
         did_slip: bool = field(init=False)
+        sync: bool = field(init=False)
         gen_var1: float = field(init=False)
         gen_var2: float = field(init=False)
         gen_var3: float = field(init=False)
 
-        def __post_init__(self, do_include_FSRs, do_include_did_slip, do_include_gen_vars):
+        def __post_init__(self, do_include_FSRs, do_include_did_slip, do_include_gen_vars, do_read_sync):
             if do_include_FSRs:
                 self.heel_fsr = False
                 self.toe_fsr = False
@@ -175,6 +187,8 @@ class Exo():
                 self.gen_var1 = None
                 self.gen_var2 = None
                 self.gen_var3 = None
+            if do_read_sync:
+                self.sync = None
 
     def close(self):
         self.update_gains()
@@ -189,6 +203,8 @@ class Exo():
         if self.do_read_fsrs:
             self.heel_fsr_detector.close()
             self.toe_fsr_detector.close()
+        if self.do_read_sync:
+            self.sync_detector.close()
 
     def update_gains(self, Kp=None, Ki=None, Kd=None, k_val=None, b_val=None, ff=None):
         '''Optionally updates individual exo gain values, and sends to Actpack.'''
@@ -265,6 +281,8 @@ class Exo():
         if self.do_read_fsrs:
             self.data.heel_fsr = self.heel_fsr_detector.value
             self.data.toe_fsr = self.toe_fsr_detector.value
+        if self.do_read_sync:
+            self.data.sync = self.sync_detector.value
 
     def get_batt_voltage(self):
         actpack_data = fxs.read_device(self.dev_id)

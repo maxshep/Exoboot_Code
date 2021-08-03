@@ -90,3 +90,6 @@ LEFT_HEEL_FSR_PIN = 17
 LEFT_TOE_FSR_PIN = 18
 RIGHT_HEEL_FSR_PIN = 24
 RIGHT_TOE_FSR_PIN = 25
+
+# RPi's GPIO pin numbers (not physical pin number) for Sync signal
+SYNC_PIN = 16

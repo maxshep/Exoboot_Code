@@ -23,7 +23,7 @@ file_ID = input(
 
 '''Connect to Exos, instantiate Exo objects.'''
 exo_list = exoboot.connect_to_exos(file_ID=file_ID, target_freq=config.TARGET_FREQ,
-                                   actpack_freq=config.ACTPACK_FREQ, do_read_fsrs=config.DO_READ_FSRS,
+                                   actpack_freq=config.ACTPACK_FREQ, do_read_fsrs=config.DO_READ_FSRS, do_read_sync=config.DO_READ_SYNC,
                                    log_en=config.DO_DEPHY_LOG, max_allowable_current=config.MAX_ALLOWABLE_CURRENT)
 print('Battery Voltage: ', 0.001*exo_list[0].get_batt_voltage(), 'V')
 
@@ -105,6 +105,7 @@ config_saver.close_file()
 for exo in exo_list:
     exo.close()
 if config.VARS_TO_PLOT:
-    plotters.save_plot(filename=exo_list[0].filename.replace('_LEFT.csv','').replace('_RIGHT.csv',''), vars_to_plot=config.VARS_TO_PLOT)
+    plotters.save_plot(filename=exo_list[0].filename.replace(
+        '_LEFT.csv', '').replace('_RIGHT.csv', ''), vars_to_plot=config.VARS_TO_PLOT)
 
 print('Done!!!')

@@ -77,6 +77,7 @@ class ConfigurableConstants():
 
     READ_ONLY: bool = False  # Does not require Lipos
     DO_READ_FSRS: bool = False
+    DO_READ_SYNC: bool = False
 
     PRINT_HS: bool = True  # Print heel strikes
     VARS_TO_PLOT: List = field(default_factory=lambda: [])
