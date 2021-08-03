@@ -2,6 +2,7 @@
 import config_util
 config = config_util.ConfigurableConstants()
 config.MAX_ALLOWABLE_CURRENT = 25000  # mA
+config.DO_READ_SYNC = True
 
 
 ''' Here are the variables that are updatable in config, and their defaults:
