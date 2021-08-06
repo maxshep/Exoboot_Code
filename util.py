@@ -15,7 +15,7 @@ class DelayTimer():
         '''
         self.delay_time = delay_time
         self.true_until = true_until
-        self.start_time = None
+        self.start_time = None  # Means timer is "inactive"
 
     def start(self):
         '''Starts the timer.'''
@@ -30,7 +30,6 @@ class DelayTimer():
                 return False
         else:
             if self.start_time is not None and time.perf_counter() > self.start_time + self.delay_time:
-                self.start_time = None
                 return True
             else:
                 return False
@@ -62,6 +61,3 @@ class FlexibleTimer():
         while time.perf_counter()-self.last_time < self.target_period:
             pass
         self.last_time = time.perf_counter()
-
-
-

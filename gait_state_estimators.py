@@ -200,6 +200,7 @@ class BilateralSlipDetectorParent():
     def update_params_from_config(self, config: Type[config_util.ConfigurableConstants]):
         print('slip detection active: ', config.SLIP_DETECT_ACTIVE)
         self.slip_detect_active = config.SLIP_DETECT_ACTIVE
+        self.update_delay(delay_ms=config.SLIP_DETECT_DELAY)
 
 
 class BilateralSlipDetectorFromSync(BilateralSlipDetectorParent):

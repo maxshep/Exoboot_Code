@@ -276,12 +276,13 @@ class SmoothReelInController(Controller):
     def command(self, reset=False):
         if reset:
             super().command_gains()
-            self.t0 = time.perf_counter()
+            self.delay_timer.start()
         self.exo.command_voltage(
             desired_mV=self.exo.motor_sign * self.reel_in_mV)
 
     def check_completion_status(self):
         if self.delay_timer.check() or self.exo.get_slack() < self.slack_cutoff:
+            self.delay_timer.reset()
             return True
         else:
             return False
