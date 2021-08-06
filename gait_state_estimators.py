@@ -163,11 +163,13 @@ class BilateralSlipDetectorParent():
     def __init__(self,
                  exo_1: Type[exoboot.Exo],
                  exo_2: Type[exoboot.Exo],
-                 delay_ms=0):
+                 delay_ms: int = 0,
+                 time_out: float = 5):
         self.exo_list = [exo_1, exo_2]
         self.slip_detect_active = False
         print('slip_detect_active: ', self.slip_detect_active)
         self.update_delay(delay_ms=delay_ms)
+        self.refractory_timer = util.DelayTimer(time_out, true_until=True)
 
     def detect(self):
         slip_detected = self.detect_slip()
@@ -203,18 +205,22 @@ class BilateralSlipDetectorFromSync(BilateralSlipDetectorParent):
     def __init__(self,
                  exo_1: Type[exoboot.Exo],
                  exo_2: Type[exoboot.Exo],
-                 delay_ms=500):
-        super().__init__(exo_1=exo_1, exo_2=exo_2, delay_ms=delay_ms)
+                 delay_ms=500,
+                 time_out=5):
+        super().__init__(exo_1=exo_1, exo_2=exo_2, delay_ms=delay_ms, time_out=time_out)
 
     def detect_slip(self):
-        for exo in self.exo_list:
-            data = exo.data
-            if self.last_sync and not data.sync:  # falling edge
-                slip_detected = True
-                break
-            else:
-                slip_detected = False
-        self.last_sync = data.sync
+        if self.refractory_timer.check():  # if recent slip
+            slip_detected = False
+        else:
+            for exo in self.exo_list:
+                if self.last_sync and not exo.data.sync:  # falling edge
+                    slip_detected = True
+                    self.refractory_timer.start()
+                    break
+                else:
+                    slip_detected = False
+        self.last_sync = exo.data.sync
         return slip_detected
 
 
@@ -228,11 +234,10 @@ class BilateralSlipDetectorIMU(BilateralSlipDetectorParent):
                  max_acc_z: float = 0.1,  # 0.1
                  do_filter_accels=True,
                  required_seconds_of_stillness=0):
-        super().__init__(exo_1, exo_2, delay_ms=0)
+        super().__init__(exo_1, exo_2, delay_ms=0, time_out=time_out)
         self.acc_threshold_x = acc_threshold_x
         self.max_acc_y = max_acc_y
         self.max_acc_z = max_acc_z
-        self.refractory_timer = util.DelayTimer(time_out, true_until=True)
         self.do_filter_accels = do_filter_accels
         self.filter_list = [[
             filters.Butterworth(N=2, Wn=0.01, btype='high'),
