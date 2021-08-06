@@ -13,7 +13,6 @@ import util
 import config_util
 import parameter_passers
 import control_muxer
-import data_util
 import plotters
 
 
