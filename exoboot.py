@@ -139,7 +139,7 @@ class Exo():
         '''A nested dataclass within Exo, reserving space for instantaneous data.'''
         do_include_FSRs: InitVar[bool] = False
         do_include_sync: InitVar[bool] = False
-        do_include_did_slip: InitVar[bool] = True
+        do_include_did_slip: InitVar[bool] = False
         do_include_gen_vars: InitVar[bool] = True
         state_time: float = 0
         loop_time: float = 0
