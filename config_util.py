@@ -158,7 +158,7 @@ def get_sync_detector(config: Type[ConfigurableConstants]):
     if config.DO_READ_SYNC:
         import gpiozero  # pylint: disable=import-error
         sync_detector = gpiozero.InputDevice(
-            pin=constants.SYNC_PIN, pull_up=True)
+            pin=constants.SYNC_PIN, pull_up=False)
         return sync_detector
     else:
         return None
