@@ -8,7 +8,6 @@ import constants
 from typing import Type
 import util
 import config_util
-import data_util
 
 
 class GaitStateEstimator():
