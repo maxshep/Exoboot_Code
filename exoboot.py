@@ -6,6 +6,7 @@ import time
 import warnings
 from dataclasses import dataclass, field, InitVar
 from scipy import interpolate
+from typing import Type
 
 import numpy as np
 
@@ -20,13 +21,8 @@ from flexsea import fxUtils as fxu
 fxs = flex.FlexSEA()
 
 
-def connect_to_exos(file_ID: str = None,
-                    target_freq: int = 200,
-                    actpack_freq: int = 200,
-                    log_en: bool = False,
-                    log_level: int = 3,
-                    do_read_fsrs: bool = False,
-                    max_allowable_current: int = 20000,
+def connect_to_exos(file_ID: str,
+                    config: Type[config_util.ConfigurableConstants()],
                     sync_detector=None):
     '''Connect to Exos, instantiate Exo objects.'''
 
@@ -40,7 +36,7 @@ def connect_to_exos(file_ID: str = None,
         ports, baud_rate = fxu.load_ports_from_file(port_cfg_path)
     elif fxu.is_pi64() or fxu.is_pi():
         ports = ['/dev/ttyACM0', '/dev/ttyACM1']
-        baud_rate = 230400
+        baud_rate = constants.DEFAULT_BAUD_RATE
     else:
         raise ValueError('Max Code only supporting Windows or pi64 so far')
     print(f"Using ports:\t{ports}")
@@ -48,14 +44,15 @@ def connect_to_exos(file_ID: str = None,
     exo_list = []
     for port in ports:
         try:
-            dev_id = fxs.open(port, baud_rate, log_level=log_level)
+            dev_id = fxs.open(port, baud_rate, log_level=3)
             fxs.start_streaming(
-                dev_id=dev_id, freq=actpack_freq, log_en=log_en)
+                dev_id=dev_id, freq=config.ACTPACK_FREQ, log_en=config.DO_DEPHY_LOG)
             exo_list.append(Exo(dev_id=dev_id, file_ID=file_ID,
-                                target_freq=target_freq,
-                                do_read_fsrs=do_read_fsrs,
-                                sync_detector=sync_detector,
-                                max_allowable_current=max_allowable_current))
+                                target_freq=config.TARGET_FREQ,
+                                do_read_fsrs=config.DO_READ_FSRS,
+                                do_include_did_slip=config.DO_DETECT_SLIP,
+                                max_allowable_current=config.MAX_ALLOWABLE_CURRENT,
+                                sync_detector=sync_detector))
         except IOError:
             print('Unable to open exo on port: ', port,
                   ' This is okay if only one exo is connected!')
@@ -72,6 +69,7 @@ class Exo():
                  file_ID: str = None,
                  target_freq: float = 200,
                  do_read_fsrs: bool = False,
+                 do_include_did_slip: bool = False,
                  sync_detector=None):
         '''Exo object is the primary interface with the Dephy ankle exos, and corresponds to a single physical exoboot.
         Args:
@@ -120,7 +118,8 @@ class Exo():
             else:
                 raise Exception('Can only use FSRs with rapberry pi!')
 
-        self.data = self.DataContainer(do_include_FSRs=do_read_fsrs)
+        self.data = self.DataContainer(
+            do_include_FSRs=do_read_fsrs, do_include_did_slip=do_include_did_slip)
         self.has_calibrated = False
         self.is_clipping = False
         if self.file_ID is not None:
@@ -505,23 +504,3 @@ class Exo():
         self.command_controller_off()
         print('Finished Calibrating ', self.side)
         return calibrated_ankle_angle
-
-    def _test_units(self):
-        for _ in range(1000):
-            time.sleep(0.005)
-            self.read_data()
-            print(self.data.ankle_angle)
-            self.write_data()
-
-
-if __name__ == '__main__':
-    exo_list = connect_to_exos(file_ID='test')
-    for exo in exo_list:
-        actpack_data = fxs.read_exo_device(exo.dev_id)
-        print(actpack_data)
-        print(actpack_data.__dict__)
-        for i in range(20):
-            # actpack_data = fxs.read_exo_device(exo.dev_id)
-            actpack_data = fxs.read_device(exo.dev_id)
-            print(actpack_data.accely, actpack_data.ank_ang)
-            time.sleep(0.1)

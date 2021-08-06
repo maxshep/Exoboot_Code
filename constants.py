@@ -2,6 +2,7 @@
 import numpy as np
 from enum import Enum
 
+DEFAULT_BAUD_RATE = 230400
 TARGET_FREQ = 200
 MAX_ANKLE_ANGLE = 86  # 83  # degrees, plantarflexion
 MIN_ANKLE_ANGLE = -63  # -60  # degrees, dorsiflexion

@@ -82,6 +82,7 @@ class ConfigurableConstants():
 
     PRINT_HS: bool = True  # Print heel strikes
     VARS_TO_PLOT: List = field(default_factory=lambda: [])
+    DO_DETECT_SLIP: bool = False
     SLIP_DETECT_ACTIVE: bool = False
     SLIP_DETECT_DELAY: int = 0
     EXPERIMENTER_NOTES: str = 'Experimenter notes go here'
