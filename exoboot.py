@@ -22,7 +22,7 @@ fxs = flex.FlexSEA()
 
 
 def connect_to_exos(file_ID: str,
-                    config: Type[config_util.ConfigurableConstants()],
+                    config: Type[config_util.ConfigurableConstants],
                     sync_detector=None):
     '''Connect to Exos, instantiate Exo objects.'''
 
