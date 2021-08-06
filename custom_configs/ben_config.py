@@ -38,6 +38,7 @@ config.DO_READ_SYNC = True
 
     READ_ONLY = False  # Does not require Lipos
     DO_READ_FSRS = False
+    DO_READ_SYNC = False
 
     PRINT_HS = True  # Print heel strikes
     SLIP_DETECT_ACTIVE = False

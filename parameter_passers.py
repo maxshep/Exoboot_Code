@@ -34,16 +34,19 @@ class ParameterPasser(threading.Thread):
                 self.config.SWING_ONLY = not self.config.SWING_ONLY
                 self.new_params_event.set()
                 self.lock.release()
+
             elif len(msg) < 3:
                 print('Message must be either "quit" or a string of parameters'
                       ' starting with a letter (v for splines, k for stiffness,'
                       ' s for setpoint) and ending with an exclamation point)')
+
             elif msg.lower() == 'quit':
                 print('Quitting')
                 self.lock.acquire()
                 self.quit_event.set()
                 self.lock.release()
                 break
+
             elif msg[-1] == '!':
                 self.lock.acquire()
                 first_letter = msg[0]
@@ -78,6 +81,9 @@ class ParameterPasser(threading.Thread):
                                   self.config.PEAK_TORQUE)
                     else:
                         print('Must provide single integer to update PEAK_TORQUE')
+                elif first_letter == 'd':
+                    # Delay for slip detectors
+                    self.config.SLIP_DETECT_DELAY = int(msg_content)
                 elif first_letter == '-':
                     self.config.EXPERIMENTER_NOTES = msg_content
                     print('Added that message to the config.')

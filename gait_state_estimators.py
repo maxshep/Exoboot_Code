@@ -159,7 +159,66 @@ class StrideAverageGaitPhaseEstimator():
         return gait_phase
 
 
-class BilateralSlipDetector():
+class BilateralSlipDetectorParent():
+    def __init__(self,
+                 exo_1: Type[exoboot.Exo],
+                 exo_2: Type[exoboot.Exo],
+                 delay_ms=0):
+        self.exo_list = [exo_1, exo_2]
+        self.slip_detect_active = False
+        print('slip_detect_active: ', self.slip_detect_active)
+        self.update_delay(delay_ms=delay_ms)
+
+    def detect(self):
+        slip_detected = self.detect_slip()
+        if self.slip_detect_active and slip_detected:
+            print('slip detected!')
+            self.delay_timer.start()
+        if self.delay_timer.check():
+            self.delay_timer.reset()
+            for exo in self.exo_list:
+                exo.data.did_slip = True
+        elif self.slip_detect_active and not slip_detected:
+            for exo in self.exo_list:
+                exo.data.did_slip = False
+        elif not self.slip_detect_active:
+            if slip_detected:
+                print('slip detected, but detector inactive')
+            for exo in self.exo_list:
+                exo.data.did_slip = False
+
+    def detect_slip(self) -> bool:
+        raise ValueError(
+            'Child class does not have a detect_slip function implemented yet')
+
+    def update_delay(self, delay_ms):
+        self.delay_timer = util.DelayTimer(delay_ms)
+
+    def update_params_from_config(self, config: Type[config_util.ConfigurableConstants]):
+        print('slip detection_active: ', config.SLIP_DETECT_ACTIVE)
+        self.slip_detect_active = config.SLIP_DETECT_ACTIVE
+
+
+class BilateralSlipDetectorFromSync(BilateralSlipDetectorParent):
+    def __init__(self,
+                 exo_1: Type[exoboot.Exo],
+                 exo_2: Type[exoboot.Exo],
+                 delay_ms=500):
+        super().__init__(exo_1=exo_1, exo_2=exo_2, delay_ms=delay_ms)
+
+    def detect_slip(self):
+        for exo in self.exo_list:
+            data = exo.data
+            if self.last_sync and not data.sync:  # falling edge
+                slip_detected = True
+                break
+            else:
+                slip_detected = False
+        self.last_sync = data.sync
+        return slip_detected
+
+
+class BilateralSlipDetectorIMU(BilateralSlipDetectorParent):
     def __init__(self,
                  exo_1: Type[exoboot.Exo],
                  exo_2: Type[exoboot.Exo],
@@ -168,16 +227,13 @@ class BilateralSlipDetector():
                  max_acc_y: float = 0.1,  # 0.1
                  max_acc_z: float = 0.1,  # 0.1
                  do_filter_accels=True,
-                 required_seconds_of_stillness=0,
-                 return_did_slip=False,
-                 start_active=False):
-        self.exo_list = [exo_1, exo_2]
+                 required_seconds_of_stillness=0):
+        super().__init__(exo_1, exo_2, delay_ms=0)
         self.acc_threshold_x = acc_threshold_x
         self.max_acc_y = max_acc_y
         self.max_acc_z = max_acc_z
         self.refractory_timer = util.DelayTimer(time_out, true_until=True)
         self.do_filter_accels = do_filter_accels
-        self.return_did_slip = return_did_slip
         self.filter_list = [[
             filters.Butterworth(N=2, Wn=0.01, btype='high'),
             filters.Butterworth(N=2, Wn=0.01, btype='high'),
@@ -185,14 +241,11 @@ class BilateralSlipDetector():
             [filters.Butterworth(N=2, Wn=0.01, btype='high'),
              filters.Butterworth(N=2, Wn=0.01, btype='high'),
              filters.Butterworth(N=2, Wn=0.01, btype='high')]]
-        self.slip_detect_active = start_active
-        print('slip_detect_active: ', self.slip_detect_active)
         self.shuffling_timer = util.DelayTimer(
             delay_time=required_seconds_of_stillness,
             true_until=True)
-        self.print_counter = 0
 
-    def detect(self, did_slip_overwrite=False):
+    def detect_slip(self):
         for exo, filt in zip(self.exo_list, self.filter_list):
             data = exo.data
             accel_x = filt[0].filter(data.accel_x)
@@ -212,31 +265,16 @@ class BilateralSlipDetector():
                     abs(accel_z) < self.max_acc_z and
                         not self.refractory_timer.check()):
                     self.refractory_timer.start()
-                    did_slip = True
+                    slip_detected = True
                     break
                 else:
-                    did_slip = False
+                    slip_detected = False
             else:
-                did_slip = False
-
-        if self.slip_detect_active and did_slip:
-            print('slip detected!')
-            for exo in self.exo_list:
-                exo.data.did_slip = True
-        elif self.slip_detect_active and not did_slip:
-            for exo in self.exo_list:
-                exo.data.did_slip = False
-        elif not self.slip_detect_active:
-            if did_slip:
-                print('slip detected, but detector inactive')
-            for exo in self.exo_list:
-                exo.data.did_slip = False
-
-    def update_params_from_config(self, config: Type[config_util.ConfigurableConstants]):
-        print('slip detection_active: ', config.SLIP_DETECT_ACTIVE)
-        self.slip_detect_active = config.SLIP_DETECT_ACTIVE
+                slip_detected = False
+        return slip_detected
 
 
+'''Deprecated===================================
 class SlipDetectorAP():
     def __init__(self,
                  data_container: Type[exoboot.Exo.DataContainer],
@@ -248,7 +286,6 @@ class SlipDetectorAP():
                  required_seconds_of_stillness=0,
                  return_did_slip=False,
                  start_active=False):
-        '''Last working with 0.5, 0.2, 0.2, no filter.'''
         self.data_container = data_container
         self.acc_threshold_x = acc_threshold_x
         self.max_acc_y = max_acc_y
@@ -283,11 +320,6 @@ class SlipDetectorAP():
 
         if abs(accel_x) > stillness_accel_limit or abs(accel_y) > stillness_accel_limit or abs(accel_z) > stillness_accel_limit:
             self.shuffling_timer.start()  # restart the shuffling_timer if not still
-            # self.data_container.gen_var3 = True
-            # print('not still!)')
-        # else:
-        #     self.data_container.gen_var3 = False
-        #  self.shuffling_timer.check() and
         if did_slip_overwrite or (self.slip_detect_active and
                                   accel_x < -1*self.acc_threshold_x and
                                   abs(accel_y) < + self.max_acc_y and
@@ -305,4 +337,4 @@ class SlipDetectorAP():
 
     def update_params_from_config(self, config: Type[config_util.ConfigurableConstants]):
         print('slip detection_active: ', config.SLIP_DETECT_ACTIVE)
-        self.slip_detect_active = config.SLIP_DETECT_ACTIVE
+        self.slip_detect_active = config.SLIP_DETECT_ACTIVE'''

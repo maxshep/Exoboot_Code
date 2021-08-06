@@ -27,7 +27,8 @@ def get_gse_and_sm_lists(exo_list, config: Type[config_util.ConfigurableConstant
                                                 Wn=config.HS_GYRO_FILTER_WN,
                                                 fs=config.TARGET_FREQ),
                 delay=config.HS_GYRO_DELAY)
-            gait_phase_estimator = gait_state_estimators.StrideAverageGaitPhaseEstimator(num_strides_required=config.NUM_STRIDES_REQUIRED)
+            gait_phase_estimator = gait_state_estimators.StrideAverageGaitPhaseEstimator(
+                num_strides_required=config.NUM_STRIDES_REQUIRED)
             toe_off_detector = gait_state_estimators.GaitPhaseBasedToeOffDetector(
                 fraction_of_gait=config.TOE_OFF_FRACTION)
             gait_state_estimator = gait_state_estimators.GaitStateEstimator(
@@ -100,11 +101,53 @@ def get_gse_and_sm_lists(exo_list, config: Type[config_util.ConfigurableConstant
                                                                         slip_recovery_time=slip_recovery_time)
             state_machine_list.append(state_machine)
 
+    elif config.TASK == config.util.Task.SLIPDETECTFROMSYNC:
+        if len(exo_list) != 2:
+            raise ValueError(
+                'Must have two exos connected for task=BILATERALSTANDINGPERTURBATION')
+        gait_phase_estimator = gait_state_estimators.BilateralSlipDetectorFromSync(
+            exo_1=exo_list[0], exo_2=exo_list[1])
+        gait_state_estimator_list.append(gait_phase_estimator)
+        for exo in exo_list:
+            standing_controller = controllers.GenericImpedanceController(
+                exo=exo, setpoint=10, k_val=100)
+            if config.STANCE_CONTROL_STYLE == config_util.StanceCtrlStyle.GENERICIMPEDANCE:
+                slip_controller = controllers.GenericImpedanceController(
+                    exo=exo, setpoint=config.SET_POINT, k_val=config.K_VAL)
+                slip_recovery_time = 1.01  # TODO(maxshep)
+            elif config.STANCE_CONTROL_STYLE == config_util.StanceCtrlStyle.FOURPOINTSPLINE:
+                print("using a spline based controller!")
+                slip_controller = controllers.FourPointSplineController(
+                    exo=exo, rise_fraction=config.RISE_FRACTION, peak_torque=config.PEAK_TORQUE,
+                    peak_fraction=config.PEAK_FRACTION,
+                    fall_fraction=config.FALL_FRACTION,
+                    bias_torque=config.SPLINE_BIAS,
+                    use_gait_phase=False)
+                # slip_recovery_time = config.FALL_FRACTION-0.01
+                slip_recovery_time = 0.99
+
+            elif config.STANCE_CONTROL_STYLE == config_util.StanceCtrlStyle.FIVEPOINTSPLINE:
+                print("using a spline based controller!")
+                slip_controller = controllers.FourPointSplineController(
+                    exo=exo, rise_fraction=config.RISE_FRACTION, peak_torque=config.PEAK_TORQUE,
+                    peak_fraction=config.PEAK_FRACTION,
+                    fall_fraction=config.FALL_FRACTION,
+                    bias_torque=config.SPLINE_BIAS,
+                    use_gait_phase=False,
+                    peak_hold_time=0.1)
+                slip_recovery_time = 0.99
+
+            state_machine = state_machines.StandingPerturbationResponse(exo=exo,
+                                                                        standing_controller=standing_controller,
+                                                                        slip_controller=slip_controller,
+                                                                        slip_recovery_time=slip_recovery_time)
+            state_machine_list.append(state_machine)
+
     elif config.TASK == config_util.Task.BILATERALSTANDINGPERTURBATION:
         if len(exo_list) != 2:
             raise ValueError(
                 'Must have two exos connected for task=BILATERALSTANDINGPERTURBATION')
-        gait_phase_estimator = gait_state_estimators.BilateralSlipDetector(
+        gait_phase_estimator = gait_state_estimators.BilateralSlipDetectorIMU(
             exo_1=exo_list[0], exo_2=exo_list[1])
         gait_state_estimator_list.append(gait_phase_estimator)
         for exo in exo_list:

@@ -14,6 +14,7 @@ class Task(Enum):
     WALKING = 0
     STANDINGPERTURBATION = 1
     BILATERALSTANDINGPERTURBATION = 2
+    SLIPDETECTFROMSYNC = 3
 
 
 class StanceCtrlStyle(Enum):
@@ -82,6 +83,7 @@ class ConfigurableConstants():
     PRINT_HS: bool = True  # Print heel strikes
     VARS_TO_PLOT: List = field(default_factory=lambda: [])
     SLIP_DETECT_ACTIVE: bool = False
+    SLIP_DETECT_DELAY: int = 0
     EXPERIMENTER_NOTES: str = 'Experimenter notes go here'
 
 
