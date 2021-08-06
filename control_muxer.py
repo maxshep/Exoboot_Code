@@ -63,45 +63,45 @@ def get_gse_and_sm_lists(exo_list, config: Type[config_util.ConfigurableConstant
                                                                                 reel_out_controller=reel_out_controller)
             state_machine_list.append(state_machine)
 
-    elif config.TASK == config_util.Task.STANDINGPERTURBATION:
-        for exo in exo_list:
-            gait_state_estimator = gait_state_estimators.SlipDetectorAP(
-                data_container=exo.data)
-            gait_state_estimator_list.append(gait_state_estimator)
-            standing_controller = controllers.GenericImpedanceController(
-                exo=exo, setpoint=10, k_val=100)
-            if config.STANCE_CONTROL_STYLE == config_util.StanceCtrlStyle.GENERICIMPEDANCE:
-                slip_controller = controllers.GenericImpedanceController(
-                    exo=exo, setpoint=config.SET_POINT, k_val=config.K_VAL)
-                slip_recovery_time = 1.01  # TODO(maxshep)
-            elif config.STANCE_CONTROL_STYLE == config_util.StanceCtrlStyle.FOURPOINTSPLINE:
-                print("using a spline based controller!")
-                slip_controller = controllers.FourPointSplineController(
-                    exo=exo, rise_fraction=config.RISE_FRACTION, peak_torque=config.PEAK_TORQUE,
-                    peak_fraction=config.PEAK_FRACTION,
-                    fall_fraction=config.FALL_FRACTION,
-                    bias_torque=config.SPLINE_BIAS,
-                    use_gait_phase=False)
-                # slip_recovery_time = config.FALL_FRACTION-0.01
-                slip_recovery_time = 0.99
-            elif config.STANCE_CONTROL_STYLE == config_util.StanceCtrlStyle.FIVEPOINTSPLINE:
-                print("using a spline based controller!")
-                slip_controller = controllers.FourPointSplineController(
-                    exo=exo, rise_fraction=config.RISE_FRACTION, peak_torque=config.PEAK_TORQUE,
-                    peak_fraction=config.PEAK_FRACTION,
-                    fall_fraction=config.FALL_FRACTION,
-                    bias_torque=config.SPLINE_BIAS,
-                    use_gait_phase=False,
-                    peak_hold_time=0.1)
-                slip_recovery_time = 0.99
+    # elif config.TASK == config_util.Task.STANDINGPERTURBATION:
+    #     for exo in exo_list:
+    #         gait_state_estimator = gait_state_estimators.SlipDetectorAP(
+    #             data_container=exo.data)
+    #         gait_state_estimator_list.append(gait_state_estimator)
+    #         standing_controller = controllers.GenericImpedanceController(
+    #             exo=exo, setpoint=10, k_val=100)
+    #         if config.STANCE_CONTROL_STYLE == config_util.StanceCtrlStyle.GENERICIMPEDANCE:
+    #             slip_controller = controllers.GenericImpedanceController(
+    #                 exo=exo, setpoint=config.SET_POINT, k_val=config.K_VAL)
+    #             slip_recovery_time = 1.01  # TODO(maxshep)
+    #         elif config.STANCE_CONTROL_STYLE == config_util.StanceCtrlStyle.FOURPOINTSPLINE:
+    #             print("using a spline based controller!")
+    #             slip_controller = controllers.FourPointSplineController(
+    #                 exo=exo, rise_fraction=config.RISE_FRACTION, peak_torque=config.PEAK_TORQUE,
+    #                 peak_fraction=config.PEAK_FRACTION,
+    #                 fall_fraction=config.FALL_FRACTION,
+    #                 bias_torque=config.SPLINE_BIAS,
+    #                 use_gait_phase=False)
+    #             # slip_recovery_time = config.FALL_FRACTION-0.01
+    #             slip_recovery_time = 0.99
+    #         elif config.STANCE_CONTROL_STYLE == config_util.StanceCtrlStyle.FIVEPOINTSPLINE:
+    #             print("using a spline based controller!")
+    #             slip_controller = controllers.FourPointSplineController(
+    #                 exo=exo, rise_fraction=config.RISE_FRACTION, peak_torque=config.PEAK_TORQUE,
+    #                 peak_fraction=config.PEAK_FRACTION,
+    #                 fall_fraction=config.FALL_FRACTION,
+    #                 bias_torque=config.SPLINE_BIAS,
+    #                 use_gait_phase=False,
+    #                 peak_hold_time=0.1)
+    #             slip_recovery_time = 0.99
 
-            state_machine = state_machines.StandingPerturbationResponse(exo=exo,
-                                                                        standing_controller=standing_controller,
-                                                                        slip_controller=slip_controller,
-                                                                        slip_recovery_time=slip_recovery_time)
-            state_machine_list.append(state_machine)
+    #         state_machine = state_machines.StandingPerturbationResponse(exo=exo,
+    #                                                                     standing_controller=standing_controller,
+    #                                                                     slip_controller=slip_controller,
+    #                                                                     slip_recovery_time=slip_recovery_time)
+    #         state_machine_list.append(state_machine)
 
-    elif config.TASK == config.util.Task.SLIPDETECTFROMSYNC:
+    elif config.TASK == config_util.Task.SLIPDETECTFROMSYNC:
         if len(exo_list) != 2:
             raise ValueError(
                 'Must have two exos connected for task=BILATERALSTANDINGPERTURBATION')
