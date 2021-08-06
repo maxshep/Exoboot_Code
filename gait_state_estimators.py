@@ -213,6 +213,7 @@ class BilateralSlipDetectorFromSync(BilateralSlipDetectorParent):
     def detect_slip(self):
         if self.refractory_timer.check():  # if recent slip
             slip_detected = False
+            self.last_sync = False
         else:
             for exo in self.exo_list:
                 if self.last_sync and not exo.data.sync:  # falling edge
@@ -221,7 +222,7 @@ class BilateralSlipDetectorFromSync(BilateralSlipDetectorParent):
                     break
                 else:
                     slip_detected = False
-        self.last_sync = exo.data.sync
+            self.last_sync = exo.data.sync
         return slip_detected
 
 
