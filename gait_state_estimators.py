@@ -172,19 +172,21 @@ class BilateralSlipDetectorParent():
 
     def detect(self):
         slip_detected = self.detect_slip()
-        if self.slip_detect_active and slip_detected:
-            print('slip detected!')
-            self.delay_timer.start()
-        if self.delay_timer.check():
-            self.delay_timer.reset()
-            for exo in self.exo_list:
-                exo.data.did_slip = True
-        elif self.slip_detect_active and not slip_detected:
-            for exo in self.exo_list:
-                exo.data.did_slip = False
-        elif not self.slip_detect_active:
+        if self.slip_detect_active:
             if slip_detected:
-                print('slip detected, but detector inactive')
+                print('slip detected!')
+                self.delay_timer.start()
+            if self.delay_timer.check():
+                print('delay finished!')
+                self.delay_timer.reset()
+                for exo in self.exo_list:
+                    exo.data.did_slip = True
+            else:
+                for exo in self.exo_list:
+                    exo.data.did_slip = False
+        else:
+            if slip_detected:
+                print('slip detected, but actuation inactive')
             for exo in self.exo_list:
                 exo.data.did_slip = False
 
