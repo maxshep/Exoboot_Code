@@ -208,6 +208,7 @@ class BilateralSlipDetectorFromSync(BilateralSlipDetectorParent):
                  delay_ms=500,
                  time_out=5):
         super().__init__(exo_1=exo_1, exo_2=exo_2, delay_ms=delay_ms, time_out=time_out)
+        self.last_sync = True
 
     def detect_slip(self):
         if self.refractory_timer.check():  # if recent slip
