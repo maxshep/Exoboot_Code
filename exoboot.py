@@ -26,8 +26,8 @@ def connect_to_exos(file_ID: str = None,
                     log_en: bool = False,
                     log_level: int = 3,
                     do_read_fsrs: bool = False,
-                    do_read_sync: bool = False,
-                    max_allowable_current: int = 20000):
+                    max_allowable_current: int = 20000,
+                    sync_detector=None):
     '''Connect to Exos, instantiate Exo objects.'''
 
     # Load Ports and baud rate
@@ -54,7 +54,7 @@ def connect_to_exos(file_ID: str = None,
             exo_list.append(Exo(dev_id=dev_id, file_ID=file_ID,
                                 target_freq=target_freq,
                                 do_read_fsrs=do_read_fsrs,
-                                do_read_sync=do_read_sync,
+                                sync_detector=sync_detector,
                                 max_allowable_current=max_allowable_current))
         except IOError:
             print('Unable to open exo on port: ', port,
@@ -72,18 +72,19 @@ class Exo():
                  file_ID: str = None,
                  target_freq: float = 200,
                  do_read_fsrs: bool = False,
-                 do_read_sync: bool = False):
+                 sync_detector=None):
         '''Exo object is the primary interface with the Dephy ankle exos, and corresponds to a single physical exoboot.
         Args:
             dev_id: int. Unique integer to identify the exo in flexsea's library. Returned by connect_to_exo
             file_ID: str. Unique string added to filename. If None, no file will be saved.
             do_read_fsrs: bool indicating whether to read FSRs.
-            dy_sync: bool indicating whether to read GPIO for sync cable '''
+            sync_detector: gpiozero class for sync line, created in config_util '''
         self.dev_id = dev_id
         self.max_allowable_current = max_allowable_current
         self.file_ID = file_ID
         self.do_read_fsrs = do_read_fsrs
-        self.do_read_sync = do_read_sync
+        self.do_read_sync = True if sync_detector is not None else False
+        self.sync_detector = sync_detector
         if self.dev_id is None:
             print('Exo obj created but no exoboot connected. Some methods available')
         elif self.dev_id in constants.LEFT_EXO_DEV_IDS:
@@ -118,11 +119,6 @@ class Exo():
                         pin=constants.RIGHT_TOE_FSR_PIN, pull_up=True)
             else:
                 raise Exception('Can only use FSRs with rapberry pi!')
-        if self.do_read_sync:
-            if fxu.is_pi() or fxu.is_pi64():
-                import gpiozero  # pylint: disable=import-error
-                self.sync_detector = gpiozero.InputDevice(
-                    pin=constants.SYNC_PIN, pull_up=True)
 
         self.data = self.DataContainer(do_include_FSRs=do_read_fsrs)
         self.has_calibrated = False

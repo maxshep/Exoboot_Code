@@ -21,10 +21,14 @@ config = config_util.load_config_from_args()  # loads config from passed args
 file_ID = input(
     'Other than the date, what would you like added to the filename?')
 
+'''if sync signal is used, this will be gpiozero object, not None.'''
+sync_detector = config_util.get_sync_detector(config)
+
 '''Connect to Exos, instantiate Exo objects.'''
 exo_list = exoboot.connect_to_exos(file_ID=file_ID, target_freq=config.TARGET_FREQ,
-                                   actpack_freq=config.ACTPACK_FREQ, do_read_fsrs=config.DO_READ_FSRS, do_read_sync=config.DO_READ_SYNC,
-                                   log_en=config.DO_DEPHY_LOG, max_allowable_current=config.MAX_ALLOWABLE_CURRENT)
+                                   actpack_freq=config.ACTPACK_FREQ, do_read_fsrs=config.DO_READ_FSRS,
+                                   log_en=config.DO_DEPHY_LOG, max_allowable_current=config.MAX_ALLOWABLE_CURRENT,
+                                   sync_detector=sync_detector)
 print('Battery Voltage: ', 0.001*exo_list[0].get_batt_voltage(), 'V')
 
 config_saver = config_util.ConfigSaver(

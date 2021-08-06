@@ -1,4 +1,4 @@
-from typing import Type
+from typing import Type, List
 from dataclasses import dataclass, field
 import time
 import csv
@@ -6,7 +6,7 @@ import sys
 import importlib
 from enum import Enum
 import argparse
-from typing import List
+import constants
 
 
 class Task(Enum):
@@ -151,3 +151,13 @@ def load_config_from_args():
     args = parse_args()
     config = load_config(config_filename=args.config)
     return config
+
+
+def get_sync_detector(config: Type[ConfigurableConstants]):
+    if config.DO_READ_SYNC:
+        import gpiozero  # pylint: disable=import-error
+        sync_detector = gpiozero.InputDevice(
+            pin=constants.SYNC_PIN, pull_up=True)
+        return sync_detector
+    else:
+        return None
