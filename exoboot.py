@@ -188,7 +188,7 @@ class Exo():
                 self.gen_var2 = None
                 self.gen_var3 = None
             if do_read_sync:
-                self.sync = None
+                self.sync = True
 
     def close(self):
         self.update_gains()

@@ -12,6 +12,7 @@ config.PEAK_TORQUE = 15
 config.SPLINE_BIAS = 0.5  # Nm
 config.DO_DEPHY_LOG = False
 config.DEPHY_LOG_LEVEL = 6
+config.DO_READ_SYNC = True
 
 
 ''' Here are the variables that are updatable in config, and their defaults:
