@@ -8,6 +8,7 @@ import constants
 from typing import Type
 import util
 import config_util
+import ml_util
 
 
 class GaitStateEstimator():
@@ -43,22 +44,45 @@ class MLGaitStateEstimator():
     def __init__(self,
                  side: Type[constants.Side],
                  data_container: Type[exoboot.Exo.DataContainer],
-                 heel_strike_detector,
-                 gait_phase_estimator,
-                 toe_off_detector):
+                 jetson_interface: Type[ml_util.JetsonInterface()],
+                 do_print_heel_strikes=True):
         '''Looks at the exo data, applies logic to detect HS, gait phase, and TO, and adds to exo.data'''
         self.side = side
-        self.data_container = data_container
-        self.heel_strike_detector = heel_strike_detector
-        self.gait_phase_estimator = gait_phase_estimator
-        self.toe_off_detector = toe_off_detector
+        self.data = data_container
+        self.do_print_heel_strikes = do_print_heel_strikes
+        self.last_is_stance = False
+        self.stride_average_gait_state_estimator = StrideAverageGaitPhaseEstimator()
+        self.jetson_object = jetson_interface
 
-    def detect(self, data: Type[exoboot.Exo.DataContainer], do_print_heel_strikes=True):
-        data = self.data_container  # For convenience
-        data.did_heel_strike = self.heel_strike_detector.detect(data)
-        data.gait_phase = self.gait_phase_estimator.estimate(data)
-        data.did_toe_off = self.toe_off_detector.detect(data)
-        if do_print_heel_strikes and data.did_heel_strike:
+    def detect(self):
+        self.jetson_object.package_and_send_message(
+            side=self.side, data_container=self.data)
+        self.jetson_object.grab_message_and_parse()
+        gait_phase, is_stance = self.jetson_object.get_most_recent_gait_phase(
+            side=self.side)
+        if gait_phase < 0:
+            gait_phase = 0
+        if gait_phase > 1:
+            gait_phase = 1
+        self.data.did_heel_strike = False
+        self.data.did_toe_off = False
+
+        # Add heel strikes and toe-offs from is_stance
+        if is_stance and not self.last_is_stance:
+            self.data.did_heel_strike = True
+        if not is_stance and self.last_is_stance:
+            self.data.did_toe_off = True
+        self.last_is_stance = is_stance
+
+        # use stride average gait phase estimator to determine if steady state and mask
+        stride_average_gait_phase = self.stride_average_gait_state_estimator.estimate(
+            data=self.data)
+        if stride_average_gait_phase is not None:
+            self.data.gait_phase = gait_phase
+        else:
+            self.data.gait_phase = None
+
+        if self.do_print_heel_strikes and self.data.did_heel_strike:
             print('heel strike detected on side: ', self.side)
 
     def update_params_from_config(self, config: Type[config_util.ConfigurableConstants]):

@@ -1,24 +1,21 @@
-from dataclasses import dataclass, field, InitVar
-from typing import List
-
-
-@dataclass
-class Book:
-    '''Object for tracking physical books in a collection.'''
-    name: str
-    do_include_FSRs: InitVar[bool] = False
-    weight: float = field(default=0.0, repr=False)
-    shelf_id: int = field(init=False)
-    chapters: List[str] = field(default_factory=list)
-    condition: str = field(default="Good", compare=False)
-
-    def __post_init__(self, do_include_FSRs):
-        if do_include_FSRs:
-            self.shelf_id = None
-        else:
-            self.shelf_id = 0
-
-
-book = Book(name='hi', do_include_FSRs=True)
-print(book.shelf_id)
-print(book)
+from tcpip import ClientTCP
+# import numpy as np
+import time
+client = ClientTCP('192.168.1.2', 8080)
+for i in range(10):
+    for side_str in ['0', '1']:
+        accel_x = '%.2f' % int(side_str)
+        accel_y = '%.2f' % int(side_str)
+        accel_z = '%.2f' % int(side_str)
+        gyro_x = '%.2f' % int(side_str)
+        gyro_y = '%.2f' % int(side_str)
+        gyro_z = '%.2f' % int(side_str)
+        ankle_angle = '%.2f' % int(side_str)
+        ankle_velocity = '%.2f' % int(side_str)
+        message = '!'+side_str + ',' + accel_x+','+accel_y+','+accel_z+','+gyro_x + \
+            ','+gyro_y+','+gyro_z+','+ankle_angle+','+ankle_velocity
+        print(message)
+        client.to_server(message)
+        time.sleep(1)
+        msg = client.from_server()
+        print(msg)

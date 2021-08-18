@@ -131,8 +131,8 @@ class Exo():
                               k_val=0,
                               b_val=0,
                               ff=constants.DEFAULT_FF)
-        self.TR_from_ankle_angle = interpolate.PchipInterpolator(
-            constants.ANKLE_PTS, self.motor_sign*constants.TR_PTS)
+            self.TR_from_ankle_angle = interpolate.PchipInterpolator(
+                constants.ANKLE_PTS, self.motor_sign*constants.TR_PTS)
 
     @dataclass
     class DataContainer:
