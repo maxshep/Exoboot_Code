@@ -48,6 +48,7 @@ class JetsonInterface():
 
     def get_most_recent_gait_phase(self, side: Type[constants.Side]):
         for message in self.data:
+            print(message)
             if side == constants.Side.LEFT and message[0] == 0:
                 gait_phase = message[1]
                 stance_swing = message[2]
