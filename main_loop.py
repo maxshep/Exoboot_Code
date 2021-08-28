@@ -15,6 +15,7 @@ import parameter_passers
 import control_muxer
 import plotters
 import ml_util
+import traceback
 
 
 config = config_util.load_config_from_args()  # loads config from passed args
@@ -99,6 +100,7 @@ while True:
         print('Ctrl-C detected, Exiting Gracefully')
         break
     except Exception as err:
+        print(traceback.print_exc())
         print("Unexpected error:", err)
         break
 

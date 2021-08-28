@@ -182,8 +182,6 @@ class GenericSplineController(Controller):
         self.exo.command_torque(desired_torque)
 
     def update_spline(self, spline_x, spline_y, first_call=False):
-        if any(x < 0 or x > 1 for x in spline_x):
-            raise ValueError('spline_x can only contain values within [0, 1]')
         if first_call or self.spline_x != spline_x or self.spline_y != spline_y:
             self.spline_x = spline_x
             self.spline_y = spline_y
@@ -238,7 +236,7 @@ class FourPointSplineController(GenericSplineController):
         if self.peak_hold_time > 0:
             return [0, rise_fraction, peak_fraction, peak_fraction+self.peak_hold_time, fall_fraction, 1]
         else:
-            return [0, rise_fraction, peak_fraction, fall_fraction, 1]
+            return [0, rise_fraction, peak_fraction, fall_fraction, 10]
 
     def _get_spline_y(self, peak_torque) -> list:
         if self.peak_hold_time > 0:

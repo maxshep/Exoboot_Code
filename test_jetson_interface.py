@@ -31,8 +31,12 @@ for idx, row in df.iterrows():
     df.loc[idx, 'gp_jetson'] = gp
     df.loc[idx, 'ss_jetson'] = ss
     print(gp, ss)
+    if idx > 400:
+        break
 
 
 plt.plot(df['gp_jetson'])
 plt.plot(df['ss_jetson'])
 plt.show()
+
+df.to_csv('test_jetson.csv')

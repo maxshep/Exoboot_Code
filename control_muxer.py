@@ -150,7 +150,7 @@ def get_gse_and_sm_lists(exo_list, config: Type[config_util.ConfigurableConstant
     elif config.TASK == config_util.Task.WALKINGMLGAITPHASE:
         jetson_interface = ml_util.JetsonInterface()
         for exo in exo_list:
-            gait_phase_estimator = gait_state_estimators.MLGaitStateEstimator(
+            gait_state_estimator = gait_state_estimators.MLGaitStateEstimator(
                 side=exo.side, data_container=exo.data, jetson_interface=jetson_interface)
             gait_state_estimator_list.append(gait_state_estimator)
             # Define State Machine
