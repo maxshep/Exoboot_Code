@@ -9,7 +9,7 @@ from collections import deque
 class JetsonInterface():
 
     def __init__(self, do_set_up_server=True, server_ip='192.168.1.2', recv_port=8080):
-        self.data = deque([[1, 0], [2, 0], [3, 0]], maxlen=10)
+        self.data = deque(maxlen=10)
         if do_set_up_server:
             self.clienttcp = tcpip.ClientTCP(server_ip, recv_port)
 
@@ -48,7 +48,6 @@ class JetsonInterface():
 
     def get_most_recent_gait_phase(self, side: Type[constants.Side]):
         for message in self.data:
-            print(message)
             if side == constants.Side.LEFT and message[0] == 0:
                 gait_phase = message[1]
                 stance_swing = message[2]
