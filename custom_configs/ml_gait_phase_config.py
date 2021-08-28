@@ -10,6 +10,7 @@ config.PEAK_FRACTION = 0.53*(1/peak_fraction_from_training)
 config.FALL_FRACTION = 1
 config.PEAK_TORQUE = 5
 config.SPLINE_BIAS = 3  # Nm
+config.DO_READ_FSRS = True
 
 
 ''' Here are the variables that are updatable in config, and their defaults:
