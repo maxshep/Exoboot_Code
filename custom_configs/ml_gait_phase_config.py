@@ -11,6 +11,7 @@ config.FALL_FRACTION = 1
 config.PEAK_TORQUE = 5
 config.SPLINE_BIAS = 3  # Nm
 config.DO_READ_FSRS = True
+config.VARS_TO_PLOT = ['heel_fsr', 'toe_fsr']
 
 
 ''' Here are the variables that are updatable in config, and their defaults:

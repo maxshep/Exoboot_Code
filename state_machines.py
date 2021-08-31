@@ -134,25 +134,21 @@ class StanceSwingReeloutReelinStateMachine(HighLevelController):
             did_controllers_switch = True
         elif self.swing_only:  # for swing only
             self.controller_now = self.swing_controller
-            did_controllers_switch = True # update gains every time for now
+            did_controllers_switch = True  # update gains every time for now
         elif (self.controller_now == self.swing_controller and
               self.exo.data.did_heel_strike and
                 self.exo.data.gait_phase is not None):
             self.controller_now = self.reel_in_controller
             did_controllers_switch = True
-            self.exo.data.gen_var1 = 4
         elif self.controller_now == self.reel_in_controller and self.reel_in_controller.check_completion_status():
             self.controller_now = self.stance_controller
             did_controllers_switch = True
-            self.exo.data.gen_var1 = 1
         elif self.controller_now == self.stance_controller and (self.exo.data.did_toe_off or self.exo.data.gait_phase is None):
             self.controller_now = self.reel_out_controller
             did_controllers_switch = True
-            self.exo.data.gen_var1 = 2
         elif self.controller_now == self.reel_out_controller and self.reel_out_controller.check_completion_status():
             self.controller_now = self.swing_controller
             did_controllers_switch = True
-            self.exo.data.gen_var1 = 3
 
         else:
             did_controllers_switch = False
