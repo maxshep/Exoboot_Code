@@ -3,7 +3,7 @@ import config_util
 config = config_util.ConfigurableConstants()
 
 config.TASK = config_util.Task.WALKINGMLGAITPHASE
-config.READ_ONLY = False
+config.READ_ONLY = True
 peak_fraction_from_training = 0.63
 config.RISE_FRACTION = 0.2*(1/peak_fraction_from_training)
 config.PEAK_FRACTION = 0.53*(1/peak_fraction_from_training)
