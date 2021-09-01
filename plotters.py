@@ -3,14 +3,16 @@ import pandas as pd
 import exoboot
 import time
 
-def save_plot(filename: str, vars_to_plot: list, save = True, max_file_len = 24000):
-    filenames = [filename+'_LEFT.csv', filename+'_RIGHT.csv']  # LEFT then RIGHT
+
+def save_plot(filename: str, vars_to_plot: list, save=True, max_file_len=24000):
+    filenames = [filename+'_LEFT.csv',
+                 filename+'_RIGHT.csv']  # LEFT then RIGHT
     sides = ['left', 'right']
     fig, axs = plt.subplots(2, figsize=(20, 5), dpi=80)
     for i in range(2):
         try:
             df = pd.read_csv(filenames[i])
-            if len(df)>max_file_len:
+            if len(df) > max_file_len:
                 print('Data file too long to plot')
                 return
             for var_name in vars_to_plot:
@@ -19,6 +21,6 @@ def save_plot(filename: str, vars_to_plot: list, save = True, max_file_len = 240
             axs[i].legend()
         except:
             print(filenames[i], ' not found for plotting')
-            pass 
+            pass
     if save:
-        plt.savefig(filename +'_plot.png')
+        plt.savefig(filename + '_plot.png')
