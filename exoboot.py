@@ -81,7 +81,7 @@ class Exo():
         self.max_allowable_current = max_allowable_current
         self.file_ID = file_ID
         self.do_read_fsrs = do_read_fsrs
-        self.do_read_sync = True if sync_detector is not None else False
+        self.do_read_sync = True if sync_detector else False
         self.sync_detector = sync_detector
         if self.dev_id is None:
             print('Exo obj created but no exoboot connected. Some methods available')
