@@ -53,6 +53,8 @@ class MLGaitStateEstimator():
         self.last_is_stance = False
         self.stride_average_gait_state_estimator = StrideAverageGaitPhaseEstimator()
         self.jetson_object = jetson_interface
+        print(
+            'REMEMBER TO PRESS a TO MAKE CONTROLLER ACTIVE (INACTIVE TO START BY DEFAULT)')
 
     def detect(self):
         self.jetson_object.package_and_send_message(
@@ -79,12 +81,13 @@ class MLGaitStateEstimator():
         self.last_is_stance = is_stance
 
         # use stride average gait phase estimator to determine if steady state and mask
-        stride_average_gait_phase = self.stride_average_gait_state_estimator.estimate(
-            data=self.data)
-        if stride_average_gait_phase is not None:
-            self.data.gait_phase = gait_phase
-        else:
-            self.data.gait_phase = None
+        # stride_average_gait_phase = self.stride_average_gait_state_estimator.estimate(
+        #     data=self.data)
+        # if stride_average_gait_phase is not None:
+        #     self.data.gait_phase = gait_phase
+        # else:
+        #     self.data.gait_phase = None
+        self.data.gait_phase = gait_phase
 
         if self.do_print_heel_strikes and self.data.did_heel_strike:
             print('heel strike detected on side: ', self.side)
