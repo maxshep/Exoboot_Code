@@ -84,6 +84,7 @@ class Exo():
         self.file_ID = file_ID
         self.do_read_fsrs = do_read_fsrs
         self.do_include_sync = True if sync_detector else False
+        print('do include sync? ', self.do_include_sync)
         if self.do_include_sync:
             print('Reading sync signal')
         if do_include_gen_vars:
@@ -179,7 +180,8 @@ class Exo():
         gen_var2: float = field(init=False)
         gen_var3: float = field(init=False)
 
-        def __post_init__(self, do_include_FSRs, do_include_did_slip, do_include_gen_vars, do_include_sync):
+        def __post_init__(self, do_include_FSRs, do_include_sync, do_include_did_slip, do_include_gen_vars):
+            # Important! The order of these args need to match their order as InitVars above
             if do_include_FSRs:
                 self.heel_fsr = False
                 self.toe_fsr = False
