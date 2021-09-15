@@ -44,7 +44,7 @@ class ConfigurableConstants():
 
     TARGET_FREQ: float = 200  # Hz
     ACTPACK_FREQ: float = 200  # Hz
-    DO_DEPHY_LOG: bool = False
+    DO_DEPHY_LOG: bool = True
     DEPHY_LOG_LEVEL: int = 4
     ONLY_LOG_IF_NEW: bool = True
 

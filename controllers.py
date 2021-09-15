@@ -78,7 +78,7 @@ class SawickiWickiController(Controller):
 
             else:
                 # Basically keep it reeled in
-                self.exo.command_torque(desired_torque=1)
+                self.exo.command_torque(desired_torque=3)
         else:
             pass  # Engage command was sent when do_engage went true
 
