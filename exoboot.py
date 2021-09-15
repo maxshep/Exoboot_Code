@@ -83,9 +83,11 @@ class Exo():
         self.max_allowable_current = max_allowable_current
         self.file_ID = file_ID
         self.do_read_fsrs = do_read_fsrs
-        self.do_read_sync = True if sync_detector else False
-        if self.do_read_sync:
+        self.do_include_sync = True if sync_detector else False
+        if self.do_include_sync:
             print('Reading sync signal')
+        if do_include_gen_vars:
+            print('Including gen vars')
         self.sync_detector = sync_detector
         if self.dev_id is None:
             print('Exo obj created but no exoboot connected. Some methods available')
@@ -124,7 +126,7 @@ class Exo():
 
         self.data = self.DataContainer(
             do_include_FSRs=do_read_fsrs, do_include_did_slip=do_include_did_slip,
-            do_include_sync=self.do_read_sync, do_include_gen_vars=do_include_gen_vars)
+            do_include_sync=self.do_include_sync, do_include_gen_vars=do_include_gen_vars)
         self.has_calibrated = False
         self.is_clipping = False
         if self.file_ID is not None:
@@ -177,7 +179,7 @@ class Exo():
         gen_var2: float = field(init=False)
         gen_var3: float = field(init=False)
 
-        def __post_init__(self, do_include_FSRs, do_include_did_slip, do_include_gen_vars, do_read_sync):
+        def __post_init__(self, do_include_FSRs, do_include_did_slip, do_include_gen_vars, do_include_sync):
             if do_include_FSRs:
                 self.heel_fsr = False
                 self.toe_fsr = False
@@ -187,7 +189,7 @@ class Exo():
                 self.gen_var1 = None
                 self.gen_var2 = None
                 self.gen_var3 = None
-            if do_read_sync:
+            if do_include_sync:
                 self.sync = True
 
     def close(self):
@@ -203,7 +205,7 @@ class Exo():
         if self.do_read_fsrs:
             self.heel_fsr_detector.close()
             self.toe_fsr_detector.close()
-        if self.do_read_sync:
+        if self.do_include_sync:
             self.sync_detector.close()
 
     def update_gains(self, Kp=None, Ki=None, Kd=None, k_val=None, b_val=None, ff=None):
@@ -281,7 +283,7 @@ class Exo():
         if self.do_read_fsrs:
             self.data.heel_fsr = self.heel_fsr_detector.value
             self.data.toe_fsr = self.toe_fsr_detector.value
-        if self.do_read_sync:
+        if self.do_include_sync:
             self.data.sync = self.sync_detector.value
 
     def get_batt_voltage(self):
