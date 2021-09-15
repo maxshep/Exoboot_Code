@@ -84,11 +84,6 @@ class Exo():
         self.file_ID = file_ID
         self.do_read_fsrs = do_read_fsrs
         self.do_include_sync = True if sync_detector else False
-        print('do include sync? ', self.do_include_sync)
-        if self.do_include_sync:
-            print('Reading sync signal')
-        if do_include_gen_vars:
-            print('Including gen vars')
         self.sync_detector = sync_detector
         if self.dev_id is None:
             print('Exo obj created but no exoboot connected. Some methods available')
@@ -188,12 +183,10 @@ class Exo():
             if do_include_did_slip:
                 self.did_slip = False
             if do_include_gen_vars:
-                print('adding gen vars...')
                 self.gen_var1 = None
                 self.gen_var2 = None
                 self.gen_var3 = None
             if do_include_sync:
-                print('adding sync...')
                 self.sync = True
 
     def close(self):
