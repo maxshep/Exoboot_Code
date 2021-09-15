@@ -84,6 +84,8 @@ class Exo():
         self.file_ID = file_ID
         self.do_read_fsrs = do_read_fsrs
         self.do_read_sync = True if sync_detector else False
+        if self.do_read_sync:
+            print('Reading sync signal')
         self.sync_detector = sync_detector
         if self.dev_id is None:
             print('Exo obj created but no exoboot connected. Some methods available')
@@ -121,7 +123,8 @@ class Exo():
                 raise Exception('Can only use FSRs with rapberry pi!')
 
         self.data = self.DataContainer(
-            do_include_FSRs=do_read_fsrs, do_include_did_slip=do_include_did_slip, do_include_sync=self.do_read_sync)
+            do_include_FSRs=do_read_fsrs, do_include_did_slip=do_include_did_slip,
+            do_include_sync=self.do_read_sync, do_include_gen_vars=do_include_gen_vars)
         self.has_calibrated = False
         self.is_clipping = False
         if self.file_ID is not None:
