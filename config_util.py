@@ -85,6 +85,7 @@ class ConfigurableConstants():
     VARS_TO_PLOT: List = field(default_factory=lambda: [])
     DO_DETECT_SLIP: bool = False
     SLIP_DETECT_ACTIVE: bool = False
+    DO_INCLUDE_GEN_VARS: bool = False
     SLIP_DETECT_DELAY: int = 0
     EXPERIMENTER_NOTES: str = 'Experimenter notes go here'
 

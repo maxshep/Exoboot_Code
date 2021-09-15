@@ -52,6 +52,7 @@ def connect_to_exos(file_ID: str,
                                 do_read_fsrs=config.DO_READ_FSRS,
                                 do_include_did_slip=config.DO_DETECT_SLIP,
                                 max_allowable_current=config.MAX_ALLOWABLE_CURRENT,
+                                do_include_gen_vars=config.DO_INCLUDE_GEN_VARS,
                                 sync_detector=sync_detector))
         except IOError:
             print('Unable to open exo on port: ', port,
@@ -70,6 +71,7 @@ class Exo():
                  target_freq: float = 200,
                  do_read_fsrs: bool = False,
                  do_include_did_slip: bool = False,
+                 do_include_gen_vars: bool = False,
                  sync_detector=None):
         '''Exo object is the primary interface with the Dephy ankle exos, and corresponds to a single physical exoboot.
         Args:

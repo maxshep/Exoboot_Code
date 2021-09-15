@@ -66,6 +66,7 @@ class SawickiWickiController(Controller):
             if len(self.ankle_angles) == 3:
                 if (self.ankle_angles[1] > self.ankle_angles[0] and
                         self.ankle_angles[1] > self.ankle_angles[2]):
+                    self.exo.data.gen_var1 = True
                     self.do_engage = True
                     self._update_setpoint(theta0=self.ankle_angles[0])
 
@@ -79,6 +80,7 @@ class SawickiWickiController(Controller):
             else:
                 # Basically keep it reeled in
                 self.exo.command_torque(desired_torque=3)
+                self.exo.gen_var1 = 5
         else:
             pass  # Engage command was sent when do_engage went true
 

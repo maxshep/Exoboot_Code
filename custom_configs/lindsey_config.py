@@ -11,6 +11,7 @@ config.REEL_IN_TIMEOUT = 0.2
 config.SWING_SLACK = 6000
 config.REEL_IN_SLACK_CUTOFF = 1000
 config.B_VAL = 0  # 2000 helped
+config.DO_INCLUDE_GEN_VARS = True
 
 ''' Here are the variables that are updatable in config, and their defaults:
 
