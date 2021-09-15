@@ -126,7 +126,7 @@ class Exo():
 
         self.data = self.DataContainer(
             do_include_FSRs=do_read_fsrs, do_include_did_slip=do_include_did_slip,
-            do_include_sync=self.do_include_sync, do_include_gen_vars=do_include_gen_vars)
+            do_include_gen_vars=do_include_gen_vars, do_include_sync=self.do_include_sync)
         self.has_calibrated = False
         self.is_clipping = False
         if self.file_ID is not None:
