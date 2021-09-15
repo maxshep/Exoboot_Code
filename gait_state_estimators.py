@@ -228,7 +228,7 @@ class BilateralSlipDetectorParent():
 
     def update_delay(self, delay_ms):
         print('updating delay timer: ', delay_ms)
-        self.delay_timer = util.DelayTimer(delay_ms)
+        self.delay_timer = util.DelayTimer(0.001*delay_ms)
 
     def update_params_from_config(self, config: Type[config_util.ConfigurableConstants]):
         print('slip detection active: ', config.SLIP_DETECT_ACTIVE)

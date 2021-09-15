@@ -10,7 +10,7 @@ class DelayTimer():
         A timer
 
         Args:
-            delay_time: amount of time to delay
+            delay_time: amount of time to delay (s)
             true_until: option to make the timer go True until delay_time is reached, then False
         '''
         self.delay_time = delay_time

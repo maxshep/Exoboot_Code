@@ -119,7 +119,7 @@ class Exo():
                 raise Exception('Can only use FSRs with rapberry pi!')
 
         self.data = self.DataContainer(
-            do_include_FSRs=do_read_fsrs, do_include_did_slip=do_include_did_slip)
+            do_include_FSRs=do_read_fsrs, do_include_did_slip=do_include_did_slip, do_include_sync=self.do_read_sync)
         self.has_calibrated = False
         self.is_clipping = False
         if self.file_ID is not None:
