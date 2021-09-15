@@ -147,7 +147,7 @@ class Exo():
         do_include_FSRs: InitVar[bool] = False
         do_include_sync: InitVar[bool] = False
         do_include_did_slip: InitVar[bool] = False
-        do_include_gen_vars: InitVar[bool] = True
+        do_include_gen_vars: InitVar[bool] = False
         state_time: float = 0
         loop_time: float = 0
         accel_x: float = 0
@@ -186,10 +186,12 @@ class Exo():
             if do_include_did_slip:
                 self.did_slip = False
             if do_include_gen_vars:
+                print('adding gen vars...')
                 self.gen_var1 = None
                 self.gen_var2 = None
                 self.gen_var3 = None
             if do_include_sync:
+                print('adding sync...')
                 self.sync = True
 
     def close(self):
