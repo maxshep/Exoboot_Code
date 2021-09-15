@@ -148,7 +148,7 @@ class GenericSplineController(Controller):
         self.spline = None  # Placeholds so update_spline can fill self.last_spline
         self.update_spline(spline_x, spline_y, first_call=True)
         self.fade_duration = fade_duration
-        self.use_gait_phase = use_gait_phase
+        self.use_gait_phase = use_gait_phase  # if False, use time (s)
         super().update_controller_gains(Kp=Kp, Ki=Ki, Kd=Kd, ff=ff)
         # Fade timer goes from 0 to fade_duration, active if below fade_duration (starts inactive)
         self.fade_start_time = time.perf_counter()-100
