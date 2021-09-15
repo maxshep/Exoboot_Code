@@ -207,7 +207,7 @@ class BilateralSlipDetectorParent():
             if slip_detected:
                 print('slip detected!')
                 self.delay_timer.start()
-            print(self.delay_time.check())
+            print(self.delay_timer.check())
             if self.delay_timer.check():
                 print('delay finished!', self.delay_timer.delay_time)
                 self.delay_timer.reset()
