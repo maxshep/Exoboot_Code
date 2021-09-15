@@ -195,6 +195,7 @@ class BilateralSlipDetectorParent():
                  exo_2: Type[exoboot.Exo],
                  delay_ms: int = 0,
                  time_out: float = 5):
+        print('instantiating bilateral slip detector with delay: ', delay_ms)
         self.exo_list = [exo_1, exo_2]
         self.slip_detect_active = False
         print('slip_detect_active: ', self.slip_detect_active)
