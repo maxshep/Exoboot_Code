@@ -1,7 +1,7 @@
 
 import config_util
 config = config_util.ConfigurableConstants()
-config.HS_GYRO_DELAY = 0.05  # For example
+# config.HS_GYRO_DELAY = 0.05  # For example
 
 
 ''' Here are the variables that are updatable in config, and their defaults:
