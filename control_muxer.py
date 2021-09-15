@@ -71,6 +71,7 @@ def get_gse_and_sm_lists(exo_list, config: Type[config_util.ConfigurableConstant
         gait_phase_estimator = gait_state_estimators.BilateralSlipDetectorFromSync(
             exo_1=exo_list[0], exo_2=exo_list[1], delay_ms=500)
         gait_state_estimator_list.append(gait_phase_estimator)
+        print('Using sync-based slip detection: use dX! to adjust delay (ms) and pX! to adjust peak torque (Nm)')
         for exo in exo_list:
             standing_controller = controllers.GenericImpedanceController(
                 exo=exo, setpoint=10, k_val=100)
@@ -79,7 +80,7 @@ def get_gse_and_sm_lists(exo_list, config: Type[config_util.ConfigurableConstant
                     exo=exo, setpoint=config.SET_POINT, k_val=config.K_VAL)
                 slip_recovery_time = 1.01  # TODO(maxshep)
             elif config.STANCE_CONTROL_STYLE == config_util.StanceCtrlStyle.FOURPOINTSPLINE:
-                print("using a spline based controller!")
+                print("using a four-point spline based controller!")
                 slip_controller = controllers.FourPointSplineController(
                     exo=exo, rise_fraction=config.RISE_FRACTION, peak_torque=config.PEAK_TORQUE,
                     peak_fraction=config.PEAK_FRACTION,
@@ -90,7 +91,7 @@ def get_gse_and_sm_lists(exo_list, config: Type[config_util.ConfigurableConstant
                 slip_recovery_time = 0.99
 
             elif config.STANCE_CONTROL_STYLE == config_util.StanceCtrlStyle.FIVEPOINTSPLINE:
-                print("using a spline based controller!")
+                print("using a five-point spline based controller!")
                 slip_controller = controllers.FourPointSplineController(
                     exo=exo, rise_fraction=config.RISE_FRACTION, peak_torque=config.PEAK_TORQUE,
                     peak_fraction=config.PEAK_FRACTION,

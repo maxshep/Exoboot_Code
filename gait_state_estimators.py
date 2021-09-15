@@ -198,7 +198,7 @@ class BilateralSlipDetectorParent():
         print('instantiating bilateral slip detector with delay: ', delay_ms)
         self.exo_list = [exo_1, exo_2]
         self.slip_detect_active = False
-        print('slip_detect_active: ', self.slip_detect_active)
+        print('Slip detection active: ', False)
         self.update_delay(delay_ms=delay_ms)
         self.refractory_timer = util.DelayTimer(time_out, true_until=True)
 
@@ -206,10 +206,9 @@ class BilateralSlipDetectorParent():
         slip_detected = self.detect_slip()
         if self.slip_detect_active:
             if slip_detected:
-                print('slip detected!')
                 self.delay_timer.start()
             if self.delay_timer.check():
-                print('delay finished!', self.delay_timer.delay_time)
+                print('Slip detected!')
                 self.delay_timer.reset()
                 for exo in self.exo_list:
                     exo.data.did_slip = True
@@ -227,11 +226,11 @@ class BilateralSlipDetectorParent():
             'Child class does not have a detect_slip function implemented yet')
 
     def update_delay(self, delay_ms):
-        print('updating delay timer: ', delay_ms)
+        print('Updated delay timer: ', delay_ms)
         self.delay_timer = util.DelayTimer(0.001*delay_ms)
 
     def update_params_from_config(self, config: Type[config_util.ConfigurableConstants]):
-        print('slip detection active: ', config.SLIP_DETECT_ACTIVE)
+        print('Slip detection active: ', config.SLIP_DETECT_ACTIVE)
         self.slip_detect_active = config.SLIP_DETECT_ACTIVE
         self.update_delay(delay_ms=config.SLIP_DETECT_DELAY)
 
@@ -240,10 +239,9 @@ class BilateralSlipDetectorFromSync(BilateralSlipDetectorParent):
     def __init__(self,
                  exo_1: Type[exoboot.Exo],
                  exo_2: Type[exoboot.Exo],
-                 delay_ms,
+                 delay_ms=0,
                  time_out=5):
         super().__init__(exo_1=exo_1, exo_2=exo_2, delay_ms=delay_ms, time_out=time_out)
-        print('making slip detector with delay: ', delay_ms)
         self.last_sync = True
 
     def detect_slip(self):
