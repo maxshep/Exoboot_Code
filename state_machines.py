@@ -139,7 +139,6 @@ class StanceSwingReeloutReelinStateMachine(HighLevelController):
               self.exo.data.did_heel_strike and
                 self.exo.data.gait_phase is not None):
             self.controller_now = self.reel_in_controller
-            print('switching to reel in: ', self.reel_in_controller.reel_in_mV)
             did_controllers_switch = True
         elif self.controller_now == self.reel_in_controller and self.reel_in_controller.check_completion_status():
             self.controller_now = self.stance_controller
