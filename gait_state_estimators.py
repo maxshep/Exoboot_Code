@@ -207,6 +207,7 @@ class BilateralSlipDetectorParent():
             if slip_detected:
                 print('slip detected!')
                 self.delay_timer.start()
+            print(self.delay_time.check())
             if self.delay_timer.check():
                 print('delay finished!', self.delay_timer.delay_time)
                 self.delay_timer.reset()
@@ -226,6 +227,7 @@ class BilateralSlipDetectorParent():
             'Child class does not have a detect_slip function implemented yet')
 
     def update_delay(self, delay_ms):
+        print('updating delay timer: ', delay_ms)
         self.delay_timer = util.DelayTimer(delay_ms)
 
     def update_params_from_config(self, config: Type[config_util.ConfigurableConstants]):
@@ -238,7 +240,7 @@ class BilateralSlipDetectorFromSync(BilateralSlipDetectorParent):
     def __init__(self,
                  exo_1: Type[exoboot.Exo],
                  exo_2: Type[exoboot.Exo],
-                 delay_ms=500,
+                 delay_ms,
                  time_out=5):
         super().__init__(exo_1=exo_1, exo_2=exo_2, delay_ms=delay_ms, time_out=time_out)
         print('making slip detector with delay: ', delay_ms)
