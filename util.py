@@ -37,6 +37,9 @@ class DelayTimer():
     def reset(self):
         self.start_time = None
 
+    def get_time(self):
+        return time.perf_counter() - self.start_time
+
 
 class FlexibleTimer():
     '''A timer that attempts to reach consistent desired freq by variable pausing.'''
