@@ -240,17 +240,26 @@ class BilateralSlipDetectorFromSync(BilateralSlipDetectorParent):
                  exo_1: Type[exoboot.Exo],
                  exo_2: Type[exoboot.Exo],
                  delay_ms=0,
-                 time_out=5):
+                 time_out=5,
+                 use_rising_edge=True):
         super().__init__(exo_1=exo_1, exo_2=exo_2, delay_ms=delay_ms, time_out=time_out)
+        self.use_rising_edge = use_rising_edge
         self.last_sync = True
 
     def detect_slip(self):
-        if self.refractory_timer.check():  # if recent slip
+        if self.refractory_timer.check():  # if recent slip, hold last_sync
             slip_detected = False
-            self.last_sync = False
+            if self.use_rising_edge:
+                self.last_sync = True
+            else:
+                self.last_sync = False
         else:
             for exo in self.exo_list:
-                if self.last_sync and not exo.data.sync:  # falling edge
+                if self.use_rising_edge and not self.last_sync and exo.data.sync:
+                    slip_detected = True
+                    self.refractory_timer.start()
+                    break
+                elif not self.use_rising_edge and self.last_sync and not exo.data.sync:  # falling edge
                     slip_detected = True
                     self.refractory_timer.start()
                     break
