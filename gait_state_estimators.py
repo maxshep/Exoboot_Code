@@ -211,9 +211,9 @@ class BilateralSlipDetectorParent():
                 self.delay_timer.start()
                 for exo in self.exo_list:
                     exo.data.gen_var1 = True
-                print('sync recieved: ', self.exo.data.loop_time)
+                print('sync recieved')
             if self.delay_timer.check():
-                print('Slip detected!', self.exo.data.loop_time)
+                print('Slip detected!')
                 self.delay_timer.reset()
                 for exo in self.exo_list:
                     exo.data.did_slip = True
