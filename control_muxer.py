@@ -69,7 +69,7 @@ def get_gse_and_sm_lists(exo_list, config: Type[config_util.ConfigurableConstant
             raise ValueError(
                 'Must have two exos connected for task=BILATERALSTANDINGPERTURBATION')
         gait_phase_estimator = gait_state_estimators.BilateralSlipDetectorFromSync(
-            exo_1=exo_list[0], exo_2=exo_list[1], delay_ms=500)
+            exo_1=exo_list[0], exo_2=exo_list[1], delay_ms=config.SLIP_DETECT_DELAY)
         gait_state_estimator_list.append(gait_phase_estimator)
         print('Using sync-based slip detection: use dX! to adjust delay (ms) and pX! to adjust peak torque (Nm)')
         for exo in exo_list:

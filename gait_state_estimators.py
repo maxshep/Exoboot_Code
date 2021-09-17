@@ -239,7 +239,7 @@ class BilateralSlipDetectorFromSync(BilateralSlipDetectorParent):
     def __init__(self,
                  exo_1: Type[exoboot.Exo],
                  exo_2: Type[exoboot.Exo],
-                 delay_ms=0,
+                 delay_ms,
                  time_out=5,
                  use_rising_edge=True):
         super().__init__(exo_1=exo_1, exo_2=exo_2, delay_ms=delay_ms, time_out=time_out)
