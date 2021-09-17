@@ -203,12 +203,15 @@ class BilateralSlipDetectorParent():
         self.refractory_timer = util.DelayTimer(time_out, true_until=True)
 
     def detect(self):
+        self.exo.data.gen_var1 = False
         slip_detected = self.detect_slip()
         if self.slip_detect_active:
             if slip_detected:
                 self.delay_timer.start()
+                self.exo.data.gen_var1 = True
+                print('sync recieved: ', self.exo.data.loop_time)
             if self.delay_timer.check():
-                print('Slip detected!')
+                print('Slip detected!', self.exo.data.loop_time)
                 self.delay_timer.reset()
                 for exo in self.exo_list:
                     exo.data.did_slip = True
