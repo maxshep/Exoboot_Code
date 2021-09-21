@@ -112,7 +112,8 @@ class StanceSwingReeloutReelinStateMachine(HighLevelController):
                  stance_controller: Type[controllers.Controller],
                  swing_controller: Type[controllers.Controller],
                  reel_out_controller: Type[controllers.Controller],
-                 reel_in_controller: Type[controllers.Controller]
+                 reel_in_controller: Type[controllers.Controller],
+                 swing_only=False
                  ):
         '''A state machine object is associated with an exo, and reads/stores exo data, applies logic to
         determine gait states and phases, chooses the correct controllers, and applies the
@@ -124,7 +125,7 @@ class StanceSwingReeloutReelinStateMachine(HighLevelController):
         self.reel_in_controller = reel_in_controller
         self.controller_now = self.reel_out_controller
         self.just_starting = True
-        self.swing_only = False
+        self.swing_only = swing_only
 
     def step(self, read_only=False):
         # Check state machine transition criteria, switching controller_now if criteria are met

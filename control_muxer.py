@@ -174,7 +174,8 @@ def get_gse_and_sm_lists(exo_list, config: Type[config_util.ConfigurableConstant
                                                                                 stance_controller=stance_controller,
                                                                                 swing_controller=swing_controller,
                                                                                 reel_in_controller=reel_in_controller,
-                                                                                reel_out_controller=reel_out_controller)
+                                                                                reel_out_controller=reel_out_controller,
+                                                                                swing_only=config.SWING_ONLY)
             state_machine_list.append(state_machine)
 
     return gait_state_estimator_list, state_machine_list
