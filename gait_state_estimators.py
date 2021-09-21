@@ -102,9 +102,10 @@ class MLGaitStateEstimator():
         # use stride average gait phase estimator to determine if steady state and mask
         self.fake_data.gyro_z = self.data.gyro_z
         self.parallel_tbe.detect()
-        self.fake_data.gait_phase = self.fake_data.gait_phase*1/0.6
-        if self.fake_data.gait_phase > 1:
-            self.fake_data.gait_phase = 0
+        if self.fake_data.gait_phase is not None:
+            self.fake_data.gait_phase = self.fake_data.gait_phase*1/0.6
+            if self.fake_data.gait_phase > 1:
+                self.fake_data.gait_phase = 0
         self.data.gen_var3 = self.fake_data.gait_phase
         #     data=self.data)
         # if stride_average_gait_phase is not None:
