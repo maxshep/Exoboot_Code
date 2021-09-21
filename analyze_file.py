@@ -8,7 +8,7 @@ import pandas as pd
 from scipy import signal
 
 folder = 'exo_data/'
-filename = "20210921_1341_max1234k_RIGHT.csv"
+filename = "20210921_1436_gpe1_LEFT.csv"
 
 df = pd.read_csv(folder + '/' + filename)
 
@@ -32,11 +32,12 @@ plt.figure(2)
 plt.plot(df.loop_time, 0.001*df.motor_current, 'y-')
 
 # plt.plot(df.loop_time, df.ankle_torque_from_current, 'y-')
-plt.plot(df.loop_time, df.ankle_angle, 'g-')
+# plt.plot(df.loop_time, df.ankle_angle, 'g-')
 plt.plot(df.loop_time, -5*df.did_heel_strike, 'k-')
+plt.plot(df.loop_time, df.gait_phase, 'k-')
 
-plt.plot(df.loop_time, df.gen_var1, 'b-')
-plt.plot(df.loop_time, df.gen_var2, 'k-')
+# plt.plot(df.loop_time, df.gen_var1, 'b-')
+# plt.plot(df.loop_time, df.gen_var2, 'k-')
 plt.plot(df.loop_time, df.gen_var3, 'r-')
 
 plt.show()
