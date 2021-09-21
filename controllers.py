@@ -53,36 +53,50 @@ class SawickiWickiController(Controller):
         self.k_val = k_val
         self.b_val = b_val
         super().update_controller_gains(Kp=Kp, Ki=Ki, Kd=Kd, ff=ff)
-        self.ankle_angles = deque(maxlen=3)  # looking for peak in pf
-        self.ankle_angle_filter = filters.Butterworth(N=2, Wn=0.2)
+        self.ankle_angles = deque(maxlen=5)  # looking for peak in pf
+        self.ankle_angle_filter = filters.Butterworth(N=2, Wn=0.1)
 
     def command(self, reset=False):
-        self.ankle_angles.append(
-            self.ankle_angle_filter.filter(self.exo.data.ankle_angle))
         if reset:
+            self.is_taught = False
+            self.found_setpt = False
             self.do_engage = False
+            self.ankle_angles.clear()  # Reset the ankle angle deque
+            self.ankle_angle_filter = filters.Butterworth(
+                N=2, Wn=0.1)  # Reset filter
             super().command_gains()
-        if self.do_engage is False:
-            if len(self.ankle_angles) == 3:
-                if (self.ankle_angles[1] > self.ankle_angles[0] and
-                        self.ankle_angles[1] > self.ankle_angles[2]):
-                    self.exo.data.gen_var1 = True
-                    self.do_engage = True
-                    self._update_setpoint(theta0=self.ankle_angles[0])
+            self.exo.data.gen_var2 = None
+        self.ankle_angles.appendleft(
+            self.ankle_angle_filter.filter(self.exo.data.ankle_angle))
+        self.exo.data.gen_var3 = self.ankle_angles[0]
 
-                    super().command_gains()
-                    print('engaged..., desired k_val: ', self.k_val,
-                          'setpoint: ', self.ankle_angles[0])
-                    self.ankle_angles.clear()  # Reset the ankle angle deque
-                    self.exo.command_motor_impedance(
-                        theta0=self.theta0_motor, k_val=self.k_val, b_val=self.b_val)
+        # check engagement
+        self.slack_cutoff = 1500
+        if self.is_taught is False:
+            self.is_taught = self.exo.get_slack() < self.slack_cutoff
 
-            else:
-                # Basically keep it reeled in
-                self.exo.command_torque(desired_torque=3)
-                self.exo.data.gen_var1 = 5
+        if self.found_setpt is False:
+            # TODO(maxshep) see if you want to change min val
+            if len(self.ankle_angles) == 5 and (self.ankle_angles[1] > self.ankle_angles[0] and
+                                                self.ankle_angles[1] > self.ankle_angles[2]) and (
+                    self.ankle_angles[0] > 5):
+                self.exo.data.gen_var2 = self.ankle_angles[0]
+                self.found_setpt = True
+                self._update_setpoint(theta0=self.ankle_angles[0])
+
+        if self.is_taught and self.found_setpt:
+            super().command_gains()
+            # print('engaged..., desired k_val: ', self.k_val,
+            #       'setpoint: ', self.ankle_angles[0])
+            self.exo.command_motor_impedance(
+                theta0=self.theta0_motor, k_val=self.k_val, b_val=self.b_val)
+            self.exo.data.gen_var1 = 6
+
         else:
-            pass  # Engage command was sent when do_engage went true
+            self.is_taught = self.exo.get_slack() < self.slack_cutoff
+            self.exo.command_voltage(
+                desired_mV=self.exo.motor_sign * 1500)
+            self.exo.data.gen_var1 = 5
 
     def _update_setpoint(self, theta0):
         '''Take in desired ankle setpoint (deg) and stores equivalent motor angle.'''
@@ -96,6 +110,7 @@ class SawickiWickiController(Controller):
         if self.k_val != config.K_VAL:
             self.k_val = config.K_VAL
             print('K updated to: ', self.k_val)
+        # TODO(maxshep) see what val you like for this in params
         self.b_val = config.B_VAL
 
 
