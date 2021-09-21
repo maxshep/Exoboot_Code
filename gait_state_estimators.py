@@ -107,8 +107,7 @@ class MLGaitStateEstimator():
             if self.fake_data.gait_phase > 1:
                 self.fake_data.gait_phase = 0
         self.data.gen_var3 = self.fake_data.gait_phase
-        #     data=self.data)
-        # if stride_average_gait_phase is not None:
+        # if self.fake_data.gait_phase is not None:
         #     self.data.gait_phase = gait_phase
         # else:
         #     self.data.gait_phase = None
