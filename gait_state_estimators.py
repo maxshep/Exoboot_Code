@@ -56,6 +56,25 @@ class MLGaitStateEstimator():
         print(
             'REMEMBER TO PRESS a TO MAKE CONTROLLER ACTIVE (INACTIVE TO START BY DEFAULT)')
 
+        # SETUP FAKE TBE FOR STANCE/SWING
+        self.fake_data = exoboot.Exo.DataContainer(
+            do_include_FSRs=False, do_include_did_slip=False,
+            do_include_gen_vars=False, do_include_sync=False)
+        default_config = config_util.ConfigurableConstants()
+        heel_strike_detector = GyroHeelStrikeDetector(
+            height=default_config.HS_GYRO_THRESHOLD,
+            gyro_filter=filters.Butterworth(N=default_config.HS_GYRO_FILTER_N,
+                                            Wn=default_config.HS_GYRO_FILTER_WN,
+                                            fs=default_config.TARGET_FREQ),
+            delay=default_config.HS_GYRO_DELAY)
+        gait_phase_estimator = StrideAverageGaitPhaseEstimator(
+            num_strides_required=default_config.NUM_STRIDES_REQUIRED)
+        toe_off_detector = GaitPhaseBasedToeOffDetector(
+            fraction_of_gait=default_config.TOE_OFF_FRACTION)
+        self.parallel_tbe = GaitStateEstimator(
+            data_container=self.fake_data, heel_strike_detector=heel_strike_detector,
+            gait_phase_estimator=gait_phase_estimator, toe_off_detector=toe_off_detector)
+
     def detect(self):
         self.jetson_object.package_and_send_message(
             side=self.side, data_container=self.data)
@@ -81,7 +100,9 @@ class MLGaitStateEstimator():
         self.last_is_stance = is_stance
 
         # use stride average gait phase estimator to determine if steady state and mask
-        # stride_average_gait_phase = self.stride_average_gait_state_estimator.estimate(
+        self.fake_data.gyro_z = self.data.gyro_z
+        self.parallel_tbe.detect()
+        self.data.gen_var3 = self.fake_data.gait_phase
         #     data=self.data)
         # if stride_average_gait_phase is not None:
         #     self.data.gait_phase = gait_phase
