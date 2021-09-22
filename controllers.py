@@ -62,8 +62,7 @@ class SawickiWickiController(Controller):
             self.found_setpt = False
             self.do_engage = False
             self.ankle_angles.clear()  # Reset the ankle angle deque
-            self.ankle_angle_filter = filters.Butterworth(
-                N=2, Wn=0.1)  # Reset filter
+            self.ankle_angle_filter.restart()  # Reset the filter
             super().command_gains()
             self.exo.data.gen_var2 = None
         self.ankle_angles.appendleft(

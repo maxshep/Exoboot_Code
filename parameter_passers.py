@@ -66,7 +66,8 @@ class ParameterPasser(threading.Thread):
                 elif first_letter == 'k':
                     if msg_content.isdigit():
                         self.config.K_VAL = int(msg_content)
-                        self.config.B_VAL = 0.5 * self.config.K_VAL  # 2.5ish = critically damped
+                        self.config.B_VAL = self.config.B_RATIO * \
+                            self.config.K_VAL  # 2.5ish = critically damped
                         print('k_val updated to: ', msg_content)
                     else:
                         print('Must provide single positive integer to update k_val')

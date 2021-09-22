@@ -75,6 +75,7 @@ class ConfigurableConstants():
     # Impedance
     K_VAL: int = 500
     B_VAL: int = 0
+    B_RATIO: float = 0.5  # when B_VAL is a function of B_RATIO. 2.5 is approx. crit. damped
     SET_POINT: float = 0  # Deg
 
     READ_ONLY: bool = False  # Does not require Lipos

@@ -19,7 +19,7 @@ class PassThroughFilter(Filter):
         return new_val
 
 
-class Butterworth(Filter):
+class Butterworth():
     '''Implements a real-time Butterworth filter using second orded cascaded filters.'''
 
     def __init__(self, N: int, Wn: float, btype='low', fs=None):
@@ -30,19 +30,28 @@ class Butterworth(Filter):
         fs: Optional: sample freq, Hz. If not None, Wn describes the cutoff freq in Hz
         '''
         self.N = N
-        if fs is not None:
-            self.Wn = Wn/(fs/2)
-        else:
-            self.Wn = Wn
+        self.fs = fs
+        self.Wn = Wn
         self.btype = btype
-        self.sos = signal.butter(N=self.N, Wn=self.Wn,
+        if self.fs is not None:
+            self._Wn = self.Wn/(self.fs/2)
+        else:
+            self._Wn = Wn
+        self.sos = signal.butter(N=self.N, Wn=self._Wn,
                                  btype=self.btype, output='sos')
         self.zi = signal.sosfilt_zi(self.sos)
+        self.first_value = True
 
     def filter(self, new_val: float) -> float:
+        if self.first_value:
+            self.zi = self.zi*new_val
+            self.first_value = False
         filtered_val, self.zi = signal.sosfilt(
             sos=self.sos, x=[new_val], zi=self.zi)
         return filtered_val[0]
+
+    def restart(self):
+        self.__init__(N=self.N, Wn=self._Wn)
 
 
 class MovingAverage(Filter):
