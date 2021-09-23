@@ -41,7 +41,7 @@ gait_state_estimator_list, state_machine_list = control_muxer.get_gse_and_sm_lis
 lock = threading.Lock()
 quit_event = threading.Event()
 new_params_event = threading.Event()
-# v0.2,20,0.45,0.6!
+# v0.2,15,0.56,0.6!
 
 '''Perform standing calibration.'''
 if not config.READ_ONLY:
