@@ -79,9 +79,9 @@ class SawickiWickiController(Controller):
             if len(self.ankle_angles) == 5 and (self.ankle_angles[1] > self.ankle_angles[0] and
                                                 self.ankle_angles[1] > self.ankle_angles[2]) and (
                     self.ankle_angles[0] > 5):
-                self.exo.data.gen_var2 = self.ankle_angles[0]
+                self.exo.data.gen_var2 = self.ankle_angles[1]
                 self.found_setpt = True
-                self._update_setpoint(theta0=self.ankle_angles[0])
+                self._update_setpoint(theta0=self.ankle_angles[1])
 
         if self.is_taught and self.found_setpt:
             self.exo.update_gains(Kp=20, Ki=200, Kd=0, ff=60)

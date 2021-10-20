@@ -14,22 +14,8 @@ filename = "20211020_1233_moreswingslack_RIGHT.csv"
 df = pd.read_csv(folder + '/' + filename)
 
 
-# plt.figure()
-# # plt.plot(df.loop_time, df.heel_fsr)
-# # plt.plot(df.loop_time, df.toe_fsr)
-# # plt.plot(df.loop_time, df.ankle_angle)
-# plt.plot(df.loop_time, df.commanded_current)
-# plt.plot(df.loop_time, df.motor_current)
-# # plt.plot(df.loop_time, df.commanded_position*0.001)
-# # plt.plot(df.loop_time, df.motor_angle*0.001)
-# plt.plot(df.loop_time, -1*df.did_slip*1000)
-
-
 plt.figure(2)
 
-
-# plt.figure()
-# plt.plot(df.loop_time, df.accel_x)
 # plt.plot(df.loop_time, df.accel_y, 'k-')
 myfilt = filters.Butterworth(N=2, Wn=0.1)
 filtered_ankle_angle = []
