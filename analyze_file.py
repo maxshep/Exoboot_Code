@@ -9,7 +9,7 @@ from scipy import signal
 import filters
 
 folder = 'exo_data/'
-filename = "20210921_1341_max1234k_RIGHT.csv"
+filename = "20211020_1233_moreswingslack_RIGHT.csv"
 
 df = pd.read_csv(folder + '/' + filename)
 
@@ -44,11 +44,17 @@ for (ankle_angle, gen_var1) in zip(df.ankle_angle, df.gen_var1):
 plt.plot(df.loop_time, df.ankle_angle, 'g-')
 plt.plot(df.loop_time, -5*df.did_heel_strike, 'r-')
 # plt.plot(df.loop_time, df.gait_phase, 'k-')
-plt.plot(df.loop_time, -5*df.did_toe_off, 'b-')
+plt.plot(df.loop_time, -3*df.did_toe_off, 'b-')
 plt.plot(df.loop_time, filtered_ankle_angle, 'b--')
 
 plt.plot(df.loop_time, df.gen_var1, 'b-')
 plt.plot(df.loop_time, df.gen_var2, 'k-')
 plt.plot(df.loop_time, df.gen_var3, 'r-')
+plt.plot(df.loop_time, 0.001*df.slack, 'g--')
+plt.plot(df.loop_time, 0.001*df.motor_current, 'm.-')
+
+
+plt.figure()
+plt.plot(df.ankle_angle[2000:3000], df.ankle_torque_from_current[2000:3000])
 
 plt.show()

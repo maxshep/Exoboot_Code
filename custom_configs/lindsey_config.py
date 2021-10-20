@@ -8,9 +8,10 @@ config.K_VAL = 1000
 config.HS_GYRO_DELAY = 0
 config.HS_GYRO_FILTER_WN = 5
 
-config.TOE_OFF_FRACTION = 0.68
+# config.TOE_OFF_FRACTION = 0.68
+config.TOE_OFF_FRACTION = 0.73
 config.REEL_IN_TIMEOUT = 0.05  # 0.2
-config.SWING_SLACK = 5000  # 6000
+config.SWING_SLACK = 3500  # 5000
 config.REEL_IN_SLACK_CUTOFF = 1000
 config.B_VAL = 500  # 2000 helped
 config.DO_INCLUDE_GEN_VARS = True

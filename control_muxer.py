@@ -46,15 +46,17 @@ def get_gse_and_sm_lists(exo_list, config: Type[config_util.ConfigurableConstant
                 exo=exo, reel_in_mV=config.REEL_IN_MV, slack_cutoff=config.REEL_IN_SLACK_CUTOFF, time_out=config.REEL_IN_TIMEOUT)
             swing_controller = controllers.StalkController(
                 exo=exo, desired_slack=config.SWING_SLACK)
-            reel_out_controller = controllers.SoftReelOutController(
-                exo=exo, desired_slack=config.SWING_SLACK)
             if config.STANCE_CONTROL_STYLE == config_util.StanceCtrlStyle.FOURPOINTSPLINE:
+                reel_out_controller = controllers.SoftReelOutController(
+                    exo=exo, desired_slack=config.SWING_SLACK)
                 stance_controller = controllers.FourPointSplineController(
                     exo=exo, rise_fraction=config.RISE_FRACTION, peak_torque=config.PEAK_TORQUE,
                     peak_fraction=config.PEAK_FRACTION,
                     fall_fraction=config.FALL_FRACTION,
                     bias_torque=config.SPLINE_BIAS)
             elif config.STANCE_CONTROL_STYLE == config_util.StanceCtrlStyle.SAWICKIWICKI:
+                reel_out_controller = controllers.SoftReelOutController(
+                    exo=exo, desired_slack=8000, force_timer_to_complete=True)
                 stance_controller = controllers.SawickiWickiController(
                     exo=exo, k_val=config.K_VAL, b_val=config.B_VAL)
             state_machine = state_machines.StanceSwingReeloutReelinStateMachine(exo=exo,

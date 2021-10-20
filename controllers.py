@@ -84,7 +84,8 @@ class SawickiWickiController(Controller):
                 self._update_setpoint(theta0=self.ankle_angles[0])
 
         if self.is_taught and self.found_setpt:
-            super().command_gains()
+            self.exo.update_gains(Kp=20, Ki=200, Kd=0, ff=60)
+            # super().command_gains()
             # print('engaged..., desired k_val: ', self.k_val,
             #       'setpoint: ', self.ankle_angles[0])
             self.exo.command_motor_impedance(
@@ -93,8 +94,10 @@ class SawickiWickiController(Controller):
 
         else:
             self.is_taught = self.exo.get_slack() < self.slack_cutoff
+            mv_to_apply = 1500  # 1500
             self.exo.command_voltage(
-                desired_mV=self.exo.motor_sign * 1500)
+                desired_mV=self.exo.motor_sign * mv_to_apply)
+            # self.exo.command_torque(desired_torque=1)
             self.exo.data.gen_var1 = 5
 
     def _update_setpoint(self, theta0):
@@ -347,13 +350,16 @@ class SoftReelOutController(Controller):
                  Kp: int = 100,
                  Ki: int = 10,
                  Kd: int = 0,
-                 ff: int = 0):
+                 ff: int = 0,
+                 max_reel_out_time: float = 0.2,
+                 force_timer_to_complete: bool = False):
         '''This controller uses position control with low gains to reach the desired slack.'''
         self.exo = exo
         super().update_controller_gains(Kp=Kp, Ki=Ki, Kd=Kd, ff=ff)
         self.desired_slack = desired_slack
         # set maximum time for controller
-        self.delay_timer = util.DelayTimer(delay_time=0.2)
+        self.delay_timer = util.DelayTimer(delay_time=max_reel_out_time)
+        self.force_timer_to_complete = force_timer_to_complete
 
     def command(self, reset=False):
         if reset:
@@ -363,10 +369,8 @@ class SoftReelOutController(Controller):
 
     def check_completion_status(self):
         slack = self.exo.get_slack()
-        if slack > self.desired_slack-500 or self.delay_timer.check():
-            return True
-        else:
-            return False
+        return (not self.force_timer_to_complete and
+                slack > self.desired_slack-500) or self.delay_timer.check()
 
 
 class GenericImpedanceController(Controller):
