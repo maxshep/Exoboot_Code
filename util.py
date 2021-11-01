@@ -48,19 +48,31 @@ class FlexibleTimer():
         self.target_period = 1/target_freq
         self.last_time = time.perf_counter()
         self.over_time = 0
+        self.warning_timer = DelayTimer(delay_time=3)
+        self.do_count_errors = True
 
     def pause(self):
-        if time.perf_counter()-self.last_time > self.target_period:
-            # Penalty for cycle going over time
-            self.over_time += 1
+        '''main function for keeping timer constant.'''
+        if self.do_count_errors:
+            if time.perf_counter()-self.last_time > self.target_period:
+                # Penalty for cycle going over time
+                self.over_time += 1
+            else:
+                # liberal reset for every good period
+                self.over_time = max(0, self.over_time - 5)
+                # Throw warning if target freqeuncy is not being hit
+            if self.over_time > 30:
+                self.warning_timer.start()
+                self.do_count_errors = False  # Stop counting errors for now
+
+        # Use timer to prevent excessive warnings.
         else:
-            # liberal reset for every good period
-            self.over_time = max(0, self.over_time - 5)
-            # Error out if target freqeuncy is not being hit
-        if self.over_time > 30:
-            # raise Exception('Target Frequency is not being hit')
-            print('Waning: Target Frequency is not being hit!')
-            self.over_time = 0
+            if self.warning_timer.check():
+                print('Warning: Target Frequency is not being hit!')
+                self.over_time = 0  # reset over_time counter
+                self.warning_timer.reset()  # reset warning timer
+
+        # Main logic
         while time.perf_counter()-self.last_time < self.target_period:
             pass
         self.last_time = time.perf_counter()

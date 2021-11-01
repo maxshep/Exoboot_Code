@@ -9,10 +9,10 @@ from scipy import signal
 import filters
 
 folder = 'exo_data/'
-filename = "20211101_1001_test_LEFT.csv"
+filename = "20211029_1519_Owenslip1_RIGHT.csv"
 
-# df = pd.read_csv(folder + '/' + filename, usecols=np.arange(23))
-df = pd.read_csv(folder + '/' + filename, usecols=np.arange(22))
+df = pd.read_csv(folder + '/' + filename, usecols=np.arange(23))
+# df = pd.read_csv(folder + '/' + filename, usecols=np.arange(22))
 
 
 plt.figure(2)
@@ -38,13 +38,13 @@ plt.figure(2)
 # plt.plot(df.loop_time, df.gen_var2, 'k-')
 # plt.plot(df.loop_time, df.gen_var3, 'r-')
 # plt.plot(df.loop_time, 0.001*df.slack, 'g--')
-# plt.plot(df.loop_time, df.did_slip)
+plt.plot(df.loop_time, df.did_slip)
 # plt.plot(df.loop_time, 0.001*df.commanded_current, 'r-')
 plt.plot(df.loop_time, df.ankle_torque_from_current, 'm--')
 plt.plot(df.loop_time, df.commanded_torque, 'r-')
-dt = np.diff(df.loop_time)
-plt.plot(df.loop_time[1:], dt*10)
-plt.plot(df.loop_time, df.did_heel_strike)
+# dt = np.diff(df.loop_time)
+# plt.plot(df.loop_time[1:], dt*10)
+# plt.plot(df.loop_time, df.did_heel_strike)
 
 # plt.plot(df.loop_time, 0.001*df.motor_current, 'm.-')
 # plt.plot(df.loop_time, df.ankle_angle)
