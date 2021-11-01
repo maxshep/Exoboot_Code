@@ -1,5 +1,7 @@
 
 import config_util
+config = config_util.ConfigurableConstants()
+
 config.TARGET_FREQ = 500
 config.READ_ONLY = True
 
