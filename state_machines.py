@@ -52,12 +52,9 @@ class StandingPerturbationResponse(HighLevelController):
             self.controller_now = self.standing_controller
             did_controllers_switch = True
         elif self.exo.data.did_slip:
-            if self.exo.side == constants.Side.LEFT:
-                print('slip detected, moving to slip controller')
             self.slip_ctrl_timer.start()
             self.controller_now = self.slip_controller
             did_controllers_switch = True
-            print(type(self.slip_controller))
         else:
             did_controllers_switch = False
 

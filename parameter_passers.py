@@ -32,8 +32,8 @@ class ParameterPasser(threading.Thread):
                 self.lock.acquire()
                 self.config.SLIP_DETECT_ACTIVE = not self.config.SLIP_DETECT_ACTIVE
                 self.config.SWING_ONLY = not self.config.SWING_ONLY
-                print('swing only: ', self.config.SWING_ONLY,
-                      'slip detect active: ', self.config.SWING_ONLY)
+                # print('swing only: ', self.config.SWING_ONLY,
+                #       'slip detect active: ', self.config.SWING_ONLY)
                 self.new_params_event.set()
                 self.lock.release()
 

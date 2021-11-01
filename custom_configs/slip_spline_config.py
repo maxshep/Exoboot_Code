@@ -4,13 +4,14 @@ config = config_util.ConfigurableConstants()
 config.TASK = config_util.Task.BILATERALSTANDINGPERTURBATION
 config.STANCE_CONTROL_STYLE = config_util.StanceCtrlStyle.FOURPOINTSPLINE
 
+config.TARGET_FREQ = 200
 config.DO_DETECT_SLIP = True
 config.RISE_FRACTION = 0.001
 config.PEAK_FRACTION = 0.05
 config.FALL_FRACTION = 0.2
 config.PEAK_TORQUE = 15
 config.SPLINE_BIAS = 0.5  # Nm
-config.DO_DEPHY_LOG = True
+config.DO_DEPHY_LOG = False
 
 
 ''' Here are the variables that are updatable in config, and their defaults:

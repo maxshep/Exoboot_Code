@@ -302,7 +302,7 @@ class BilateralSlipDetectorIMU(BilateralSlipDetectorParent):
     def __init__(self,
                  exo_1: Type[exoboot.Exo],
                  exo_2: Type[exoboot.Exo],
-                 acc_threshold_x: float = 0.2,  # 0.2
+                 acc_threshold_x: float = 0.15,  # 0.2
                  time_out: float = 5,
                  max_acc_y: float = 0.1,  # 0.1
                  max_acc_z: float = 0.1,  # 0.1
