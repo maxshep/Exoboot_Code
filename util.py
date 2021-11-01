@@ -71,6 +71,7 @@ class FlexibleTimer():
                 print('Warning: Target Frequency is not being hit!')
                 self.over_time = 0  # reset over_time counter
                 self.warning_timer.reset()  # reset warning timer
+                self.do_count_errors = True
 
         # Main logic
         while time.perf_counter()-self.last_time < self.target_period:
