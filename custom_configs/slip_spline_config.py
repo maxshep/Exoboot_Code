@@ -10,7 +10,7 @@ config.RISE_FRACTION = 0.001
 config.PEAK_FRACTION = 0.05
 config.FALL_FRACTION = 0.2
 config.PEAK_TORQUE = 15
-config.SPLINE_BIAS = 0.5  # Nm
+config.SPLINE_BIAS = 1  # Nm
 config.DO_DEPHY_LOG = False
 
 
