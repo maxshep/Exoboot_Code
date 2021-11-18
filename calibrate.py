@@ -5,6 +5,7 @@ import time
 import csv
 import util
 import constants
+import config_util
 
 
 def calibrate_encoder_to_ankle_conversion(exo: exoboot.Exo):
@@ -22,7 +23,8 @@ def calibrate_encoder_to_ankle_conversion(exo: exoboot.Exo):
 
 
 if __name__ == '__main__':
-    exo_list = exoboot.connect_to_exos(file_ID='calibration2')
+    config = config_util.load_config_from_args() 
+    exo_list = exoboot.connect_to_exos(file_ID='calibration2',config=config)
     if len(exo_list) > 1:
         raise ValueError("Just turn on one exo for calibration")
     exo = exo_list[0]

@@ -4,7 +4,7 @@ from enum import Enum
 
 DEFAULT_BAUD_RATE = 230400
 TARGET_FREQ = 200
-MAX_ANKLE_ANGLE = 86  # 83  # degrees, plantarflexion
+MAX_ANKLE_ANGLE = 130 #86  # 83  # degrees, plantarflexion
 MIN_ANKLE_ANGLE = -63  # -60  # degrees, dorsiflexion
 
 # These polynomials are derived from the calibration routine (calibrate.py), analyzed with transmission_analysis.py
@@ -20,12 +20,12 @@ RIGHT_ANKLE_TO_MOTOR = np.array(
 ANKLE_PTS = np.array([-60, -40, 0, 10, 20, 30, 40, 45.6, 55, 80])  # Deg
 TR_PTS = np.array([16, 16, 15, 14.5, 14, 11.5, 5, 0, -6.5, -12])  # Nm/Nm
 
-LEFT_ANKLE_ANGLE_OFFSET = -92  # deg
+LEFT_ANKLE_ANGLE_OFFSET = 270#-92  # deg
 RIGHT_ANKLE_ANGLE_OFFSET = 88  # deg
 
 # Add to these lists if dev_ids change, or new exos or actpacks are purchased!
 RIGHT_EXO_DEV_IDS = [65295, 3148]
-LEFT_EXO_DEV_IDS = [63086, 2873]
+LEFT_EXO_DEV_IDS = [63086, 2873, 77]
 
 MS_TO_SECONDS = 0.001
 # Converts raw Dephy encoder output to degrees

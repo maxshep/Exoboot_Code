@@ -6,14 +6,17 @@ from scipy import signal
 from scipy import interpolate
 
 LEFT_ANKLE_TO_MOTOR = np.array(
-    [-7.46848531e-06,  6.16855504e-04,  7.54072228e-02,  7.50135291e-01,
-     -7.03196238e+02, -3.95156221e+04])
+     [ 9.36778417e-07 -3.51197077e-04  5.06105392e-02 -3.48434541e+00
+  1.13870320e+02  1.93747384e+04])
+    #[-7.46848531e-06,  6.16855504e-04,  7.54072228e-02,  7.50135291e-01,
+    # -7.03196238e+02, -3.95156221e+04])
+
 RIGHT_ANKLE_TO_MOTOR = np.array(
     [6.53412109e-06, -5.10000261e-04, -7.52460274e-02, -1.27584877e+00,
      7.05016223e+02, -1.09811413e+04])
 
-folder = 'calibration_files/'
-for filename in ["20210619_0005_calibration2_LEFT.csv"]:
+folder = 'exo_data/'
+for filename in ["20211115_1701_calibration2_LEFT.csv"]:
     # filename = "20210616_1945_calibration2_RIGHT.csv"
     with open(folder + filename) as f:
         motor_angle = [int(row["motor_angle"])
