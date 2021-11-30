@@ -10,10 +10,11 @@ config.PEAK_FRACTION = 0.53*(1/peak_fraction_from_training)
 config.FALL_FRACTION = 1
 config.PEAK_TORQUE = 5
 config.SPLINE_BIAS = 3  # Nm
-config.DO_READ_FSRS = True
-config.VARS_TO_PLOT = ['heel_fsr', 'toe_fsr']
+# config.DO_READ_FSRS = True
+# config.VARS_TO_PLOT = ['heel_fsr', 'toe_fsr']
 config.SWING_ONLY = True
 config.DO_INCLUDE_GEN_VARS = True
+config.TARGET_FREQ = 200
 
 
 ''' Here are the variables that are updatable in config, and their defaults:
