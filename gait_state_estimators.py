@@ -97,7 +97,7 @@ class MLGaitStateEstimator():
 
         # If Jetson sends stance not as a bool but float:
         if self.stance_is_float:
-            self.data.gen_var1 = is_stance
+            self.data.gen_var2 = is_stance
             is_stance = True if is_stance > self.is_stance_threshold else False
 
         # Add heel strikes and toe-offs from is_stance
