@@ -45,11 +45,14 @@ class MLGaitStateEstimator():
                  side: Type[constants.Side],
                  data_container: Type[exoboot.Exo.DataContainer],
                  jetson_interface: Type[ml_util.JetsonInterface],
-                 do_print_heel_strikes=True):
+                 do_print_heel_strikes=True,
+                 stance_is_float=True):
         '''Looks at the exo data, applies logic to detect HS, gait phase, and TO, and adds to exo.data'''
         self.side = side
         self.data = data_container
+        self.is_stance_threshold = 0.5
         self.do_print_heel_strikes = do_print_heel_strikes
+        self.stance_is_float = stance_is_float
         self.last_is_stance = False
         self.stride_average_gait_state_estimator = StrideAverageGaitPhaseEstimator()
         self.jetson_object = jetson_interface
@@ -91,6 +94,11 @@ class MLGaitStateEstimator():
             gait_phase = 1
         self.data.did_heel_strike = False
         self.data.did_toe_off = False
+
+        # If Jetson sends stance not as a bool but float:
+        if self.stance_is_float:
+            self.data.gen_var1 = is_stance
+            is_stance = True if is_stance > self.is_stance_threshold else False
 
         # Add heel strikes and toe-offs from is_stance
         if is_stance and not self.last_is_stance:
