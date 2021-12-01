@@ -46,7 +46,8 @@ class MLGaitStateEstimator():
                  data_container: Type[exoboot.Exo.DataContainer],
                  jetson_interface: Type[ml_util.JetsonInterface],
                  do_print_heel_strikes=True,
-                 stance_is_float=True):
+                 stance_is_float=True,
+                 do_filter_gait_phase=False):
         '''Looks at the exo data, applies logic to detect HS, gait phase, and TO, and adds to exo.data'''
         self.side = side
         self.data = data_container
@@ -58,6 +59,12 @@ class MLGaitStateEstimator():
         self.jetson_object = jetson_interface
         print(
             'REMEMBER TO PRESS a TO MAKE CONTROLLER ACTIVE (INACTIVE TO START BY DEFAULT)')
+
+        if do_filter_gait_phase:
+            # Hardcoded 8 Hz first order filter
+            self.gait_phase_filter = filters.Butterworth(N=1, Wn=0.08)
+        else:
+            self.gait_phase_filter = filters.PassThroughFilter()
 
         # SETUP FAKE TBE FOR STANCE/SWING
         self.fake_data = exoboot.Exo.DataContainer(
@@ -88,9 +95,10 @@ class MLGaitStateEstimator():
             gait_phase, is_stance = my_gait_phase_info
         else:
             return
+        gait_phase = self.gait_phase_filter(gait_phase)
         if gait_phase < 0:
             gait_phase = 0
-        if gait_phase > 1:
+        elif gait_phase > 1:
             gait_phase = 1
         self.data.did_heel_strike = False
         self.data.did_toe_off = False

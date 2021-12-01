@@ -88,6 +88,7 @@ class ConfigurableConstants():
     SLIP_DETECT_ACTIVE: bool = False
     DO_INCLUDE_GEN_VARS: bool = False
     SLIP_DETECT_DELAY: int = 0
+    DO_FILTER_GAIT_PHASE: bool = False
     EXPERIMENTER_NOTES: str = 'Experimenter notes go here'
 
 

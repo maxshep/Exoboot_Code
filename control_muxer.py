@@ -154,7 +154,8 @@ def get_gse_and_sm_lists(exo_list, config: Type[config_util.ConfigurableConstant
         jetson_interface = ml_util.JetsonInterface()
         for exo in exo_list:
             gait_state_estimator = gait_state_estimators.MLGaitStateEstimator(
-                side=exo.side, data_container=exo.data, jetson_interface=jetson_interface)
+                side=exo.side, data_container=exo.data, jetson_interface=jetson_interface,
+                do_filter_gait_phase=config.DO_FILTER_GAIT_PHASE)
             gait_state_estimator_list.append(gait_state_estimator)
             # Define State Machine
             reel_in_controller = controllers.SmoothReelInController(
