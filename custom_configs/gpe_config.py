@@ -15,7 +15,7 @@ config.SPLINE_BIAS = 3  # Nm
 config.SWING_ONLY = True
 config.DO_INCLUDE_GEN_VARS = True
 config.TARGET_FREQ = 200
-config.DO_FILTER_GAIT_PHASE = False
+config.DO_FILTER_GAIT_PHASE = True
 
 
 ''' Here are the variables that are updatable in config, and their defaults:
