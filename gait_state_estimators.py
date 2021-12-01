@@ -95,7 +95,7 @@ class MLGaitStateEstimator():
             gait_phase, is_stance = my_gait_phase_info
         else:
             return
-        gait_phase = self.gait_phase_filter(gait_phase)
+        gait_phase = self.gait_phase_filter.filter(gait_phase)
         if gait_phase < 0:
             gait_phase = 0
         elif gait_phase > 1:
