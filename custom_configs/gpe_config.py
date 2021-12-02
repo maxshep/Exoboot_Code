@@ -16,6 +16,7 @@ config.SWING_ONLY = True
 config.DO_INCLUDE_GEN_VARS = True
 config.TARGET_FREQ = 200
 config.DO_FILTER_GAIT_PHASE = True
+config.DO_READ_SYNC = True
 
 
 ''' Here are the variables that are updatable in config, and their defaults:

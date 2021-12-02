@@ -16,6 +16,7 @@ config.REEL_IN_SLACK_CUTOFF = 1000
 config.B_VAL = 500  # 2000 helped
 config.DO_INCLUDE_GEN_VARS = True
 config.REEL_IN_MV = 1500
+config.DO_READ_SYNC = True
 
 ''' Here are the variables that are updatable in config, and their defaults:
 
