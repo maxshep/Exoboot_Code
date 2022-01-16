@@ -11,7 +11,7 @@ import filters
 import time
 import util
 import config_util
-import communication #it contains the comunication loop
+import parameter_passers
 import control_muxer
 import plotters
 import ml_util
@@ -22,7 +22,7 @@ import grpc
 import Message_pb2
 import Message_pb2_grpc
 
-computer_address = f"{'35.3.247.229'}:" f"{50050}" #This contains the ip address of the device running the optimizer
+computer_address = f"{'35.3.247.229'}:" f"{50050}"
 
 config = config_util.load_config_from_args()  # loads config from passed args
 file_ID = input(
@@ -43,7 +43,6 @@ config_saver = config_util.ConfigSaver(
 gait_state_estimator_list, state_machine_list = control_muxer.get_gse_and_sm_lists(
     exo_list=exo_list, config=config)
 
-
 '''Perform standing calibration.'''
 if not config.READ_ONLY:
     for exo in exo_list:
@@ -62,13 +61,25 @@ print('Start!')
 timer = util.FlexibleTimer(
     target_freq=config.TARGET_FREQ)  # attempts constants freq
 t0 = time.perf_counter()
-communication_thread = communication.ControllerCommunication(config=config)
 config_saver.write_data(loop_time=0)  # Write first row on config
 only_write_if_new = not config.READ_ONLY and config.ONLY_LOG_IF_NEW
 
-'''This function gives the call to the optimizer to update the cmase {Note: even though this function 
-calls the optimizer everytime the controller finishes running, the cmaes gets updated only after the 
-new parameters are generated (This is logic is written in the optimizer script)}'''
+
+class GenerateControlParameters (Message_pb2_grpc.GenerateControlParametersServicer):
+    def ControlParameterRequest(self, request, context):
+        config.RISE_FRACTION = request.control_parameters[0]
+        config.PEAK_FRACTION = request.control_parameters[1]
+        config.FALL_FRACTION = request.control_parameters[2]
+        config.PEAK_TORQUE = request.control_parameters[3]
+        config.SPLINE_BIAS = request.control_parameters[4]
+        return Message_pb2.Null()
+
+def s3():
+	server3 = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+	Message_pb2_grpc.add_GenerateControlParametersServicer_to_server(GenerateControlParameters(), server3)
+	server3.add_insecure_port('0.0.0.0:80080')
+	server3.start()
+	server3.wait_for_termination()
 
 def update_function():
     with grpc.insecure_channel(computer_address, options=(('grpc.enable_http_proxy', 0),)) as channel:
@@ -76,11 +87,13 @@ def update_function():
         stub.UpdateRequest(Message_pb2.URequest(update_request = 'update'))
     return
 
+p1 = threading.Thread(target=s3)
+p1.start()
+
 while True:
     try:
         timer.pause()
         loop_time = time.perf_counter() - t0
-
         for exo in exo_list:
             exo.read_data(loop_time=loop_time)
         for gait_state_estimator in gait_state_estimator_list:

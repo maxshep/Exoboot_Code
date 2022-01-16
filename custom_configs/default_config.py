@@ -4,7 +4,7 @@ config = config_util.ConfigurableConstants()
 # config.HS_GYRO_DELAY = 0.05  # For example
 config.REEL_IN_MV = 100
 config.SWING_SLACK = 5000
-
+config.READ_ONLY = True
 
 ''' Here are the variables that are updatable in config, and their defaults:
 

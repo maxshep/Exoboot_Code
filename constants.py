@@ -4,7 +4,7 @@ from enum import Enum
 
 DEFAULT_BAUD_RATE = 230400
 TARGET_FREQ = 200
-MAX_ANKLE_ANGLE = 86  # 83  # degrees, plantarflexion
+MAX_ANKLE_ANGLE = 10000  # 83  # degrees, plantarflexion
 MIN_ANKLE_ANGLE = -63  # -60  # degrees, dorsiflexion
 
 # These polynomials are derived from the calibration routine (calibrate.py), analyzed with transmission_analysis.py
@@ -24,7 +24,7 @@ LEFT_ANKLE_ANGLE_OFFSET = -92  # deg
 RIGHT_ANKLE_ANGLE_OFFSET = 88  # deg
 
 # Add to these lists if dev_ids change, or new exos or actpacks are purchased!
-RIGHT_EXO_DEV_IDS = [65295, 3148]
+RIGHT_EXO_DEV_IDS = [65295, 3148,77]
 LEFT_EXO_DEV_IDS = [63086, 2873]
 
 MS_TO_SECONDS = 0.001

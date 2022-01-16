@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+message Null {};
+
+/* This service is between
+GUI: Running on the Surface Tablet {Client}
+and
+Optimizer: Running on the Nvidia Jetson nano {Server}
+DESCRIPTION:
+The GUI will send the user input {i.e int32 LIKE(1), DISLIKE(-1) or SKIP(0)} and will receive a
+NULL message indicating new control parameters are generated -> new torque values
+are given to the motor by the FourSplineController -> the CMAES has been updated
+*/
+service GuiOptimizer{
+  rpc UserInput (GuiInputRequest) returns (Null) {}
+
+}
+
+message GuiInputRequest {
+  int32 UserPreference = 1;
+}
+
+/* This service is between
+Optimizer: Running on the Nvidia Jetson nano {Client}
+and
+Controller: Running on the RPi {Server}
+DESCRIPTION:
+The optimizer will send the a new set of control parameters {i.e array with 4 elements}
+generated using the old control parameters to the controller and will receive
+NULL message
+{NOTE: The optimizer's generate command is triggered only after an input from the
+user via the GUI}
+*/
+service GenerateControlParameters {
+  rpc ControlParameterRequest (CPRequest) returns (Null) {}
+}
+
+
+message CPRequest {
+  repeated float control_parameters = 1;
+}
+
+
+/* This service is between
+Controller: Running on the RPi {Client}
+and
+Optimizer: Running on the Nvidia Jetson nano {Server}
+DESCRIPTION:
+The controller will send a request to the optimizer to update the CMAES and will
+receive NULL in return from the optimizer
+{NOTE: The update is triggered only after the FourSplineController is executed and
+the new control parameters are generated}
+*/
+service UpdateCmaesRequest {
+  rpc UpdateRequest (URequest) returns (Null) {}
+}
+
+message URequest {
+  string update_request = 1;
+}
