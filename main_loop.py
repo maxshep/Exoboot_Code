@@ -112,3 +112,4 @@ if config.VARS_TO_PLOT:
         '_LEFT.csv', '').replace('_RIGHT.csv', ''), vars_to_plot=config.VARS_TO_PLOT)
 
 print('Done!!!')
+print("Demo for Varun")

@@ -13,9 +13,10 @@ def calibrate_encoder_to_ankle_conversion(exo: exoboot.Exo):
     between ankle and motor angles. Move through the full RoM!!!'''
     exo.update_gains(Kp=constants.DEFAULT_KP, Ki=constants.DEFAULT_KI,
                      Kd=constants.DEFAULT_KD, ff=constants.DEFAULT_FF)
-    exo.command_current(exo.motor_sign*2000)
+    # exo.command_current(exo.motor_sign*1000)
     print('begin!')
     for _ in range(1000):
+        exo.command_current(exo.motor_sign*1000)
         time.sleep(0.02)
         exo.read_data()
         exo.write_data()

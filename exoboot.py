@@ -9,6 +9,7 @@ from scipy import interpolate
 from typing import Type
 
 import numpy as np
+import pdb
 
 import config_util
 import constants
@@ -92,11 +93,13 @@ class Exo():
             self.motor_sign = -1
             self.ankle_to_motor_angle_polynomial = constants.LEFT_ANKLE_TO_MOTOR
             self.ankle_angle_offset = constants.LEFT_ANKLE_ANGLE_OFFSET
+            # self.TR_from_ankle_angle = self.motor_sign * constants.LEFT_ANKLE_TO_TR
         elif self.dev_id in constants.RIGHT_EXO_DEV_IDS:
             self.side = constants.Side.RIGHT
             self.motor_sign = 1
             self.ankle_to_motor_angle_polynomial = constants.RIGHT_ANKLE_TO_MOTOR
             self.ankle_angle_offset = constants.RIGHT_ANKLE_ANGLE_OFFSET
+            # self.TR_from_ankle_angle = self.motor_sign * constants.RIGHT_ANKLE_TO_TR
         else:
             raise ValueError(
                 'dev_id: ', self.dev_id, 'not found in constants.LEFT_EXO_DEV_IDS or constants.RIGHT_EXO_DEV_IDS')
@@ -253,7 +256,8 @@ class Exo():
         self.data.gyro_x = -1 * actpack_data.gyrox * constants.GYRO_GAIN
         self.data.gyro_y = -1 * self.motor_sign * \
             actpack_data.gyroy * constants.GYRO_GAIN
-        self.data.gyro_z = self.motor_sign * actpack_data.gyroz * constants.GYRO_GAIN
+        self.data.gyro_z = actpack_data.gyroz * constants.GYRO_GAIN # sign may be different from Max's device
+        # self.data.gyro_z = self.motor_sign * actpack_data.gyroz * constants.GYRO_GAIN
         '''Motor angle and current are kept in Dephy's orientation, but ankle
         angle and torque are converted to positive = plantarflexion.'''
         self.data.motor_angle = actpack_data.mot_ang
@@ -400,6 +404,7 @@ class Exo():
                 desired_current = reel_in_current  # A small amount to stay reeled in
             elif 40 < self.data.ankle_angle <= 45:  # Window of taper
                 desired_torque = desired_torque*(45-self.data.ankle_angle)/5
+                print('after desired_torque',desired_torque)
                 desired_current = max(reel_in_current, self._ankle_torque_to_motor_current(
                     torque=desired_torque))
             else:
@@ -409,6 +414,7 @@ class Exo():
             desired_current = self._ankle_torque_to_motor_current(
                 torque=desired_torque)
 
+        print('desirec current', desired_current)
         self.command_current(desired_mA=desired_current)
         if do_return_command_torque:
             return desired_torque
@@ -447,6 +453,7 @@ class Exo():
     def calculate_max_allowable_torque(self):
         '''Calculates max allowable torque from self.max_allowable_current and ankle_angle.'''
         max_allowable_torque = max(
+            #  0, self._motor_current_to_ankle_torque(current=self.max_allowable_current)*0.1)
             0, self._motor_current_to_ankle_torque(current=self.motor_sign*self.max_allowable_current))
         return max_allowable_torque
 
@@ -455,12 +462,15 @@ class Exo():
         motor_torque = current*constants.MOTOR_CURRENT_TO_MOTOR_TORQUE
         ankle_torque = motor_torque * \
             self.TR_from_ankle_angle(self.data.ankle_angle)
+            # np.polyval(self.TR_from_ankle_angle, self.data.ankle_angle)
+            
         return ankle_torque
 
     def _ankle_torque_to_motor_current(self, torque: float) -> int:
         '''Converts torque (Nm) to current (mA), based on side and transmission ratio (no dynamics)'''
         motor_torque = torque / \
             self.TR_from_ankle_angle(self.data.ankle_angle)
+        #    np.polyval(self.TR_from_ankle_angle, self.data.ankle_angle) 
         motor_current = int(
             motor_torque / constants.MOTOR_CURRENT_TO_MOTOR_TORQUE)
 

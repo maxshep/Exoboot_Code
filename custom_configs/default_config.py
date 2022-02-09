@@ -3,7 +3,11 @@ import config_util
 config = config_util.ConfigurableConstants()
 # config.HS_GYRO_DELAY = 0.05  # For example
 config.REEL_IN_MV = 100
-config.SWING_SLACK = 5000
+config.SWING_SLACK = 3000
+config.DO_INCLUDE_GEN_VARS = True
+config.SWING_ONLY = False
+config.MAX_ALLOWABLE_CURRENT = 10000  # mA
+config.PEAK_TORQUE = 15
 
 
 ''' Here are the variables that are updatable in config, and their defaults:

@@ -90,7 +90,7 @@ class ConfigurableConstants():
     SLIP_DETECT_DELAY: int = 0
     EXPERIMENTER_NOTES: str = 'Experimenter notes go here'
 
-
+    count = 0
 class ConfigSaver():
     def __init__(self, file_ID: str, config: Type[ConfigurableConstants]):
         '''file_ID is used as a custom file identifier after date.'''

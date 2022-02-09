@@ -6,7 +6,7 @@ import exoboot
 import filters
 import controllers
 import ml_util
-
+import pdb
 
 def get_do_bilateral_data(config: Type[config_util.ConfigurableConstants]):
     if config.TASK == config_util.Task.STANDINGPERTURBATION:
@@ -59,6 +59,7 @@ def get_gse_and_sm_lists(exo_list, config: Type[config_util.ConfigurableConstant
                     exo=exo, desired_slack=8000, force_timer_to_complete=True)
                 stance_controller = controllers.SawickiWickiController(
                     exo=exo, k_val=config.K_VAL, b_val=config.B_VAL)
+
             state_machine = state_machines.StanceSwingReeloutReelinStateMachine(exo=exo,
                                                                                 stance_controller=stance_controller,
                                                                                 swing_controller=swing_controller,

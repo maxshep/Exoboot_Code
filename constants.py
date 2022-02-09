@@ -4,13 +4,13 @@ from enum import Enum
 
 DEFAULT_BAUD_RATE = 230400
 TARGET_FREQ = 200
-MAX_ANKLE_ANGLE = 130 #86  # 83  # degrees, plantarflexion
+MAX_ANKLE_ANGLE = 90 #86  # 83  # degrees, plantarflexion
 MIN_ANKLE_ANGLE = -63  # -60  # degrees, dorsiflexion
 
 # These polynomials are derived from the calibration routine (calibrate.py), analyzed with transmission_analysis.py
 LEFT_ANKLE_TO_MOTOR = np.array(
-    [-8.92089947e-06, 6.54524084e-04, 9.47872779e-02, 5.97822436e-01,
-     -7.61045898e+02, 1.06551671e+04])
+    [ 4.55457639e-06,  9.33159049e-04,  3.84317533e-02,  1.20392037e+00,
+ -7.47532497e+02, -1.26586792e+04])
 # [-7.46848531e-06,  6.16855504e-04,  7.54072228e-02,  7.50135291e-01,
 #  -7.03196238e+02, -3.95156221e+04])
 RIGHT_ANKLE_TO_MOTOR = np.array(
@@ -20,7 +20,12 @@ RIGHT_ANKLE_TO_MOTOR = np.array(
 ANKLE_PTS = np.array([-60, -40, 0, 10, 20, 30, 40, 45.6, 55, 80])  # Deg
 TR_PTS = np.array([16, 16, 15, 14.5, 14, 11.5, 5, 0, -6.5, -12])  # Nm/Nm
 
-LEFT_ANKLE_ANGLE_OFFSET = 270#-92  # deg
+# LEFT_ANKLE_TO_TR = np.array([ 5.00380707e-07,  8.20159320e-05,  2.53334311e-03,  5.29066571e-02,
+#  -1.64252746e+01])
+# RIGHT_ANKLE_TO_TR = np.array([ 4.83188447e-07, -3.83712114e-05, -3.61934700e-03,  4.54812251e-01,
+#        -2.89416189e+01]) ## NEED TO CHANGE FOR RIGHT ANKLE
+
+LEFT_ANKLE_ANGLE_OFFSET = 201#-92  # deg
 RIGHT_ANKLE_ANGLE_OFFSET = 88  # deg
 
 # Add to these lists if dev_ids change, or new exos or actpacks are purchased!
