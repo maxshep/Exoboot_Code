@@ -414,7 +414,6 @@ class Exo():
             desired_current = self._ankle_torque_to_motor_current(
                 torque=desired_torque)
 
-        print('desirec current', desired_current)
         self.command_current(desired_mA=desired_current)
         if do_return_command_torque:
             return desired_torque
