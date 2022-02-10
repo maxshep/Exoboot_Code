@@ -4,4 +4,4 @@ pardir = os.path.dirname(os.path.dirname(
     os.path.abspath(__file__))) + '/preference_learning_dephy_exo'
 print(pardir)
 sys.path.append(pardir)
-import simulate_main_loop
+import main_loop
