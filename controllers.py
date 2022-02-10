@@ -197,6 +197,7 @@ class GenericSplineController(Controller):
                 phase=phase, fraction=(time.perf_counter()-self.fade_start_time)/self.fade_duration)
         else:
             desired_torque = self.spline(phase)
+            
         self.exo.command_torque(desired_torque)
 
     def update_spline(self, spline_x, spline_y, first_call=False):
