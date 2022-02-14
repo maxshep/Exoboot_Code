@@ -59,15 +59,8 @@ for filename in ["20220210_1440_calibration2_LEFT.csv"]:
 
     plt.plot(ankle_angle, -TR_from_ankle_angle(ankle_angle), linewidth=5, label = "pchip auto")
 
-<<<<<<< HEAD
-    # ankle_pts = [-60, -40, 0, 10, 20, 30, 40, 45.6, 55, 80]
     ankle_pts = [-40, -20, 0, 10, 20, 30, 40, 45.6, 50, 55]
-    # deriv_pts = [16, 16, 15, 14.5, 14, 11.5, 5, 0, -6.5, -12]
     deriv_pts =  [19, 17, 16.5, 15.5, 13.5, 10, 4, -1, -5, -11 ]
-=======
-    ankle_pts = [-60, -40, 0, 10, 20, 30, 40, 45.6, 55, 80]
-    deriv_pts = [16, 16, 15, 14.5, 14, 11.5, 5, 0, -6.5, -12]
->>>>>>> 071de1eb78c54ed0e9de8fa50b3fa3c66ddf946d
 
     deriv_spline_fit = interpolate.pchip_interpolate(
         ankle_pts, deriv_pts, ankle_angle)
