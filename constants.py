@@ -9,8 +9,8 @@ MIN_ANKLE_ANGLE = -63  # -60  # degrees, dorsiflexion
 
 # These polynomials are derived from the calibration routine (calibrate.py), analyzed with transmission_analysis.py
 LEFT_ANKLE_TO_MOTOR = np.array(
-    [ 4.55457639e-06,  9.33159049e-04,  3.84317533e-02,  1.20392037e+00,
- -7.47532497e+02, -1.26586792e+04])
+    [ 3.15505504e-06,  9.74634080e-04,  3.91921745e-02,  1.27661897e+00
+ -7.49862118e+02 -2.95300769e+04])
 RIGHT_ANKLE_TO_MOTOR = np.array(
     [6.53412109e-06, -5.10000261e-04, -7.52460274e-02, -1.27584877e+00,
      7.05016223e+02, -1.09811413e+04])
