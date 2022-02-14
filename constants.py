@@ -11,15 +11,15 @@ MIN_ANKLE_ANGLE = -63  # -60  # degrees, dorsiflexion
 LEFT_ANKLE_TO_MOTOR = np.array(
     [ 4.55457639e-06,  9.33159049e-04,  3.84317533e-02,  1.20392037e+00,
  -7.47532497e+02, -1.26586792e+04])
-# [-7.46848531e-06,  6.16855504e-04,  7.54072228e-02,  7.50135291e-01,
-#  -7.03196238e+02, -3.95156221e+04])
 RIGHT_ANKLE_TO_MOTOR = np.array(
     [6.53412109e-06, -5.10000261e-04, -7.52460274e-02, -1.27584877e+00,
      7.05016223e+02, -1.09811413e+04])
+
 # These points are used to create a Pchip spline, which defines the transmission ratio as a function of ankle angle
 ANKLE_PTS = np.array([-60, -40, 0, 10, 20, 30, 40, 45.6, 55, 80])  # Deg
 TR_PTS = np.array([16, 16, 15, 14.5, 14, 11.5, 5, 0, -6.5, -12])  # Nm/Nm
 
+# TODO: attempt to change the manual picking of ANKLE_PTS and TR_PTS
 # LEFT_ANKLE_TO_TR = np.array([ 5.00380707e-07,  8.20159320e-05,  2.53334311e-03,  5.29066571e-02,
 #  -1.64252746e+01])
 # RIGHT_ANKLE_TO_TR = np.array([ 4.83188447e-07, -3.83712114e-05, -3.61934700e-03,  4.54812251e-01,

@@ -8,8 +8,6 @@ from scipy import interpolate
 LEFT_ANKLE_TO_MOTOR = np.array(
     [ 4.39808862e-06, -4.36579117e-04, -5.49068346e-02,  1.03495054e+01,
  -1.31716523e+03,  4.97232882e+04])
-    # [-7.46848531e-06,  6.16855504e-04,  7.54072228e-02,  7.50135291e-01,
-    # -7.03196238e+02, -3.95156221e+04])
 
 RIGHT_ANKLE_TO_MOTOR = np.array(
     [6.53412109e-06, -5.10000261e-04, -7.52460274e-02, -1.27584877e+00,
@@ -35,7 +33,7 @@ for filename in ["20211117_2240_calibration2_LEFT.csv"]:
     mytuples = zip(*zipped_sorted_lists)
     ankle_angle, motor_angle = [
         list(mytuple) for mytuple in mytuples]
-    # plt.plot(ankle_angle, motor_angle)
+    plt.plot(ankle_angle, motor_angle)
 
     # Filter
     b, a = signal.butter(N=1, Wn=0.05)
@@ -43,7 +41,7 @@ for filename in ["20211117_2240_calibration2_LEFT.csv"]:
         b, a, motor_angle, method="gust")
     ankle_angle = signal.filtfilt(
         b, a, ankle_angle, method="gust")
-    # plt.plot(ankle_angle, motor_angle)
+    plt.plot(ankle_angle, motor_angle)
 
     # Calculate Gradient
     TR = np.gradient(motor_angle)/np.gradient(ankle_angle)
@@ -57,7 +55,7 @@ for filename in ["20211117_2240_calibration2_LEFT.csv"]:
                    constants.ENC_CLICKS_TO_DEG, deg=5)
     print('Polynomial coefficients: ', p)
     polyfitted_left_motor_angle = np.polyval(p, ankle_angle)
-    # plt.plot(ankle_angle, polyfitted_left_motor_angle)
+    plt.plot(ankle_angle, polyfitted_left_motor_angle)
 
     pcurrent = LEFT_ANKLE_TO_MOTOR
     polyfitted_left_motor_angle = np.polyval(pcurrent, ankle_angle)
