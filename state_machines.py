@@ -136,7 +136,6 @@ class StanceSwingReeloutReelinStateMachine(HighLevelController):
         elif (self.controller_now == self.swing_controller and
               self.exo.data.did_heel_strike and
                 self.exo.data.gait_phase is not None):
-            print("transitioned!!!!")
             self.controller_now = self.reel_in_controller
             did_controllers_switch = True
             self.exo.data.gen_var1 = 0

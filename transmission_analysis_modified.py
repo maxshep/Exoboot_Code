@@ -8,7 +8,7 @@ import constants
 
 
 folder = 'exo_data/'
-for filename in ["20220104_1810_calibration2_LEFT.csv"]:
+for filename in ["20220210_1440_calibration2_LEFT.csv"]:
 # for filename in ["20211117_2240_calibration2_LEFT.csv"]:
     # filename = "20210616_1945_calibration2_RIGHT.csv"
     with open(folder + filename) as f:
@@ -54,23 +54,23 @@ for filename in ["20220104_1810_calibration2_LEFT.csv"]:
     print('Polynomial deriv coefficients: ', p_deriv)
 
     TR_from_polyfit = np.polyval(p_deriv, ankle_angle)
-    plt.plot(ankle_angle, TR_from_polyfit)
+    plt.plot(ankle_angle, -TR_from_polyfit, label="polyfit")
 
     TR_from_ankle_angle = interpolate.PchipInterpolator(
                 ankle_angle, TR_from_polyfit)
 
-    plt.plot(ankle_angle, -TR_from_ankle_angle(ankle_angle), linewidth=5)
+    plt.plot(ankle_angle, -TR_from_ankle_angle(ankle_angle), linewidth=5, label = "pchip auto")
 
-    ankle_pts = [-60, -40, 0, 10, 20, 30, 40, 45.6, 55, 80]
-    # ankle_pts = [pts + 60 for pts in ankle_pts ]
-    deriv_pts = [16, 16, 15, 14.5, 14, 11.5, 5, 0, -6.5, -12]
+    # ankle_pts = [-60, -40, 0, 10, 20, 30, 40, 45.6, 55, 80]
+    ankle_pts = [-40, -20, 0, 10, 20, 30, 40, 45.6, 50, 55]
+    # deriv_pts = [16, 16, 15, 14.5, 14, 11.5, 5, 0, -6.5, -12]
+    deriv_pts =  [19, 17, 16.5, 15.5, 13.5, 10, 4, -1, -5, -11 ]
 
     deriv_spline_fit = interpolate.pchip_interpolate(
         ankle_pts, deriv_pts, ankle_angle)
 
-    plt.plot(ankle_angle, deriv_spline_fit, linewidth=5)
-
-
+    plt.plot(ankle_angle, deriv_spline_fit, linewidth=5,  label = "pchip manual")
+    plt.legend()
     plt.ylabel('Transmission Ratio')
     plt.xlabel('Ankle Angle')
 

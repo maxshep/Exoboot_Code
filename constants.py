@@ -17,8 +17,9 @@ RIGHT_ANKLE_TO_MOTOR = np.array(
     [6.53412109e-06, -5.10000261e-04, -7.52460274e-02, -1.27584877e+00,
      7.05016223e+02, -1.09811413e+04])
 # These points are used to create a Pchip spline, which defines the transmission ratio as a function of ankle angle
-ANKLE_PTS = np.array([-60, -40, 0, 10, 20, 30, 40, 45.6, 55, 80])  # Deg
-TR_PTS = np.array([16, 16, 15, 14.5, 14, 11.5, 5, 0, -6.5, -12])  # Nm/Nm
+ANKLE_PTS = np.array([-40, -20, 0, 10, 20, 30, 40, 45.6, 50, 55])  # Deg
+TR_PTS = np.array([19, 17, 16.5, 15.5, 13.5, 10, 4, -1, -5, -11 ])  # Nm/Nm
+
 
 # LEFT_ANKLE_TO_TR = np.array([ 5.00380707e-07,  8.20159320e-05,  2.53334311e-03,  5.29066571e-02,
 #  -1.64252746e+01])
