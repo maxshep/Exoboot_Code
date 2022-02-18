@@ -4,18 +4,20 @@ from enum import Enum
 
 DEFAULT_BAUD_RATE = 230400
 TARGET_FREQ = 200
-MAX_ANKLE_ANGLE = 90 #86  # 83  # degrees, plantarflexion
-MIN_ANKLE_ANGLE = -63  # -60  # degrees, dorsiflexion
+MAX_ANKLE_ANGLE = 60 #90 #86  # 83  # degrees, plantarflexion
+MIN_ANKLE_ANGLE = -45 #-63  # -60  # degrees, dorsiflexion
 
 # These polynomials are derived from the calibration routine (calibrate.py), analyzed with transmission_analysis.py
 LEFT_ANKLE_TO_MOTOR = np.array(
-    [ 3.15505504e-06,  9.74634080e-04,  3.91921745e-02,  1.27661897e+00
- -7.49862118e+02 -2.95300769e+04])
+    [ 2.47157499e-06,  9.83537025e-04,  4.52559550e-02 , 1.17349392e+00,
+-7.61679007e+02, -2.98407136e+04])
 RIGHT_ANKLE_TO_MOTOR = np.array(
     [6.53412109e-06, -5.10000261e-04, -7.52460274e-02, -1.27584877e+00,
      7.05016223e+02, -1.09811413e+04])
 
 # These points are used to create a Pchip spline, which defines the transmission ratio as a function of ankle angle
+# ANKLE_PTS = np.array([-60, -40, 0, 10, 20, 30, 40, 45.6, 55, 80])  # Deg
+# TR_PTS = np.array([16, 16, 15, 14.5, 14, 11.5, 5, 0, -6.5, -12])  # Nm/Nm
 ANKLE_PTS = np.array([-40, -20, 0, 10, 20, 30, 40, 45.6, 50, 55])  # Deg
 TR_PTS = np.array([19, 17, 16.5, 15.5, 13.5, 10, 4, -1, -5, -11 ])  # Nm/Nm
 
