@@ -6,14 +6,15 @@ from scipy import signal
 from scipy import interpolate
 
 LEFT_ANKLE_TO_MOTOR = np.array(
-    [-7.46848531e-06,  6.16855504e-04,  7.54072228e-02,  7.50135291e-01,
-     -7.03196238e+02, -3.95156221e+04])
+    [ 4.39808862e-06, -4.36579117e-04, -5.49068346e-02,  1.03495054e+01,
+ -1.31716523e+03,  4.97232882e+04])
+
 RIGHT_ANKLE_TO_MOTOR = np.array(
     [6.53412109e-06, -5.10000261e-04, -7.52460274e-02, -1.27584877e+00,
      7.05016223e+02, -1.09811413e+04])
 
-folder = 'calibration_files/'
-for filename in ["20210619_0005_calibration2_LEFT.csv"]:
+folder = 'exo_data/'
+for filename in ["20211117_2240_calibration2_LEFT.csv"]:
     # filename = "20210616_1945_calibration2_RIGHT.csv"
     with open(folder + filename) as f:
         motor_angle = [int(row["motor_angle"])
@@ -26,7 +27,7 @@ for filename in ["20210619_0005_calibration2_LEFT.csv"]:
     plt.figure(1)
     plt.xlabel('ankle angle')
     plt.ylabel('motor angle')
-    plt.plot(ankle_angle, motor_angle)
+    # plt.plot(ankle_angle, motor_angle)
     # Sort the data points
     zipped_sorted_lists = sorted(zip(ankle_angle, motor_angle))
     mytuples = zip(*zipped_sorted_lists)
@@ -45,6 +46,10 @@ for filename in ["20210619_0005_calibration2_LEFT.csv"]:
     # Calculate Gradient
     TR = np.gradient(motor_angle)/np.gradient(ankle_angle)
 
+
+
+    plt.plot(ankle_angle, motor_angle /
+                   constants.ENC_CLICKS_TO_DEG)
     # Polyfit
     p = np.polyfit(ankle_angle, motor_angle /
                    constants.ENC_CLICKS_TO_DEG, deg=5)

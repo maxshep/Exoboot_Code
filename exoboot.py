@@ -9,6 +9,7 @@ from scipy import interpolate
 from typing import Type
 
 import numpy as np
+import pdb
 
 import config_util
 import constants
@@ -92,11 +93,14 @@ class Exo():
             self.motor_sign = -1
             self.ankle_to_motor_angle_polynomial = constants.LEFT_ANKLE_TO_MOTOR
             self.ankle_angle_offset = constants.LEFT_ANKLE_ANGLE_OFFSET
+            # TODO: change manual tuning of splines to be automatic
+            # self.TR_from_ankle_angle = self.motor_sign * constants.LEFT_ANKLE_TO_TR
         elif self.dev_id in constants.RIGHT_EXO_DEV_IDS:
             self.side = constants.Side.RIGHT
             self.motor_sign = 1
             self.ankle_to_motor_angle_polynomial = constants.RIGHT_ANKLE_TO_MOTOR
             self.ankle_angle_offset = constants.RIGHT_ANKLE_ANGLE_OFFSET
+            # self.TR_from_ankle_angle = self.motor_sign * constants.RIGHT_ANKLE_TO_TR
         else:
             raise ValueError(
                 'dev_id: ', self.dev_id, 'not found in constants.LEFT_EXO_DEV_IDS or constants.RIGHT_EXO_DEV_IDS')
@@ -253,7 +257,7 @@ class Exo():
         self.data.gyro_x = -1 * actpack_data.gyrox * constants.GYRO_GAIN
         self.data.gyro_y = -1 * self.motor_sign * \
             actpack_data.gyroy * constants.GYRO_GAIN
-        self.data.gyro_z = self.motor_sign * actpack_data.gyroz * constants.GYRO_GAIN
+        self.data.gyro_z = -1 * self.motor_sign * actpack_data.gyroz * constants.GYRO_GAIN # sign may be different from Max's device
         '''Motor angle and current are kept in Dephy's orientation, but ankle
         angle and torque are converted to positive = plantarflexion.'''
         self.data.motor_angle = actpack_data.mot_ang
@@ -455,12 +459,17 @@ class Exo():
         motor_torque = current*constants.MOTOR_CURRENT_TO_MOTOR_TORQUE
         ankle_torque = motor_torque * \
             self.TR_from_ankle_angle(self.data.ankle_angle)
+            # TODO: change manual tuning of splines to be automatic
+            # np.polyval(self.TR_from_ankle_angle, self.data.ankle_angle)
+            
         return ankle_torque
 
     def _ankle_torque_to_motor_current(self, torque: float) -> int:
         '''Converts torque (Nm) to current (mA), based on side and transmission ratio (no dynamics)'''
         motor_torque = torque / \
             self.TR_from_ankle_angle(self.data.ankle_angle)
+        # TODO: change manual tuning of splines to be automatic
+        #    np.polyval(self.TR_from_ankle_angle, self.data.ankle_angle) 
         motor_current = int(
             motor_torque / constants.MOTOR_CURRENT_TO_MOTOR_TORQUE)
 

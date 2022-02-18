@@ -7,7 +7,6 @@ import filters
 import controllers
 import ml_util
 
-
 def get_do_bilateral_data(config: Type[config_util.ConfigurableConstants]):
     if config.TASK == config_util.Task.STANDINGPERTURBATION:
         print('yoyoyo')

@@ -90,7 +90,14 @@ class ConfigurableConstants():
     SLIP_DETECT_DELAY: int = 0
     EXPERIMENTER_NOTES: str = 'Experimenter notes go here'
 
-
+    #It is always zero untill the first generation 
+    #When this variable is non zero it means the update function can be called
+    #It basically avoids any error caused by grpc call not being received due
+    #to server not running on the optimizer side  
+    number_of_calls: int = 0
+    confirmed: bool = False
+    generation: int = 0
+    
 class ConfigSaver():
     def __init__(self, file_ID: str, config: Type[ConfigurableConstants]):
         '''file_ID is used as a custom file identifier after date.'''

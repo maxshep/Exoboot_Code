@@ -4,28 +4,36 @@ from enum import Enum
 
 DEFAULT_BAUD_RATE = 230400
 TARGET_FREQ = 200
-MAX_ANKLE_ANGLE = 86  # 83  # degrees, plantarflexion
-MIN_ANKLE_ANGLE = -63  # -60  # degrees, dorsiflexion
+MAX_ANKLE_ANGLE = 60 #90 #86  # 83  # degrees, plantarflexion
+MIN_ANKLE_ANGLE = -45 #-63  # -60  # degrees, dorsiflexion
 
 # These polynomials are derived from the calibration routine (calibrate.py), analyzed with transmission_analysis.py
 LEFT_ANKLE_TO_MOTOR = np.array(
-    [-8.92089947e-06, 6.54524084e-04, 9.47872779e-02, 5.97822436e-01,
-     -7.61045898e+02, 1.06551671e+04])
-# [-7.46848531e-06,  6.16855504e-04,  7.54072228e-02,  7.50135291e-01,
-#  -7.03196238e+02, -3.95156221e+04])
+    [ 2.47157499e-06,  9.83537025e-04,  4.52559550e-02 , 1.17349392e+00,
+-7.61679007e+02, -2.98407136e+04])
 RIGHT_ANKLE_TO_MOTOR = np.array(
     [6.53412109e-06, -5.10000261e-04, -7.52460274e-02, -1.27584877e+00,
      7.05016223e+02, -1.09811413e+04])
-# These points are used to create a Pchip spline, which defines the transmission ratio as a function of ankle angle
-ANKLE_PTS = np.array([-60, -40, 0, 10, 20, 30, 40, 45.6, 55, 80])  # Deg
-TR_PTS = np.array([16, 16, 15, 14.5, 14, 11.5, 5, 0, -6.5, -12])  # Nm/Nm
 
-LEFT_ANKLE_ANGLE_OFFSET = -92  # deg
+# These points are used to create a Pchip spline, which defines the transmission ratio as a function of ankle angle
+# ANKLE_PTS = np.array([-60, -40, 0, 10, 20, 30, 40, 45.6, 55, 80])  # Deg
+# TR_PTS = np.array([16, 16, 15, 14.5, 14, 11.5, 5, 0, -6.5, -12])  # Nm/Nm
+ANKLE_PTS = np.array([-40, -20, 0, 10, 20, 30, 40, 45.6, 50, 55])  # Deg
+TR_PTS = np.array([19, 17, 16.5, 15.5, 13.5, 10, 4, -1, -5, -11 ])  # Nm/Nm
+
+
+# TODO: attempt to change the manual picking of ANKLE_PTS and TR_PTS
+# LEFT_ANKLE_TO_TR = np.array([ 5.00380707e-07,  8.20159320e-05,  2.53334311e-03,  5.29066571e-02,
+#  -1.64252746e+01])
+# RIGHT_ANKLE_TO_TR = np.array([ 4.83188447e-07, -3.83712114e-05, -3.61934700e-03,  4.54812251e-01,
+#        -2.89416189e+01]) ## NEED TO CHANGE FOR RIGHT ANKLE
+
+LEFT_ANKLE_ANGLE_OFFSET = 201#-92  # deg
 RIGHT_ANKLE_ANGLE_OFFSET = 88  # deg
 
 # Add to these lists if dev_ids change, or new exos or actpacks are purchased!
 RIGHT_EXO_DEV_IDS = [65295, 3148]
-LEFT_EXO_DEV_IDS = [63086, 2873]
+LEFT_EXO_DEV_IDS = [63086, 2873, 77]
 
 MS_TO_SECONDS = 0.001
 # Converts raw Dephy encoder output to degrees
