@@ -97,6 +97,7 @@ class ConfigurableConstants():
     number_of_calls: int = 0
     confirmed: bool = False
     generation: int = 0
+    User_Ready = True
     
 class ConfigSaver():
     def __init__(self, file_ID: str, config: Type[ConfigurableConstants]):
