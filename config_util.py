@@ -7,7 +7,7 @@ import importlib
 from enum import Enum
 import argparse
 import constants
-
+import os
 
 class Task(Enum):
     '''Used to determine gait_event_detector used and state machines used.'''
@@ -108,6 +108,10 @@ class ConfigSaver():
         filename = subfolder_name + \
             time.strftime("%Y%m%d_%H%M_") + file_ID + \
             '_CONFIG' + '.csv'
+        if os.path.exists(subfolder_name) and os.path.isdir(subfolder_name):
+            pass
+        else:
+            os.mkdir(subfolder_name)
         self.my_file = open(filename, 'w', newline='')
         self.writer = csv.DictWriter(
             self.my_file, fieldnames=self.config.__dict__.keys())

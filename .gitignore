@@ -13,6 +13,7 @@ exo_data/
 *.csv
 # *.dll
 com.txt
+.DS_Store
 
 ### VisualStudioCode ###
 .vscode/*
