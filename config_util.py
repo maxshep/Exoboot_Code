@@ -95,9 +95,12 @@ class ConfigurableConstants():
     #It basically avoids any error caused by grpc call not being received due
     #to server not running on the optimizer side  
     number_of_calls: int = 0
-    confirmed: bool = False
     generation: int = 0
-    User_Ready = True
+    # DO NOT CHANGE THE DEFAULT VALUE
+    confirmed: bool = False
+    User_Ready = False
+    
+    
     
 class ConfigSaver():
     def __init__(self, file_ID: str, config: Type[ConfigurableConstants]):
