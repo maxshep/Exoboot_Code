@@ -38,9 +38,9 @@ gait_state_estimator_list, state_machine_list = control_muxer.get_gse_and_sm_lis
     exo_list=exo_list, config=config)
 
 '''Prep parameter passing.'''
-lock = threading.Lock()
-quit_event = threading.Event()
-new_params_event = threading.Event()
+#lock = threading.Lock()
+#quit_event = threading.Event()
+#new_params_event = threading.Event()
 # v0.2,15,0.56,0.6!
 
 '''Perform standing calibration.'''
@@ -61,9 +61,7 @@ print('Start!')
 timer = util.FlexibleTimer(
     target_freq=config.TARGET_FREQ)  # attempts constants freq
 t0 = time.perf_counter()
-keyboard_thread = parameter_passers.ParameterPasser(
-    lock=lock, config=config, quit_event=quit_event,
-    new_params_event=new_params_event)
+#keyboard_thread = parameter_passers.ParameterPasser(lock=lock, config=config, quit_event=quit_event,new_params_event=new_params_event)
 config_saver.write_data(loop_time=0)  # Write first row on config
 only_write_if_new = not config.READ_ONLY and config.ONLY_LOG_IF_NEW
 
@@ -73,7 +71,7 @@ while True:
         timer.pause()
         loop_time = time.perf_counter() - t0
 
-        lock.acquire()
+        """lock.acquire()
         if new_params_event.is_set():
             config_saver.write_data(loop_time=loop_time)  # Update config file
             for state_machine in state_machine_list:  # Make sure up to date
@@ -83,7 +81,7 @@ while True:
             new_params_event.clear()
         if quit_event.is_set():  # If user enters "quit"
             break
-        lock.release()
+        lock.release()"""
 
         for exo in exo_list:
             exo.read_data(loop_time=loop_time)

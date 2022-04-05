@@ -15,10 +15,12 @@ def calibrate_encoder_to_ankle_conversion(exo: exoboot.Exo):
                      Kd=constants.DEFAULT_KD, ff=constants.DEFAULT_FF)
     # exo.command_current(exo.motor_sign*1000)
     print('begin!')
-    for _ in range(1000):
+    #for _ in range(1000):
+    while True:
         exo.command_current(exo.motor_sign*1000)
         time.sleep(0.02)
         exo.read_data()
+        print(exo.data.state_time)
         exo.write_data()
     print('Done! File saved.')
 

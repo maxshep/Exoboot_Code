@@ -256,7 +256,7 @@ class Exo():
         self.data.gyro_x = -1 * actpack_data.gyrox * constants.GYRO_GAIN
         self.data.gyro_y = -1 * self.motor_sign * \
             actpack_data.gyroy * constants.GYRO_GAIN
-        self.data.gyro_z = -1 * self.motor_sign * actpack_data.gyroz * constants.GYRO_GAIN # sign may be different from Max's device
+        self.data.gyro_z = self.motor_sign * actpack_data.gyroz * constants.GYRO_GAIN # sign may be different from Max's device
         '''Motor angle and current are kept in Dephy's orientation, but ankle
         angle and torque are converted to positive = plantarflexion.'''
         self.data.motor_angle = actpack_data.mot_ang
