@@ -38,9 +38,9 @@ gait_state_estimator_list, state_machine_list = control_muxer.get_gse_and_sm_lis
     exo_list=exo_list, config=config)
 
 '''Prep parameter passing.'''
-lock = threading.Lock()
-quit_event = threading.Event()
-new_params_event = threading.Event()
+#lock = threading.Lock()
+#quit_event = threading.Event()
+#new_params_event = threading.Event()
 # v0.2,15,0.56,0.6!
 
 '''Perform standing calibration.'''
@@ -67,14 +67,14 @@ only_write_if_new = not config.READ_ONLY and config.ONLY_LOG_IF_NEW
 for exo in exo_list:
     exo.read_data()
 t0_state_time = exo.data.state_time
-
+print("ACTPACK_FREQUENCY",config.ACTPACK_FREQ)
+time.sleep(5)
 while True:
     try:
         #timer.pause()
-        time.sleep(0.1)
+        time.sleep(0.2)
         loop_time = time.perf_counter() - t0
-
-        lock.acquire()
+        """lock.acquire()
         if new_params_event.is_set():
             config_saver.write_data(loop_time=loop_time)  # Update config file
             for state_machine in state_machine_list:  # Make sure up to date
@@ -84,7 +84,7 @@ while True:
             new_params_event.clear()
         if quit_event.is_set():  # If user enters "quit"
             break
-        lock.release()
+        lock.release()"""
 
         for exo in exo_list:
             exo.read_data(loop_time=loop_time)
@@ -100,6 +100,14 @@ while True:
 
             print("Loop TIme", loop_time)
             print("State_Time",exo.data.state_time - t0_state_time)
+
+        if((exo.data.state_time - t0_state_time)>= 50):
+            t0_state_time = exo.data.state_time
+            print("Here........................")
+            for exo in exo_list:
+                exo.reset(config)
+        
+        
 
     except KeyboardInterrupt:
         print('Ctrl-C detected, Exiting Gracefully')

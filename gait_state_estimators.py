@@ -32,10 +32,11 @@ class GaitStateEstimator():
         data.did_heel_strike = self.heel_strike_detector.detect(data)
         data.gait_phase = self.gait_phase_estimator.estimate(data)
         data.did_toe_off = self.toe_off_detector.detect(data)
+        #print("Enter detect")
         if self.do_print_heel_strikes and data.did_heel_strike:
             print('heel strike detected on side: %-*s  at time: %s' %
                   (10, self.side, data.loop_time))
-
+            #print("Enter detect did_heel_strike")
     def update_params_from_config(self, config: Type[config_util.ConfigurableConstants]):
         pass
 
