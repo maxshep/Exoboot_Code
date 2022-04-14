@@ -99,7 +99,7 @@ class ConfigurableConstants():
     # DO NOT CHANGE THE DEFAULT VALUE
     confirmed: bool = False
     User_Ready = False
-    
+
     
     
 class ConfigSaver():

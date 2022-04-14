@@ -93,6 +93,8 @@ class Exo():
             self.motor_sign = -1
             self.ankle_to_motor_angle_polynomial = constants.LEFT_ANKLE_TO_MOTOR
             self.ankle_angle_offset = constants.LEFT_ANKLE_ANGLE_OFFSET
+            self.TR_from_ankle_angle = interpolate.PchipInterpolator(
+            constants.ANKLE_PTS_LEFT, self.motor_sign*constants.TR_PTS_LEFT)
             # TODO: change manual tuning of splines to be automatic
             # self.TR_from_ankle_angle = self.motor_sign * constants.LEFT_ANKLE_TO_TR
         elif self.dev_id in constants.RIGHT_EXO_DEV_IDS:
@@ -100,6 +102,8 @@ class Exo():
             self.motor_sign = 1
             self.ankle_to_motor_angle_polynomial = constants.RIGHT_ANKLE_TO_MOTOR
             self.ankle_angle_offset = constants.RIGHT_ANKLE_ANGLE_OFFSET
+            self.TR_from_ankle_angle = interpolate.PchipInterpolator(
+            constants.ANKLE_PTS_RIGHT, self.motor_sign*constants.TR_PTS_RIGHT)
             # self.TR_from_ankle_angle = self.motor_sign * constants.RIGHT_ANKLE_TO_TR
         else:
             raise ValueError(
@@ -138,8 +142,7 @@ class Exo():
                               k_val=0,
                               b_val=0,
                               ff=constants.DEFAULT_FF)
-            self.TR_from_ankle_angle = interpolate.PchipInterpolator(
-                constants.ANKLE_PTS, self.motor_sign*constants.TR_PTS)
+            #self.TR_from_ankle_angle = interpolate.PchipInterpolator(constants.ANKLE_PTS, self.motor_sign*constants.TR_PTS)
 
     @dataclass
     class DataContainer:
@@ -280,7 +283,7 @@ class Exo():
         self.data.gyro_y = -1 * self.motor_sign * \
             actpack_data.gyroy * constants.GYRO_GAIN
         #Remove -1 for EB-51
-        self.data.gyro_z = -1 * self.motor_sign * actpack_data.gyroz * constants.GYRO_GAIN # sign may be different from Max's device
+        self.data.gyro_z = self.motor_sign * actpack_data.gyroz * constants.GYRO_GAIN # sign may be different from Max's device
         '''Motor angle and current are kept in Dephy's orientation, but ankle
         angle and torque are converted to positive = plantarflexion.'''
         self.data.motor_angle = actpack_data.mot_ang
