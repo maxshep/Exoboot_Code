@@ -13,8 +13,8 @@ RIGHT_ANKLE_TO_MOTOR = np.array(
      7.05016223e+02, -1.09811413e+04])
 
 folder = 'calibration_files/'
-for filename in ["20210619_0005_calibration2_LEFT.csv"]:
-    # filename = "20210616_1945_calibration2_RIGHT.csv"
+for filename in ["20210618_2318_calibration2_RIGHT.csv"]:
+    # filename = "20210619_0005_calibration2_LEFT.csv"
     with open(folder + filename) as f:
         motor_angle = [int(row["motor_angle"])
                        for row in csv.DictReader(f)]
@@ -32,7 +32,7 @@ for filename in ["20210619_0005_calibration2_LEFT.csv"]:
     mytuples = zip(*zipped_sorted_lists)
     ankle_angle, motor_angle = [
         list(mytuple) for mytuple in mytuples]
-    plt.plot(ankle_angle, motor_angle)
+    plt.plot(ankle_angle, motor_angle, color='green')
 
     # Filter
     b, a = signal.butter(N=1, Wn=0.05)
@@ -50,21 +50,22 @@ for filename in ["20210619_0005_calibration2_LEFT.csv"]:
                    constants.ENC_CLICKS_TO_DEG, deg=5)
     print('Polynomial coefficients: ', p)
     polyfitted_left_motor_angle = np.polyval(p, ankle_angle)
-    plt.plot(ankle_angle, polyfitted_left_motor_angle)
+    plt.plot(ankle_angle, polyfitted_left_motor_angle, color='blue')
 
     pcurrent = LEFT_ANKLE_TO_MOTOR
     polyfitted_left_motor_angle = np.polyval(pcurrent, ankle_angle)
-    plt.plot(ankle_angle, polyfitted_left_motor_angle, linestyle='dashed')
+    plt.plot(ankle_angle, polyfitted_left_motor_angle,
+             color='red', linestyle='dashed')
 
     plt.figure(2)
     p_deriv = np.polyder(p)
     TR_from_polyfit = np.polyval(p_deriv, ankle_angle)
-    # plt.plot(ankle_angle, -TR_from_polyfit)
+    plt.plot(ankle_angle, -TR_from_polyfit*constants.ENC_CLICKS_TO_DEG)
 
     p = np.polyfit(ankle_angle, TR, deg=4)
     deriv_left2 = np.polyval(p, ankle_angle)
 
-    # plt.plot(ankle_angle, -TR)
+    plt.plot(ankle_angle, -TR)
 
     ankle_pts = [-60, -40, 0, 10, 20, 30, 40, 45.6, 55, 80]
     deriv_pts = [16, 16, 15, 14.5, 14, 11.5, 5, 0, -6.5, -12]
